@@ -1,0 +1,13 @@
+Para configurar o Supabase (.env.local):
+
+  Opção 1 - Dê dois cliques em: criar-env-local.bat
+            (Se .env.local já existir e der erro, use: criar-env-local.bat /F)
+
+  Opção 2 - Copie .env.example para .env.local manualmente.
+
+  O .env.example já tem URL e chave de exemplo. Se o seu projeto Supabase
+  for outro, abra .env.local e atualize:
+    - VITE_SUPABASE_URL (Project Settings > API > Project URL)
+    - VITE_SUPABASE_ANON_KEY (Project Settings > API > anon public)
+
+  Reinicie o servidor: npm run dev ou start-dev.bat

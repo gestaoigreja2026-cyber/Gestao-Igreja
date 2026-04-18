@@ -1,0 +1,754 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    scrollbar-gutter: stable;
+    font-size: 16px;
+    /* Fonte maior para mobile */
+  }
+
+  @media (min-width: 1280px) {
+    html {
+      font-size: 15px;
+      /* Fonte padrão para PC Grande */
+    }
+  }
+
+  body {
+    @apply antialiased overflow-x-hidden;
+    touch-action: manipulation;
+    line-height: 1.6;
+  }
+}
+
+/*
+  🎨 Sistema de Temas Premium - Gestão Igreja
+  5 Temas com Dark Mode automático
+  ☀️ Fé Radiante | ✨ Luz Divina | 🌊 Oceano Profundo | 🌿 Jardim do Éden | 🌹 Rosa de Saron
+*/
+
+@layer base {
+
+  /* ═══════════════════════════════════════════════
+     ☀️ TEMA 1: FÉ RADIANTE (Default) - Laranja
+     ═══════════════════════════════════════════════ */
+  :root,
+  [data-theme="fe-radiante"] {
+    --background: 0 0% 100%;
+    --foreground: 20 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 20% 12%;
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 27 96% 61%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 20 20% 12%;
+    --muted: 30 15% 88%;
+    --muted-foreground: 25 10% 45%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 30 30% 88%;
+    --input: 30 30% 88%;
+    --ring: 24 95% 53%;
+    --radius: 1rem;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 20 20% 12%;
+    --sidebar-primary: 24 95% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 24 95% 96%;
+    --sidebar-accent-foreground: 24 95% 43%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 24 95% 53%;
+    --chart-1: 24 95% 53%;
+    --chart-2: 43 96% 56%;
+    --chart-3: 27 96% 61%;
+    --chart-4: 199 89% 48%;
+    --chart-5: 15 85% 60%;
+    --sidebar: 0 0% 99%;
+    --shadow-hsl: 24 95% 53%;
+    --font-sans: 'Raleway', 'Open Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-serif: ui-serif, Georgia, serif;
+    --font-mono: ui-monospace, SFMono-Regular, monospace;
+    --shadow-2xs: 0 1px 2px 0px hsl(var(--shadow-hsl) / 0.08);
+    --shadow-xs: 0 2px 4px 0px hsl(var(--shadow-hsl) / 0.1);
+    --shadow-sm: 0 2px 8px 0px hsl(var(--shadow-hsl) / 0.12), 0 1px 3px -1px hsl(var(--shadow-hsl) / 0.08);
+    --shadow: 0 4px 12px 0px hsl(var(--shadow-hsl) / 0.15), 0 2px 4px -1px hsl(var(--shadow-hsl) / 0.1);
+    --shadow-md: 0 6px 16px 0px hsl(var(--shadow-hsl) / 0.18), 0 2px 6px -2px hsl(var(--shadow-hsl) / 0.12);
+    --shadow-lg: 0 10px 24px 0px hsl(var(--shadow-hsl) / 0.2), 0 4px 8px -2px hsl(var(--shadow-hsl) / 0.15);
+    --shadow-xl: 0 16px 32px 0px hsl(var(--shadow-hsl) / 0.22), 0 6px 12px -2px hsl(var(--shadow-hsl) / 0.18);
+    --shadow-2xl: 0 24px 48px 0px hsl(var(--shadow-hsl) / 0.25), 0 8px 16px -4px hsl(var(--shadow-hsl) / 0.2);
+    --tracking-normal: 0em;
+    --spacing: 0.25rem;
+  }
+
+  .dark,
+  .dark[data-theme="fe-radiante"] {
+    --background: 20 10% 12%;
+    --foreground: 30 40% 98%;
+    --card: 20 8% 16%;
+    --card-foreground: 30 40% 98%;
+    --popover: 20 8% 16%;
+    --popover-foreground: 30 40% 98%;
+    --primary: 24 95% 58%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 27 96% 65%;
+    --secondary-foreground: 20 10% 12%;
+    --accent: 43 96% 60%;
+    --accent-foreground: 20 10% 12%;
+    --muted: 20 8% 22%;
+    --muted-foreground: 30 20% 65%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 20 8% 24%;
+    --input: 20 8% 24%;
+    --ring: 24 95% 58%;
+    --sidebar-background: 20 10% 10%;
+    --sidebar-foreground: 30 40% 98%;
+    --sidebar-primary: 24 95% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 20 10% 18%;
+    --sidebar-accent-foreground: 24 95% 70%;
+    --sidebar-border: 20 8% 18%;
+    --sidebar-ring: 24 95% 58%;
+    --chart-1: 24 95% 58%;
+    --chart-2: 43 96% 60%;
+    --chart-3: 27 96% 65%;
+    --chart-4: 199 89% 55%;
+    --chart-5: 15 85% 65%;
+    --sidebar: 20 10% 10%;
+    --shadow-hsl: 24 95% 53%;
+    --shadow-2xs: 0 1px 2px 0px hsl(var(--shadow-hsl) / 0.15), 0 0 4px hsl(var(--shadow-hsl) / 0.08);
+    --shadow-xs: 0 2px 4px 0px hsl(var(--shadow-hsl) / 0.18), 0 0 8px hsl(var(--shadow-hsl) / 0.1);
+    --shadow-sm: 0 2px 8px 0px hsl(var(--shadow-hsl) / 0.2), 0 1px 3px -1px hsl(var(--shadow-hsl) / 0.15);
+    --shadow: 0 4px 12px 0px hsl(var(--shadow-hsl) / 0.22), 0 2px 4px -1px hsl(var(--shadow-hsl) / 0.18);
+    --shadow-md: 0 6px 16px 0px hsl(var(--shadow-hsl) / 0.25), 0 2px 6px -2px hsl(var(--shadow-hsl) / 0.2);
+    --shadow-lg: 0 10px 24px 0px hsl(var(--shadow-hsl) / 0.28), 0 4px 8px -2px hsl(var(--shadow-hsl) / 0.22);
+    --shadow-xl: 0 16px 32px 0px hsl(var(--shadow-hsl) / 0.3), 0 6px 12px -2px hsl(var(--shadow-hsl) / 0.25);
+    --shadow-2xl: 0 24px 48px 0px hsl(var(--shadow-hsl) / 0.35), 0 8px 16px -4px hsl(var(--shadow-hsl) / 0.3);
+  }
+
+  /* ═══════════════════════════════════════════════
+     ✨ TEMA 2: LUZ DIVINA - Roxo Vibrante
+     ═══════════════════════════════════════════════ */
+  [data-theme="luz-divina"] {
+    --background: 0 0% 100%;
+    --foreground: 240 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 20% 12%;
+    --primary: 258 90% 66%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 330 81% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 38 92% 50%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 260 15% 88%;
+    --muted-foreground: 250 10% 45%;
+    --border: 258 20% 88%;
+    --input: 258 20% 88%;
+    --ring: 258 90% 66%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 240 20% 12%;
+    --sidebar-primary: 258 90% 66%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 258 60% 93%;
+    --sidebar-accent-foreground: 258 90% 56%;
+    --sidebar-border: 258 20% 90%;
+    --sidebar-ring: 258 90% 66%;
+    --chart-1: 258 90% 66%;
+    --chart-2: 330 81% 60%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 85% 70%;
+    --chart-5: 340 75% 65%;
+    --sidebar: 0 0% 99%;
+    --shadow-hsl: 258 90% 66%;
+  }
+
+  .dark[data-theme="luz-divina"] {
+    --background: 250 25% 10%;
+    --foreground: 250 30% 98%;
+    --card: 250 20% 14%;
+    --card-foreground: 250 30% 98%;
+    --popover: 250 20% 14%;
+    --popover-foreground: 250 30% 98%;
+    --primary: 258 90% 70%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 330 81% 65%;
+    --secondary-foreground: 250 25% 10%;
+    --accent: 38 92% 55%;
+    --accent-foreground: 250 25% 10%;
+    --muted: 250 15% 22%;
+    --muted-foreground: 250 15% 65%;
+    --border: 250 15% 24%;
+    --input: 250 15% 24%;
+    --ring: 258 90% 70%;
+    --sidebar-background: 250 25% 8%;
+    --sidebar-foreground: 250 30% 98%;
+    --sidebar-primary: 258 90% 70%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 250 20% 18%;
+    --sidebar-accent-foreground: 258 90% 78%;
+    --sidebar-border: 250 15% 18%;
+    --sidebar-ring: 258 90% 70%;
+    --chart-1: 258 90% 70%;
+    --chart-2: 330 81% 65%;
+    --chart-3: 38 92% 55%;
+    --chart-4: 280 85% 75%;
+    --chart-5: 340 75% 70%;
+    --sidebar: 250 25% 8%;
+    --shadow-hsl: 258 90% 66%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🌊 TEMA 3: OCEANO PROFUNDO - Azul Real
+     ═══════════════════════════════════════════════ */
+  [data-theme="oceano-profundo"] {
+    --background: 0 0% 100%;
+    --foreground: 220 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 12%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 192 91% 36%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 210 15% 88%;
+    --muted-foreground: 215 10% 45%;
+    --border: 210 25% 88%;
+    --input: 210 25% 88%;
+    --ring: 217 91% 60%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 220 20% 12%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 60% 93%;
+    --sidebar-accent-foreground: 217 91% 50%;
+    --sidebar-border: 210 20% 90%;
+    --sidebar-ring: 217 91% 60%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 192 91% 36%;
+    --chart-3: 199 89% 48%;
+    --chart-4: 240 60% 60%;
+    --chart-5: 180 60% 45%;
+    --sidebar: 0 0% 99%;
+    --shadow-hsl: 217 91% 60%;
+  }
+
+  .dark[data-theme="oceano-profundo"] {
+    --background: 222 35% 10%;
+    --foreground: 210 40% 98%;
+    --card: 222 30% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 30% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 192 91% 42%;
+    --secondary-foreground: 222 35% 10%;
+    --accent: 199 89% 55%;
+    --accent-foreground: 222 35% 10%;
+    --muted: 220 15% 22%;
+    --muted-foreground: 215 15% 65%;
+    --border: 220 15% 24%;
+    --input: 220 15% 24%;
+    --ring: 217 91% 65%;
+    --sidebar-background: 222 35% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 25% 18%;
+    --sidebar-accent-foreground: 217 91% 75%;
+    --sidebar-border: 222 20% 18%;
+    --sidebar-ring: 217 91% 65%;
+    --chart-1: 217 91% 65%;
+    --chart-2: 192 91% 42%;
+    --chart-3: 199 89% 55%;
+    --chart-4: 240 60% 65%;
+    --chart-5: 180 60% 50%;
+    --sidebar: 222 35% 8%;
+    --shadow-hsl: 217 91% 60%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🌿 TEMA 4: JARDIM DO ÉDEN - Verde Esmeralda
+     ═══════════════════════════════════════════════ */
+  [data-theme="jardim-eden"] {
+    --background: 0 0% 100%;
+    --foreground: 160 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 160 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 160 20% 12%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 168 76% 42%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 43 96% 56%;
+    --accent-foreground: 160 20% 12%;
+    --muted: 150 12% 88%;
+    --muted-foreground: 155 10% 45%;
+    --border: 150 20% 88%;
+    --input: 150 20% 88%;
+    --ring: 160 84% 39%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 160 20% 12%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 150 50% 93%;
+    --sidebar-accent-foreground: 160 84% 32%;
+    --sidebar-border: 150 20% 90%;
+    --sidebar-ring: 160 84% 39%;
+    --chart-1: 160 84% 39%;
+    --chart-2: 168 76% 42%;
+    --chart-3: 43 96% 56%;
+    --chart-4: 120 60% 50%;
+    --chart-5: 180 60% 40%;
+    --sidebar: 0 0% 99%;
+    --shadow-hsl: 160 84% 39%;
+  }
+
+  .dark[data-theme="jardim-eden"] {
+    --background: 160 15% 10%;
+    --foreground: 150 30% 98%;
+    --card: 160 12% 14%;
+    --card-foreground: 150 30% 98%;
+    --popover: 160 12% 14%;
+    --popover-foreground: 150 30% 98%;
+    --primary: 160 84% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 168 76% 48%;
+    --secondary-foreground: 160 15% 10%;
+    --accent: 43 96% 60%;
+    --accent-foreground: 160 15% 10%;
+    --muted: 160 10% 22%;
+    --muted-foreground: 150 12% 65%;
+    --border: 160 10% 24%;
+    --input: 160 10% 24%;
+    --ring: 160 84% 45%;
+    --sidebar-background: 160 15% 8%;
+    --sidebar-foreground: 150 30% 98%;
+    --sidebar-primary: 160 84% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 160 12% 18%;
+    --sidebar-accent-foreground: 160 84% 58%;
+    --sidebar-border: 160 10% 18%;
+    --sidebar-ring: 160 84% 45%;
+    --chart-1: 160 84% 45%;
+    --chart-2: 168 76% 48%;
+    --chart-3: 43 96% 60%;
+    --chart-4: 120 60% 55%;
+    --chart-5: 180 60% 45%;
+    --sidebar: 160 15% 8%;
+    --shadow-hsl: 160 84% 39%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🌹 TEMA 5: ROSA DE SARON - Rosa Elegante
+     ═══════════════════════════════════════════════ */
+  [data-theme="rosa-saron"] {
+    --background: 0 0% 100%;
+    --foreground: 345 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 345 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 345 20% 12%;
+    --primary: 350 89% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 330 81% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 15 90% 55%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 345 12% 88%;
+    --muted-foreground: 340 10% 45%;
+    --border: 345 20% 88%;
+    --input: 345 20% 88%;
+    --ring: 350 89% 60%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 345 20% 12%;
+    --sidebar-primary: 350 89% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 345 55% 93%;
+    --sidebar-accent-foreground: 350 89% 50%;
+    --sidebar-border: 345 20% 90%;
+    --sidebar-ring: 350 89% 60%;
+    --chart-1: 350 89% 60%;
+    --chart-2: 330 81% 60%;
+    --chart-3: 15 90% 55%;
+    --chart-4: 280 60% 60%;
+    --chart-5: 0 70% 50%;
+    --sidebar: 0 0% 99%;
+    --shadow-hsl: 350 89% 60%;
+  }
+
+  .dark[data-theme="rosa-saron"] {
+    --background: 345 15% 10%;
+    --foreground: 345 25% 98%;
+    --card: 345 12% 14%;
+    --card-foreground: 345 25% 98%;
+    --popover: 345 12% 14%;
+    --popover-foreground: 345 25% 98%;
+    --primary: 350 89% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 330 81% 65%;
+    --secondary-foreground: 345 15% 10%;
+    --accent: 15 90% 60%;
+    --accent-foreground: 345 15% 10%;
+    --muted: 345 10% 22%;
+    --muted-foreground: 340 12% 65%;
+    --border: 345 10% 24%;
+    --input: 345 10% 24%;
+    --ring: 350 89% 65%;
+    --sidebar-background: 345 15% 8%;
+    --sidebar-foreground: 345 25% 98%;
+    --sidebar-primary: 350 89% 65%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 345 12% 18%;
+    --sidebar-accent-foreground: 350 89% 75%;
+    --sidebar-border: 345 10% 18%;
+    --sidebar-ring: 350 89% 65%;
+    --chart-1: 350 89% 65%;
+    --chart-2: 330 81% 65%;
+    --chart-3: 15 90% 60%;
+    --chart-4: 280 60% 65%;
+    --chart-5: 0 70% 55%;
+    --sidebar: 345 15% 8%;
+    --shadow-hsl: 350 89% 60%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🌌 TEMA 6: NOITE ESTRELADA - Azul Escuro
+     ═══════════════════════════════════════════════ */
+  [data-theme="noite-estrelada"] {
+    --background: 222 47% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 222 47% 20%;
+    --secondary: 217 91% 60%;
+    --accent: 214 32% 91%;
+    --muted: 214 32% 95%;
+    --muted-foreground: 215 16% 47%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 222 47% 20%;
+    --sidebar-background: 222 47% 15%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-accent: 222 47% 25%;
+    --shadow-hsl: 222 47% 20%;
+  }
+
+  .dark[data-theme="noite-estrelada"] {
+    --background: 222 47% 8%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 12%;
+    --card-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --secondary: 222 47% 30%;
+    --accent: 217 19% 27%;
+    --muted: 217 19% 20%;
+    --muted-foreground: 215 20% 65%;
+    --border: 217 19% 27%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🖤 TEMA 7: SOBERANIA - Preto / Obsidian
+     ═══════════════════════════════════════════════ */
+  [data-theme="soberania-preto"] {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    --secondary: 0 0% 20%;
+    --accent: 0 0% 90%;
+    --muted: 0 0% 95%;
+    --border: 0 0% 89%;
+    --ring: 0 0% 0%;
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --shadow-hsl: 0 0% 0%;
+  }
+
+  .dark[data-theme="soberania-preto"] {
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --secondary: 0 0% 15%;
+    --accent: 0 0% 12%;
+    --muted: 0 0% 10%;
+    --border: 0 0% 12%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🍃 TEMA 8: ESPERANÇA VIVA - Verde Gradiente
+     ═══════════════════════════════════════════════ */
+  [data-theme="esperanca-viva"] {
+    --background: 145 30% 98%;
+    --foreground: 145 60% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 145 60% 10%;
+    --primary: 142 76% 36%;
+    --secondary: 160 84% 39%;
+    --accent: 145 20% 92%;
+    --muted: 145 20% 95%;
+    --border: 145 30% 90%;
+    --ring: 142 76% 36%;
+    --sidebar-background: 145 40% 15%;
+    --sidebar-foreground: 145 20% 98%;
+    --sidebar-primary: 142 76% 45%;
+    --sidebar-accent: 145 40% 20%;
+    --shadow-hsl: 142 76% 36%;
+  }
+
+  .dark[data-theme="esperanca-viva"] {
+    --background: 145 40% 6%;
+    --foreground: 145 20% 98%;
+    --card: 145 40% 10%;
+    --card-foreground: 145 20% 98%;
+    --primary: 142 76% 45%;
+    --secondary: 142 76% 25%;
+    --accent: 142 30% 20%;
+    --muted: 142 30% 15%;
+    --border: 142 30% 20%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🍇 TEMA 9: AÇAÍ PROFUNDO - Roxo Açai
+     ═══════════════════════════════════════════════ */
+  [data-theme="acai-profundo"] {
+    --background: 275 40% 98%;
+    --foreground: 275 60% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 275 60% 10%;
+    --primary: 275 80% 25%;
+    --secondary: 275 60% 45%;
+    --accent: 275 20% 92%;
+    --muted: 275 20% 95%;
+    --border: 275 30% 90%;
+    --ring: 275 80% 25%;
+    --sidebar-background: 275 40% 15%;
+    --shadow-hsl: 275 80% 25%;
+  }
+
+  .dark[data-theme="acai-profundo"] {
+    --background: 275 60% 6%;
+    --foreground: 275 20% 98%;
+    --card: 275 60% 10%;
+    --card-foreground: 275 20% 98%;
+    --primary: 275 80% 55%;
+    --secondary: 275 80% 30%;
+    --accent: 275 30% 20%;
+    --muted: 275 30% 15%;
+    --border: 275 30% 20%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     👑 TEMA 10: CIDADE DE OURO - Dourado Premium
+     ═══════════════════════════════════════════════ */
+  [data-theme="cidade-ouro"] {
+    --background: 0 0% 100%;
+    --foreground: 45 60% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 45 60% 10%;
+    --primary: 43 89% 38%;
+    --secondary: 35 90% 50%;
+    --accent: 45 40% 90%;
+    --muted: 45 40% 95%;
+    --border: 45 40% 88%;
+    --ring: 43 70% 45%;
+    --sidebar-background: 43 30% 10%;
+    --shadow-hsl: 43 70% 45%;
+  }
+
+  .dark[data-theme="cidade-ouro"] {
+    --background: 43 30% 6%;
+    --foreground: 43 40% 98%;
+    --card: 43 30% 10%;
+    --card-foreground: 43 40% 98%;
+    --primary: 43 70% 55%;
+    --secondary: 35 90% 40%;
+    --border: 43 30% 20%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🌊 TEMA 12: OCEANO PROFUNDO - Azul Oceano
+     ═══════════════════════════════════════════════ */
+  [data-theme="oceano-profundo"] {
+    --background: 0 0% 100%;
+    --foreground: 221 39% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 221 39% 11%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 221 70% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 199 89% 48%;
+    --accent-foreground: 221 39% 11%;
+    --muted: 221 15% 94%;
+    --muted-foreground: 221 10% 45%;
+    --border: 221 20% 90%;
+    --input: 221 20% 90%;
+    --ring: 221 83% 53%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 221 39% 11%;
+    --sidebar-primary: 221 83% 53%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 221 80% 95%;
+    --sidebar-accent-foreground: 221 83% 40%;
+    --sidebar-border: 221 20% 90%;
+    --sidebar-ring: 221 83% 53%;
+    --chart-1: 221 83% 53%;
+    --chart-2: 199 89% 48%;
+    --chart-3: 185 91% 45%;
+    --chart-4: 240 60% 60%;
+    --chart-5: 221 60% 45%;
+    --sidebar: 0 0% 99%;
+    --shadow-hsl: 221 83% 53%;
+  }
+
+  .dark[data-theme="oceano-profundo"] {
+    --background: 221 40% 6%;
+    --foreground: 221 40% 98%;
+    --card: 221 35% 10%;
+    --card-foreground: 221 40% 98%;
+    --primary: 221 83% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 221 70% 50%;
+    --border: 221 30% 18%;
+    --ring: 221 83% 60%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     🌊 TEMA 11: AZUL PISCINA - Azul Piscina
+     ═══════════════════════════════════════════════ */
+  [data-theme="azul-piscina"] {
+    --background: 0 0% 100%;
+    --foreground: 185 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 185 20% 12%;
+    --primary: 185 91% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 195 91% 36%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 175 89% 48%;
+    --accent-foreground: 0 0% 100%;
+    --muted: 185 15% 88%;
+    --muted-foreground: 185 10% 45%;
+    --border: 185 25% 88%;
+    --input: 185 25% 88%;
+    --ring: 185 91% 45%;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 185 20% 12%;
+    --sidebar-primary: 185 91% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 185 60% 93%;
+    --sidebar-accent-foreground: 185 91% 40%;
+    --sidebar-border: 185 20% 90%;
+    --sidebar-ring: 185 91% 45%;
+    --chart-1: 185 91% 45%;
+    --chart-2: 195 91% 36%;
+    --chart-3: 175 89% 48%;
+    --chart-4: 240 60% 60%;
+    --chart-5: 180 60% 45%;
+    --sidebar: 0 0% 99%;
+    --shadow-hsl: 185 91% 45%;
+  }
+
+  .dark[data-theme="azul-piscina"] {
+    --background: 185 35% 10%;
+    --foreground: 185 40% 98%;
+    --card: 185 30% 14%;
+    --card-foreground: 185 40% 98%;
+    --primary: 185 91% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 195 91% 42%;
+    --secondary-foreground: 185 35% 10%;
+    --accent: 175 89% 55%;
+    --accent-foreground: 185 35% 10%;
+    --muted: 185 15% 22%;
+    --muted-foreground: 185 15% 65%;
+    --border: 185 15% 24%;
+    --input: 185 15% 24%;
+    --ring: 185 91% 55%;
+    --sidebar-background: 185 35% 8%;
+    --sidebar-foreground: 185 40% 98%;
+    --sidebar-primary: 185 91% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 185 25% 18%;
+    --sidebar-accent-foreground: 185 91% 75%;
+    --sidebar-border: 185 20% 18%;
+    --sidebar-ring: 185 91% 55%;
+    --chart-1: 185 91% 55%;
+    --chart-2: 195 91% 42%;
+    --chart-3: 175 89% 55%;
+    --chart-4: 240 60% 65%;
+    --chart-5: 180 60% 50%;
+    --sidebar: 185 35% 8%;
+    --shadow-hsl: 185 91% 45%;
+  }
+
+  /* ═══════════════════════════════════════════════
+     Estilos Base
+     ═══════════════════════════════════════════════ */
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Safe area para notch e barra de gestos (mobile/tablet/PWA) */
+@layer utilities {
+  .safe-area-padding {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+}
+
+/* Remove URLs do rodapé e cabeçalho durante impressão */
+@media print {
+  @page {
+    margin: 2cm;
+  }
+
+  /* Remove cabeçalhos e rodapés padrão do navegador que mostram URLs */
+  body::after,
+  body::before,
+  *::after[content*="localhost"],
+  *::after[content*="caixa-diario"],
+  *::before[content*="localhost"],
+  *::before[content*="caixa-diario"] {
+    content: none !important;
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Remove URLs de links impressos */
+  a[href*="localhost"]::after,
+  a[href*="caixa-diario"]::after {
+    content: none !important;
+    display: none !important;
+  }
+}
