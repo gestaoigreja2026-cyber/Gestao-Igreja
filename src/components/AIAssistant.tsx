@@ -383,13 +383,46 @@ Precisa de ajuda?
 • Treinamento de equipe
 • Configuração inicial assistida`
   },
+  como_acessar: {
+    keywords: ['como acessar', 'login', 'entrar', 'senha', 'cadastro', 'registro', 'criar conta', 'primeiro acesso', 'esqueci senha', 'recuperar senha'],
+    response: `🔑 **Como Acessar o Sistema**
+
+**Para quem já tem conta:**
+1. Clique em **"Entrar"** (botão azul no topo)
+2. Digite seu **email** cadastrado
+3. Digite sua **senha**
+4. Clique em **"Entrar no Sistema"**
+
+**Esqueceu a senha?**
+1. Na tela de login, clique em **"Esqueci minha senha"**
+2. Digite seu email cadastrado
+3. Você receberá um link para redefinir a senha
+4. Crie uma nova senha segura
+
+**Primeiro acesso (Teste Grátis):**
+1. Clique em **"Testar grátis"** (botão verde)
+2. Preencha os dados da sua igreja
+3. Crie seu usuário administrador
+4. Comece a usar imediatamente!
+
+**Requisitos:**
+• Navegador: Chrome, Firefox, Safari ou Edge
+• Internet estável
+• Disponível em: computador, tablet e celular
+
+**Instalar o App (PWA):**
+• Clique em **"Instalar App"** no navegador
+• Ou use o menu do Chrome → "Instalar aplicativo"
+• Funciona offline e tem notificações push`
+  },
   geral: {
     keywords: ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e aí', 'hey', 'hi', 'hello'],
     response: `👋 **Olá! Bem-vindo ao Gestão Igreja!**
 
 Sou o **Assistente Virtual** especialista no sistema. Posso ajudar com:
 
-📊 Dashboard e estatísticas
+� **Como Acessar** - Login, senha, primeiro acesso
+�📊 Dashboard e estatísticas
 👥 Cadastro de membros
 🏘️ Células e ministérios
 💰 Finanças e caixa
@@ -408,6 +441,7 @@ Escreva sua dúvida naturalmente, por exemplo:
 - "Como cadastrar um membro?"
 - "Como funciona o caixa?"
 - "O que é consolidação?"
+- "Como faço login?"
 - "Quanto custa o sistema?"
 
 Como posso ajudar você hoje? 😊`
