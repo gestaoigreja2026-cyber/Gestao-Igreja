@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useInstallPWA } from '@/hooks/useInstallPWA';
 import { APP_NAME } from '@/lib/constants';
 import { motion } from 'framer-motion';
+import { AIAssistant } from '@/components/AIAssistant';
 
 const HOTMART_CHECKOUT_URL = import.meta.env.VITE_HOTMART_CHECKOUT_URL || 'https://pay.hotmart.com/O104666619F?bid=1772219819580';
 
@@ -622,6 +623,9 @@ export default function Landing() {
           </p>
         </div>
       </footer>
+
+      {/* Assistente Virtual de IA */}
+      <AIAssistant />
     </div>
   );
 }
