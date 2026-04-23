@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils';
 
 const LOGO_SRC = '/logo-app.png';
-const LOGO_BLUE = '#2563EB';
 
 interface LogoProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -36,9 +35,8 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
         style={{ ...sizeStyles[size] }}
       >
         <div
-          className="w-full h-full relative"
+          className="w-full h-full relative bg-primary"
           style={{
-            backgroundColor: LOGO_BLUE,
             WebkitMaskImage: `url(${LOGO_SRC})`,
             maskImage: `url(${LOGO_SRC})`,
             WebkitMaskSize: 'contain',
@@ -65,10 +63,9 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
         <div className="flex flex-col gap-0.5">
           <div
             className={cn(
-              "font-black tracking-tight leading-none flex items-center gap-1.5",
+              "font-black tracking-tight leading-none flex items-center gap-1.5 text-primary",
               textSizeClasses[size]
             )}
-            style={{ color: LOGO_BLUE }}
           >
             <span>Gestão</span>
             <span>Igreja</span>

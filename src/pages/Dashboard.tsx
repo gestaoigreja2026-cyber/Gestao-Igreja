@@ -26,6 +26,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DailyVerse } from '@/components/DailyVerse';
 import { BirthdayCard } from '@/components/BirthdayCard';
 import { DashboardCustomizer } from '@/components/DashboardCustomizer';
+import { StatsOverview } from '@/components/dashboard/StatsOverview';
+import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
+import { RecentConverts } from '@/components/dashboard/RecentConverts';
+import { FinanceSummary } from '@/components/dashboard/FinanceSummary';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import {
@@ -37,6 +41,7 @@ import {
 import { SUBSCRIPTION_PIX } from '@/lib/subscriptionConfig';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { SystemStatusBanner } from '@/components/SystemStatusBanner';
 
 interface QuickActionDef {
   icon?: ElementType | null;
@@ -87,6 +92,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6" data-dashboard-root>
+      <SystemStatusBanner />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -103,6 +109,9 @@ export default function Dashboard() {
           }}
         />
       </div>
+
+      {/* Estatísticas Gerais - Sempre visíveis */}
+      <StatsOverview />
 
       {/* Widgets configuráveis */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -165,6 +174,15 @@ export default function Dashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Widgets de dados - Sempre visíveis */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <UpcomingEvents />
+        <RecentConverts />
+        {['pastor', 'tesoureiro', 'secretario', 'superadmin'].includes(user?.role ?? '') && (
+          <FinanceSummary />
+        )}
+      </div>
     </div>
   );
 }

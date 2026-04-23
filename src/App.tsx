@@ -46,6 +46,7 @@ const Schools = lazy(() => import("./pages/Schools"));
 const Discipleship = lazy(() => import("./pages/Discipleship"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Artigo = lazy(() => import("./pages/Artigo"));
+const Consolidacao = lazy(() => import("./pages/Consolidacao"));
 
 function PageFallback() {
   return (
@@ -96,14 +97,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/cadastro" replace />;
   }
 
-  // Tesoureiro: acesso somente a Dashboard, Caixa Diário e Como Acessar (via Dashboard)
-  const tesoureiroOnlyPaths = ['/dashboard', '/caixa-diario', '/como-acessar', '/discipulado'];
+  // Tesoureiro: acesso somente a Dashboard, Caixa Diário, Relatórios e Como Acessar (via Dashboard)
+  const tesoureiroOnlyPaths = ['/dashboard', '/caixa-diario', '/relatorios', '/como-acessar', '/discipulado'];
   if (user?.role === 'tesoureiro' && !tesoureiroOnlyPaths.includes(location.pathname)) {
     return <Navigate to="/caixa-diario" replace />;
   }
 
-  // Líder de célula: acesso somente a Dashboard, Células e páginas acessíveis via Dashboard
-  const liderCelulaOnlyPaths = ['/dashboard', '/celulas', '/escolas', '/discipulado', '/institucional', '/pastores', '/privacidade', '/como-acessar'];
+  // Líder de célula: acesso somente a Dashboard, Células, Consolidação e páginas acessíveis via Dashboard
+  const liderCelulaOnlyPaths = ['/dashboard', '/celulas', '/consolidacao', '/escolas', '/discipulado', '/institucional', '/pastores', '/privacidade', '/como-acessar'];
   if (user?.role === 'lider_celula' && !liderCelulaOnlyPaths.includes(location.pathname)) {
     return <Navigate to="/celulas" replace />;
   }
@@ -173,6 +174,7 @@ function AppRoutes() {
         <Route path="/login" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/membros" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'superadmin']}><Members /></RoleProtectedRoute>} />
+        <Route path="/consolidacao" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'lider_celula', 'superadmin']}><Consolidacao /></RoleProtectedRoute>} />
         <Route path="/celulas" element={<ProtectedRoute><Cells /></ProtectedRoute>} />
         <Route path="/ministerios" element={<ProtectedRoute><Ministries /></ProtectedRoute>} />
         <Route path="/eventos" element={<ProtectedRoute><Events /></ProtectedRoute>} />
