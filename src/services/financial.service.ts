@@ -34,20 +34,32 @@ export interface FinancialSummary {
 ========================= */
 
 async function create(data: CreateFinancialTransactionDTO, churchId: string) {
-  const { error } = await (supabase.from('financial_transactions') as any)
-    .insert({
-      type: data.type,
-      category: data.category,
-      amount: data.amount,
-      description: data.description ?? null,
-      date: data.date,
-      church_id: churchId
-    } as any);
+  console.log('Criando transação:', { data, churchId });
+  
+  const insertData = {
+    type: data.type,
+    category: data.category,
+    amount: data.amount,
+    description: data.description ?? null,
+    date: data.date,
+    church_id: churchId
+  };
+  
+  console.log('Dados a inserir:', insertData);
+  
+  const { data: result, error } = await supabase
+    .from('financial_transactions')
+    .insert(insertData)
+    .select()
+    .single();
 
   if (error) {
     console.error('Erro Supabase (create):', error);
-    throw error;
+    throw new Error(error.message || 'Erro ao criar transação');
   }
+  
+  console.log('Transação criada:', result);
+  return result;
 }
 
 async function list(startDate?: Date, endDate?: Date): Promise<Transaction[]> {
