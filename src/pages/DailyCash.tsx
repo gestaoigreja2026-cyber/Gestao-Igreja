@@ -531,6 +531,7 @@ const DailyCash = () => {
                       <Select
                         value={newTransaction.type}
                         onValueChange={(val: 'entrada' | 'saida') => {
+                          console.log('Tipo alterado para:', val);
                           setNewTransaction({
                             ...newTransaction,
                             type: val,
@@ -538,12 +539,12 @@ const DailyCash = () => {
                           });
                         }}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="w-full">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="entrada"><span>Entrada</span></SelectItem>
-                          <SelectItem value="saida"><span>Saída</span></SelectItem>
+                        <SelectContent position="popper" className="z-[9999]">
+                          <SelectItem value="entrada">Entrada</SelectItem>
+                          <SelectItem value="saida">Saída</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>

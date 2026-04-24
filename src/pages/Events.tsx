@@ -443,20 +443,20 @@ export default function Events() {
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
                 <div className="overflow-x-auto pb-3 -mx-4 px-4 scrollbar-hide">
                     <TabsList className="flex w-max lg:w-auto lg:inline-flex min-w-full lg:min-w-0 bg-primary/5 p-1 rounded-2xl">
-                        <TabsTrigger value="calendario" className="gap-3 px-6 py-4 sm:py-2 text-xl sm:text-lg data-[state=active]:bg-white data-[state=active]:shadow-md rounded-xl transition-all">
-                            <Calendar className="h-8 w-8" />
+                        <TabsTrigger value="calendario" className="gap-1.5 sm:gap-2 px-4 py-2.5 sm:py-3 text-sm data-[state=active]:bg-white data-[state=active]:shadow-md rounded-xl transition-all">
+                            <Calendar className="h-5 w-5" />
                             <span>Calendário</span>
                         </TabsTrigger>
-                        <TabsTrigger value="eventos" className="gap-3 px-6 py-4 sm:py-2 text-xl sm:text-lg data-[state=active]:bg-white data-[state=active]:shadow-md rounded-xl transition-all">
-                            <Tag className="h-8 w-8" />
+                        <TabsTrigger value="eventos" className="gap-1.5 sm:gap-2 px-4 py-2.5 sm:py-3 text-sm data-[state=active]:bg-white data-[state=active]:shadow-md rounded-xl transition-all">
+                            <Tag className="h-5 w-5" />
                             <span>Eventos</span>
                         </TabsTrigger>
-                        <TabsTrigger value="escalas" className="gap-3 px-6 py-4 sm:py-2 text-xl sm:text-lg data-[state=active]:bg-white data-[state=active]:shadow-md rounded-xl transition-all">
-                            <Users className="h-8 w-8" />
+                        <TabsTrigger value="escalas" className="gap-1.5 sm:gap-2 px-4 py-2.5 sm:py-3 text-sm data-[state=active]:bg-white data-[state=active]:shadow-md rounded-xl transition-all">
+                            <Users className="h-5 w-5" />
                             <span>Escalas</span>
                         </TabsTrigger>
-                        <TabsTrigger value="checklists" className="gap-3 px-6 py-4 sm:py-2 text-xl sm:text-lg data-[state=active]:bg-white data-[state=active]:shadow-md rounded-xl transition-all">
-                            <ListChecks className="h-8 w-8" />
+                        <TabsTrigger value="checklists" className="gap-1.5 sm:gap-2 px-4 py-2.5 sm:py-3 text-sm data-[state=active]:bg-white data-[state=active]:shadow-md rounded-xl transition-all">
+                            <ListChecks className="h-5 w-5" />
                             <span>Checklists</span>
                         </TabsTrigger>
                     </TabsList>
