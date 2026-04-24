@@ -559,32 +559,47 @@ const DailyCash = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label><span>Valor</span></Label>
+                    <Label><span>Valor *</span></Label>
                     <Input
                       type="text"
                       placeholder="R$ 0,00"
                       value={amountStr}
                       onChange={handleAmountChange}
+                      required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label><span>Categoria</span></Label>
+                    <Label><span>Categoria *</span></Label>
                     <Select
-                      value={newTransaction.category}
-                      onValueChange={(val) => setNewTransaction({ ...newTransaction, category: val })}
+                      value={newTransaction.category || undefined}
+                      onValueChange={(val) => {
+                        console.log('Categoria selecionada:', val);
+                        setNewTransaction({ ...newTransaction, category: val });
+                      }}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione..." />
+                        <SelectValue placeholder="Selecione uma categoria..." />
                       </SelectTrigger>
                       <SelectContent>
-                        {currentCategories.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            <span>{category}</span>
+                        {currentCategories.length === 0 ? (
+                          <SelectItem value="_empty" disabled>
+                            Nenhuma categoria disponível
                           </SelectItem>
-                        ))}
+                        ) : (
+                          currentCategories.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))
+                        )}
                       </SelectContent>
                     </Select>
+                    {currentCategories.length === 0 && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Selecione um tipo (Entrada ou Saída) primeiro
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
