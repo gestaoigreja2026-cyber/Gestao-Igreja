@@ -426,15 +426,28 @@ const DailyCash = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('=== HANDLE SUBMIT ===');
+    console.log('newTransaction:', newTransaction);
+    console.log('user:', user);
+    console.log('churchId:', user?.churchId);
+    
     if (!newTransaction.amount || newTransaction.amount <= 0) {
+      console.log('Erro: Valor inválido');
       toast({ title: "Valor inválido", description: "Informe um valor válido.", variant: "destructive" });
       return;
     }
     if (!newTransaction.category) {
+      console.log('Erro: Categoria faltando');
       toast({ title: "Categoria faltando", description: "Informe uma categoria.", variant: "destructive" });
       return;
     }
+    if (!user?.churchId) {
+      console.log('Erro: ChurchId não encontrado');
+      toast({ title: "Erro", description: "Igreja não identificada. Faça login novamente.", variant: "destructive" });
+      return;
+    }
 
+    console.log('Dados validados, chamando mutation...');
     if (editingTransaction) {
       updateMutation.mutate({
         id: editingTransaction.id,
