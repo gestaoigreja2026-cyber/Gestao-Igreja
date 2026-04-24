@@ -578,13 +578,13 @@ const DailyCash = () => {
                         setNewTransaction({ ...newTransaction, category: val });
                       }}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Selecione uma categoria..." />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" className="max-h-[300px] overflow-y-auto z-[9999]">
                         {currentCategories.length === 0 ? (
                           <SelectItem value="_empty" disabled>
-                            Nenhuma categoria disponível
+                            Nenhuma categoria disponível - Selecione Entrada ou Saída primeiro
                           </SelectItem>
                         ) : (
                           currentCategories.map((category) => (
