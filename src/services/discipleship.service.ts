@@ -9,8 +9,8 @@ export const discipleshipService = {
     /**
      * Get all discipleships
      */
-    async getAll() {
-        const { data, error } = await supabase
+    async getAll(churchId?: string | null) {
+        let query = supabase
             .from('discipleships')
             .select(`
                 *,
@@ -18,6 +18,12 @@ export const discipleshipService = {
                 mentor:members!discipleships_mentor_id_fkey(*)
             `)
             .order('created_at', { ascending: false });
+        
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return data;

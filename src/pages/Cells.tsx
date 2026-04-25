@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, Users, Calendar, FileText, Plus, Trash2, Loader2, Home, ShieldCheck, MapPinned, Navigation, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, Users, Calendar, FileText, Plus, Trash2, Loader2, Home, ShieldCheck, MapPinned, Navigation, ChevronDown, ChevronUp, FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -34,6 +34,7 @@ import { membersService } from '@/services/members.service';
 import { Member } from '@/types';
 import { geocodeAddress, openStreetMapUrl, googleMapsUrl } from '@/lib/geocoding';
 import { CellMapPicker, CellMapView, CellsMapAll } from '@/components/CellMap';
+import { ExcelCellMonthlyReportButton } from '@/components/ExcelCellMonthlyReport';
 interface Cell {
   id: string;
   name: string;
@@ -300,6 +301,7 @@ export default function Cells() {
             <p className="font-semibold text-lg">{cells.length} Células Ativas</p>
           </div>
           <div className="flex gap-2">
+            <ExcelCellMonthlyReportButton />
             {isAdmin && (
               <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                 <DialogTrigger asChild>
@@ -374,14 +376,24 @@ export default function Cells() {
                         <Label>Líder</Label>
                         <Select value={newCell.leaderId} onValueChange={(v) => setNewCell({ ...newCell, leaderId: v })}>
                           <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                          <SelectContent>{members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
+                          <SelectContent
+                            className="z-[99999] max-h-[300px] overflow-y-auto"
+                            side="bottom"
+                            sideOffset={4}
+                            avoidCollisions={true}
+                          >{members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
                       <div className="space-y-2">
                         <Label>Anfitrião</Label>
                         <Select value={newCell.hostId} onValueChange={(v) => setNewCell({ ...newCell, hostId: v })}>
                           <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                          <SelectContent>{members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
+                          <SelectContent
+                            className="z-[99999] max-h-[300px] overflow-y-auto"
+                            side="bottom"
+                            sideOffset={4}
+                            avoidCollisions={true}
+                          >{members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
                         </Select>
                       </div>
                     </div>
@@ -401,7 +413,12 @@ export default function Cells() {
             <SelectTrigger className="w-full sm:w-[180px] h-9">
               <SelectValue placeholder="Dia da reunião" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent
+              className="z-[99999] max-h-[300px] overflow-y-auto"
+              side="bottom"
+              sideOffset={4}
+              avoidCollisions={true}
+            >
               <SelectItem value="todos">Todos os dias</SelectItem>
               <SelectItem value="Segunda-feira">Segunda-feira</SelectItem>
               <SelectItem value="Terça-feira">Terça-feira</SelectItem>
@@ -818,7 +835,12 @@ function CellDetailsDialog({ open, onOpenChange, cell, onSuccess }: {
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Busque por nome ou e-mail..." />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent
+                  className="z-[99999] max-h-[300px] overflow-y-auto"
+                  side="bottom"
+                  sideOffset={4}
+                  avoidCollisions={true}
+                >
                   {allMembers
                     .filter(am => !members.some(m => m.member_id === am.id))
                     .map(m => (

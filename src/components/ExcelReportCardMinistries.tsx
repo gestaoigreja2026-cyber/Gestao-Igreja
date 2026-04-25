@@ -2,8 +2,10 @@ import { FileSpreadsheet, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import * as XLSX from 'xlsx-js-style';
 import { saveAs } from 'file-saver';
+import { churchesService } from '@/services/churches.service';
 
 // ============================================
 // ESTILOS ELEGANTES DE EXCEL COM CORES
@@ -232,6 +234,7 @@ const evolucaoData = {
 
 export function MinisteriosReportCard({ disabled }: { disabled?: boolean }) {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const calcularEstatisticas = () => {
     const data = ministeriosData.data;
@@ -254,9 +257,9 @@ export function MinisteriosReportCard({ disabled }: { disabled?: boolean }) {
   };
 
   // Aba 1: Dados dos Ministérios
-  const criarAbaDados = () => {
+  const criarAbaDados = async (churchName: string) => {
     const wsData = [
-      ['GESTÃO DE MINISTÉRIOS - IGREJA LOCAL'],
+      [`GESTÃO DE MINISTÉRIOS - ${churchName}`],
       [`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}`],
       [],
       ministeriosData.headers,
@@ -318,11 +321,11 @@ export function MinisteriosReportCard({ disabled }: { disabled?: boolean }) {
   };
 
   // Aba 2: Resumo com KPIs
-  const criarAbaResumo = () => {
+  const criarAbaResumo = async (churchName: string) => {
     const stats = calcularEstatisticas();
     
     const wsData = [
-      ['DASHBOARD EXECUTIVO - MINISTÉRIOS'],
+      [`DASHBOARD EXECUTIVO - MINISTÉRIOS - ${churchName}`],
       [`Atualizado: ${new Date().toLocaleDateString('pt-BR')}`],
       [],
       ['INDICADORES CHAVE (KPIs)'],
@@ -386,11 +389,11 @@ export function MinisteriosReportCard({ disabled }: { disabled?: boolean }) {
   };
 
   // Aba 3: Evolução dos Ministérios (dados para gráfico de linha)
-  const criarAbaEvolucao = () => {
+  const criarAbaEvolucao = async (churchName: string) => {
     const { meses, ministerios } = evolucaoData;
     
     const wsData = [
-      ['EVOLUÇÃO DOS MINISTÉRIOS - ÚLTIMOS 6 MESES'],
+      [`EVOLUÇÃO DOS MINISTÉRIOS - ${churchName} - ÚLTIMOS 6 MESES`],
       ['Dados para criar gráfico de linha: Selecione toda a tabela e insira Gráfico de Linha'],
       [],
       ['Mês', ...meses],
@@ -465,11 +468,11 @@ export function MinisteriosReportCard({ disabled }: { disabled?: boolean }) {
   };
 
   // Aba 4: Análise Comparativa
-  const criarAbaAnalise = () => {
+  const criarAbaAnalise = async (churchName: string) => {
     const data = ministeriosData.data;
     
     const wsData = [
-      ['ANÁLISE COMPARATIVA - EFICIÊNCIA DOS MINISTÉRIOS'],
+      [`ANÁLISE COMPARATIVA - EFICIÊNCIA DOS MINISTÉRIOS - ${churchName}`],
       [],
       ['Ministério', 'Membros', 'Visitantes', 'Total Pessoas', 'Reuniões/Ano', 'Pessoas/Reunião', 'Taxa Conv.'],
       ...data.map(row => {
@@ -511,15 +514,45 @@ export function MinisteriosReportCard({ disabled }: { disabled?: boolean }) {
     return ws;
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     try {
-      // Link para download do arquivo na pasta public
-      const link = document.createElement('a');
-      link.href = '/planilha-ministerios.xlsx';
-      link.download = 'Planilha_Ministerios_PROFISSIONAL.xlsx';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Buscar nome da igreja
+      let churchName = 'IGREJA LOCAL';
+      if (user?.churchId) {
+        try {
+          const church = await churchesService.getById(user.churchId);
+          if (church?.name) churchName = church.name.toUpperCase();
+        } catch (e) {
+          console.warn('Erro ao buscar dados da igreja:', e);
+        }
+      }
+
+      // Gerar planilha dinamicamente
+      const wb = XLSX.utils.book_new();
+      
+      const wsDados = await criarAbaDados(churchName);
+      const wsResumo = await criarAbaResumo(churchName);
+      const wsEvolucao = await criarAbaEvolucao(churchName);
+      const wsAnalise = await criarAbaAnalise(churchName);
+      
+      XLSX.utils.book_append_sheet(wb, wsDados, 'Dados');
+      XLSX.utils.book_append_sheet(wb, wsResumo, 'Dashboard');
+      XLSX.utils.book_append_sheet(wb, wsEvolucao, 'Evolução');
+      XLSX.utils.book_append_sheet(wb, wsAnalise, 'Análise');
+
+      const excelBuffer = XLSX.write(wb, { 
+        bookType: 'xlsx', 
+        type: 'array',
+        cellStyles: true
+      });
+      
+      const blob = new Blob([excelBuffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      const fileName = `Planilha_Ministerios_${churchName.replace(/\s+/g, '_')}.xlsx`;
+      
+      saveAs(blob, fileName);
       
       toast({
         title: 'Download iniciado!',

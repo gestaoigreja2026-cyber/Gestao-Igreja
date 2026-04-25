@@ -2,11 +2,17 @@ import { supabase } from '@/lib/supabaseClient';
 import { Asset, AssetMaintenance } from '@/types';
 
 export const assetsService = {
-    async getAssets() {
-        const { data, error } = await supabase
+    async getAssets(churchId?: string | null) {
+        let query = supabase
             .from('assets')
             .select('*')
             .order('created_at', { ascending: false });
+
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         // Map camelCase

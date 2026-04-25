@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Member } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { membersService } from '@/services/members.service';
-import { exportToCsv, membersExportFilename } from '@/lib/exportCsv';
+import { ExcelMembersButton } from '@/components/ExcelMembersReport';
 import { churchesService } from '@/services/churches.service';
 import { pastorsService } from '@/services/pastors.service';
 import { useAuth } from '@/contexts/AuthContext';
@@ -194,21 +194,7 @@ export default function Members() {
         {!showForm && (
           <div className="flex flex-wrap gap-2">
             {members.length > 0 && (user?.role === 'superadmin' || !['aluno', 'membro', 'congregado'].includes(user?.role ?? '')) && (
-              <Button variant="outline" onClick={() => {
-                exportToCsv(members.map(m => ({
-                  Nome: m.name,
-                  Email: m.email,
-                  Telefone: m.phone,
-                  'Data Nascimento': m.birthDate,
-                  'Estado Civil': m.maritalStatus,
-                  Endereço: m.address,
-                  Categoria: m.category,
-                })), { filename: membersExportFilename() });
-                toast({ title: 'Exportado', description: `${members.length} membros exportados em CSV.` });
-              }} className="gap-2" aria-label="Exportar membros em CSV">
-                <FileDown className="h-4 w-4" />
-                Exportar CSV
-              </Button>
+              <ExcelMembersButton />
             )}
             {(user?.role === 'superadmin' || (user?.role !== 'aluno' && user?.role !== 'membro' && user?.role !== 'congregado' && user?.role !== 'tesoureiro')) && (
               <Button onClick={() => { setEditingMember(null); setShowForm(true); }} className="w-full sm:w-auto">

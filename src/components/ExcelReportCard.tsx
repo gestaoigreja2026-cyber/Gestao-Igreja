@@ -2,8 +2,10 @@ import { FileSpreadsheet, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import * as XLSX from 'xlsx-js-style';
 import { saveAs } from 'file-saver';
+import { churchesService } from '@/services/churches.service';
 
 // Estilos profissionais de Excel
 const STYLES = {
@@ -121,6 +123,7 @@ export function ExcelReportCard({
   headers,
 }: ExcelReportCardProps) {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const generateSampleData = (sheet: string): { headers: string[]; data: any[]; summary?: any } => {
     switch (sheet) {
@@ -307,7 +310,7 @@ export function ExcelReportCard({
   };
 
   // Criar aba de resumo/dashboard
-  const createSummarySheet = (wb: XLSX.WorkBook, sheetName: string, summaryData: any) => {
+  const createSummarySheet = (wb: XLSX.WorkBook, sheetName: string, summaryData: any, churchName: string) => {
     if (!summaryData) return;
     
     const summaryHeaders = ['Indicador', 'Valor'];
@@ -320,7 +323,7 @@ export function ExcelReportCard({
     });
 
     const wsData = [
-      [`${sheetName} - Dashboard Resumo`],
+      [`${sheetName} - Dashboard Resumo - ${churchName}`],
       ['Gerado em: ' + new Date().toLocaleDateString('pt-BR')],
       [],
       summaryHeaders,
@@ -360,7 +363,7 @@ export function ExcelReportCard({
     XLSX.utils.book_append_sheet(wb, ws, 'Resumo');
   };
 
-  const applyFormatting = (ws: XLSX.WorkSheet, headers: string[], data: any[][]) => {
+  const applyFormatting = (ws: XLSX.WorkSheet, headers: string[], data: any[][], churchName: string) => {
     const range = XLSX.utils.decode_range(ws['!ref'] || 'A1:A1');
     
     // Adicionar título e subtítulo
@@ -371,6 +374,10 @@ export function ExcelReportCard({
     // Ajustar range para incluir título
     range.e.r += 2;
     ws['!ref'] = XLSX.utils.encode_range(range);
+
+    // Adicionar título com nome da igreja
+    ws['A1'] = { v: `${headers[0] || 'RELATÓRIO'} - ${churchName}`, s: STYLES.title };
+    ws['A2'] = { v: 'Gerado em: ' + new Date().toLocaleDateString('pt-BR'), s: STYLES.subtitle };
 
     // Aplicar estilos nos cabeçalhos
     for (let c = 0; c < headers.length; c++) {
@@ -421,6 +428,17 @@ export function ExcelReportCard({
 
   const handleDownload = async () => {
     try {
+      // Buscar nome da igreja
+      let churchName = 'IGREJA LOCAL';
+      if (user?.churchId) {
+        try {
+          const church = await churchesService.getById(user.churchId);
+          if (church?.name) churchName = church.name.toUpperCase();
+        } catch (e) {
+          console.warn('Erro ao buscar dados da igreja:', e);
+        }
+      }
+
       if (onGenerate) {
         await onGenerate();
       } else {
@@ -433,13 +451,13 @@ export function ExcelReportCard({
         const ws = XLSX.utils.aoa_to_sheet(wsData);
         
         // Aplicar formatação profissional
-        applyFormatting(ws, sampleData.headers, sampleData.data);
+        applyFormatting(ws, sampleData.headers, sampleData.data, churchName);
         
         XLSX.utils.book_append_sheet(wb, ws, sheetName);
         
         // Criar aba de resumo se houver dados sumarizados
         if (sampleData.summary) {
-          createSummarySheet(wb, sheetName, sampleData.summary);
+          createSummarySheet(wb, sheetName, sampleData.summary, churchName);
         }
         
         // Configurações avançadas de exportação
@@ -505,16 +523,77 @@ export function ExcelReportCard({
 // Cards específicos para cada módulo
 export function CelulasReportCard({ disabled }: { disabled?: boolean }) {
   const { toast } = useToast();
+  const { user } = useAuth();
   
-  const handleDownload = () => {
+  const handleDownload = async () => {
     try {
-      // Link para download do arquivo na pasta public
-      const link = document.createElement('a');
-      link.href = '/planilha-celulas.xlsx';
-      link.download = 'Planilha_Celulas_PROFISSIONAL.xlsx';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Buscar nome da igreja
+      let churchName = 'IGREJA LOCAL';
+      if (user?.churchId) {
+        try {
+          const church = await churchesService.getById(user.churchId);
+          if (church?.name) churchName = church.name.toUpperCase();
+        } catch (e) {
+          console.warn('Erro ao buscar dados da igreja:', e);
+        }
+      }
+
+      // Dados de exemplo para Células
+      const sampleData = {
+        headers: ['ID', 'Nome da Célula', 'Líder', 'Vice-Líder', 'Endereço', 'Dia', 'Horário', 'Participantes', 'Status'],
+        data: [
+          ['C001', 'Célula Jovens - Centro', 'João Silva', 'Maria Santos', 'Rua A, 123 - Centro', 'Terça', '20:00', 12, 'Ativa'],
+          ['C002', 'Célula Famílias - Bairro', 'Pedro Costa', 'Ana Lima', 'Rua B, 456 - Jardim', 'Quarta', '19:30', 8, 'Ativa'],
+          ['C003', 'Célula Mulheres', 'Irmã Ana', 'Irmã Maria', 'Rua C, 789 - Centro', 'Quinta', '14:00', 15, 'Ativa'],
+          ['C004', 'Célula Homens', 'Carlos Oliveira', 'José Santos', 'Rua D, 101 - Bairro', 'Sábado', '09:00', 10, 'Ativa'],
+          ['C005', 'Célula Jovens Adolescentes', 'Pr. Ricardo', 'Amanda Souza', 'Rua E, 202 - Centro', 'Sexta', '20:00', 18, 'Ativa'],
+          ['C006', 'Célula Casais', 'Roberto e Ana', 'Carlos e Maria', 'Av. F, 303 - Centro', 'Segunda', '20:00', 6, 'Ativa'],
+          ['C007', 'Célula Idosos', 'Irmão José', 'Irmã Rosa', 'Rua G, 404 - Bairro', 'Quinta', '15:00', 12, 'Ativa'],
+          ['C008', 'Célula Intercessão', 'Pastora Maria', 'Diácono Pedro', 'Rua H, 505 - Centro', 'Terça', '06:00', 8, 'Ativa']
+        ]
+      };
+
+      // Gerar planilha dinamicamente
+      const wb = XLSX.utils.book_new();
+      
+      const wsData = [
+        [`CÉLULAS - ${churchName}`],
+        [`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`],
+        [],
+        sampleData.headers,
+        ...sampleData.data
+      ];
+      
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Aplicar estilos
+      ws['A1'] = { v: wsData[0][0], s: STYLES.title };
+      ws['A2'] = { v: wsData[1][0], s: STYLES.subtitle };
+      ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 8 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 8 } }
+      ];
+
+      // Cabeçalhos
+      for (let c = 0; c < sampleData.headers.length; c++) {
+        ws[XLSX.utils.encode_cell({ r: 3, c })] = { v: sampleData.headers[c], s: STYLES.header };
+      }
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Células');
+
+      const excelBuffer = XLSX.write(wb, { 
+        bookType: 'xlsx', 
+        type: 'array',
+        cellStyles: true
+      });
+      
+      const blob = new Blob([excelBuffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      const fileName = `Planilha_Celulas_${churchName.replace(/\s+/g, '_')}.xlsx`;
+      
+      saveAs(blob, fileName);
       
       toast({
         title: 'Download iniciado!',
@@ -561,16 +640,77 @@ export function CelulasReportCard({ disabled }: { disabled?: boolean }) {
 
 export function SecretariaReportCard({ disabled }: { disabled?: boolean }) {
   const { toast } = useToast();
+  const { user } = useAuth();
   
-  const handleDownload = () => {
+  const handleDownload = async () => {
     try {
-      // Link para download do arquivo na pasta public
-      const link = document.createElement('a');
-      link.href = '/planilha-secretaria.xlsx';
-      link.download = 'Planilha_Secretaria_EXPERT.xlsx';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Buscar nome da igreja
+      let churchName = 'IGREJA LOCAL';
+      if (user?.churchId) {
+        try {
+          const church = await churchesService.getById(user.churchId);
+          if (church?.name) churchName = church.name.toUpperCase();
+        } catch (e) {
+          console.warn('Erro ao buscar dados da igreja:', e);
+        }
+      }
+
+      // Dados de exemplo para Secretaria
+      const sampleData = {
+        headers: ['ID', 'Nome', 'Data Nasc.', 'Telefone', 'Email', 'Cargo', 'Data Batismo', 'Status'],
+        data: [
+          ['M001', 'João da Silva', '15/03/1985', '(11) 99999-1111', 'joao.silva@email.com', 'Membro', '10/05/2010', 'Ativo'],
+          ['M002', 'Maria Santos', '22/07/1990', '(11) 99999-2222', 'maria.santos@email.com', 'Líder de Célula', '15/08/2012', 'Ativo'],
+          ['M003', 'Pedro Costa', '05/11/1978', '(11) 99999-3333', 'pedro.costa@email.com', 'Diácono', '20/12/2005', 'Ativo'],
+          ['M004', 'Ana Lima', '18/09/1995', '(11) 99999-4444', 'ana.lima@email.com', 'Membro', '25/03/2018', 'Ativo'],
+          ['M005', 'Carlos Oliveira', '30/01/1982', '(11) 99999-5555', 'carlos.oliveira@email.com', 'Pastor', '10/02/2008', 'Ativo'],
+          ['M006', 'Julia Mendes', '12/04/1988', '(11) 99999-6666', 'julia.mendes@email.com', 'Líder de Louvor', '22/06/2015', 'Ativo'],
+          ['M007', 'Fernando Souza', '08/12/1975', '(11) 99999-7777', 'fernando.souza@email.com', 'Presbítero', '18/09/2003', 'Ativo'],
+          ['M008', 'Luciana Torres', '25/06/1992', '(11) 99999-8888', 'luciana.torres@email.com', 'Membro', '14/11/2019', 'Ativo']
+        ]
+      };
+
+      // Gerar planilha dinamicamente
+      const wb = XLSX.utils.book_new();
+      
+      const wsData = [
+        [`SECRETARIA - ${churchName}`],
+        [`Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')}`],
+        [],
+        sampleData.headers,
+        ...sampleData.data
+      ];
+      
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Aplicar estilos
+      ws['A1'] = { v: wsData[0][0], s: STYLES.title };
+      ws['A2'] = { v: wsData[1][0], s: STYLES.subtitle };
+      ws['!merges'] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } }
+      ];
+
+      // Cabeçalhos
+      for (let c = 0; c < sampleData.headers.length; c++) {
+        ws[XLSX.utils.encode_cell({ r: 3, c })] = { v: sampleData.headers[c], s: STYLES.header };
+      }
+
+      XLSX.utils.book_append_sheet(wb, ws, 'Secretaria');
+
+      const excelBuffer = XLSX.write(wb, { 
+        bookType: 'xlsx', 
+        type: 'array',
+        cellStyles: true
+      });
+      
+      const blob = new Blob([excelBuffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+      });
+      
+      const fileName = `Planilha_Secretaria_${churchName.replace(/\s+/g, '_')}.xlsx`;
+      
+      saveAs(blob, fileName);
       
       toast({
         title: 'Download iniciado!',

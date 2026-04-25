@@ -201,15 +201,9 @@ export default function NewLogin() {
                     <Card className="shadow-2xl border-primary/10 overflow-hidden">
                         <CardContent className="p-5 sm:p-6">
                             <div className="text-center mb-5">
-                                <div className="flex justify-center mb-0" style={{ transform: 'scale(1.44)', transformOrigin: 'center' }}>
+                                <div className="flex justify-center mb-4 overflow-visible" style={{ transform: 'scale(1.26)', transformOrigin: 'center' }}>
                                     <Logo size="md" showText={false} />
                                 </div>
-                                <h1 className="text-4xl font-black tracking-tight mb-1">
-                                    Gestão Igreja
-                                </h1>
-                                <div className="h-1 w-20 bg-primary mx-auto rounded-full mb-3"
-                                    style={{ backgroundColor: 'hsl(var(--primary))' }}></div>
-                                <h2 className="text-2xl font-bold text-foreground/80">Bem-vindo</h2>
                             </div>
 
                             <form onSubmit={handleWelcomeSubmit} className="space-y-4">

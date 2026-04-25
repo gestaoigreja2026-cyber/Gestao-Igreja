@@ -9,11 +9,17 @@ export interface Budget {
 }
 
 export const budgetsService = {
-    async listByMonth(month: string) {
-        const { data, error } = await supabase
+    async listByMonth(month: string, churchId?: string | null) {
+        let query = supabase
             .from('budgets')
             .select('*')
             .eq('month', month);
+
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return data as Budget[];

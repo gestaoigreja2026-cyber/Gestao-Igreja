@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { FileText, Send, Users, Loader2, Download, Trash2, CreditCard, Search, Plus, Minus } from 'lucide-react';
+import { FileText, Send, Users, Loader2, Download, Trash2, CreditCard, Search, Plus, Minus, FileSpreadsheet } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { membersService } from '@/services/members.service';
 import { documentsService, ChurchDocument } from '@/services/documents.service';
 import { Member } from '@/types';
+import SecretaryMonthlyReportExcel from '@/components/SecretaryMonthlyReportExcel';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -134,6 +135,7 @@ export default function Secretariat() {
                 </div>
                 {canEdit && (
                     <div className="flex gap-2">
+                        <SecretaryMonthlyReportExcel />
                         <Button onClick={handlePrint} className="gap-2">
                             <Download className="h-4 w-4" />
                             Baixar PDF / Imprimir

@@ -7,6 +7,13 @@ export interface PrayerRequest {
   is_anonymous: boolean;
   requester_id: string | null;
   requester_name: string | null;
+  contact?: string | null;
+  category?: 'saude' | 'familia' | 'financeiro' | 'espiritual' | 'outros' | null;
+  status?: 'pendente' | 'em_oracao' | 'respondido' | 'concluido' | null;
+  assigned_to?: string | null;
+  assigned_to_name?: string | null;
+  return_date?: string | null;
+  testimony?: string | null;
   prayed_count: number;
   created_at: string;
 }
@@ -25,7 +32,17 @@ export const prayerRequestsService = {
 
   async create(
     churchId: string,
-    params: { content: string; isAnonymous?: boolean; requesterName?: string }
+    params: {
+      content: string;
+      isAnonymous?: boolean;
+      requesterName?: string;
+      contact?: string;
+      category?: 'saude' | 'familia' | 'financeiro' | 'espiritual' | 'outros';
+      assignedTo?: string;
+      assignedToName?: string;
+      returnDate?: string;
+      testimony?: string;
+    }
   ): Promise<PrayerRequest> {
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -37,7 +54,26 @@ export const prayerRequestsService = {
         is_anonymous: params.isAnonymous ?? false,
         requester_id: params.isAnonymous ? null : user?.id ?? null,
         requester_name: params.isAnonymous ? null : (params.requesterName?.trim() || user?.email?.split('@')[0] || 'Anônimo'),
+        contact: params.contact?.trim() || null,
+        category: params.category || 'outros',
+        status: 'pendente',
+        assigned_to: params.assignedTo || null,
+        assigned_to_name: params.assignedToName || null,
+        return_date: params.returnDate || null,
+        testimony: params.testimony?.trim() || null,
       })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as PrayerRequest;
+  },
+
+  async update(id: string, updates: Partial<PrayerRequest>): Promise<PrayerRequest> {
+    const { data, error } = await supabase
+      .from('prayer_requests')
+      .update(updates)
+      .eq('id', id)
       .select()
       .single();
 

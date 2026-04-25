@@ -9,14 +9,20 @@ export const ministriesService = {
     /**
      * Get all ministries
      */
-    async getAll() {
-        const { data, error } = await supabase
+    async getAll(churchId?: string | null) {
+        let query = supabase
             .from('ministries')
             .select(`
         *,
         leader:members!ministries_leader_id_fkey(id, name, phone, email)
       `)
             .order('name');
+        
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return data;

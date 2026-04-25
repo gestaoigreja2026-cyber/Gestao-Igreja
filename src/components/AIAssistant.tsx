@@ -95,7 +95,7 @@ Cadastro de ministérios:
 Acesso: Menu → Ministérios e Células → Ministérios`
   },
   caixa: {
-    keywords: ['caixa', 'financeiro', 'dinheiro', 'entrada', 'saída', 'tesouro', 'oferta', 'dízimo', 'financeiro'],
+    keywords: ['caixa', 'financeiro', 'dinheiro', 'entrada', 'saída', 'tesouro', 'oferta', 'dízimo', 'financeiro', 'extrato', 'upload', 'ofx', 'csv', 'pdf'],
     response: `💰 **Caixa Diário (Financeiro)**
 
 Controle completo de finanças:
@@ -106,6 +106,11 @@ Controle completo de finanças:
 • **Comprovantes:** Upload de notas fiscais/recibos
 • **Relatórios:** Por período, por categoria, consolidado
 • **Saldo em tempo real**
+
+**Importação de Extratos:**
+⚠️ **PDF não suportado** - Extratos em PDF não podem ser lidos automaticamente.
+✅ **Formatos suportados:** OFX, CSV, TXT
+💡 **Dica:** Baixe o extrato em formato OFX ou CSV diretamente do Internet Banking do seu banco. A maioria dos bancos brasileiros oferece essa opção.
 
 **Segurança:**
 - Acesso restrito a pastor, tesoureiro e secretário

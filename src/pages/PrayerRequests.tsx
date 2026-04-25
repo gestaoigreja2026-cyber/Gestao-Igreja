@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { HandHeart, Send, Loader2, Heart, Trash2, Church } from 'lucide-react';
+import { HandHeart, Send, Loader2, Heart, Trash2, Church, Phone, User, Calendar, Tag, ClipboardList, CheckCircle, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -18,14 +19,16 @@ import {
   PrayerRequest,
 } from '@/services/prayerRequests.service';
 import { churchesService } from '@/services/churches.service';
+import { membersService } from '@/services/members.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { canWriteInRestrictedModules } from '@/lib/permissions';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { EmptyState } from '@/components/EmptyState';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { ExcelPrayerMonthlyReportButton } from '@/components/ExcelPrayerMonthlyReport';
 export default function PrayerRequests() {
   useDocumentTitle('Solicitações de Oração');
   const { user, churchId, viewingChurch, switchChurch } = useAuth();
@@ -42,6 +45,16 @@ export default function PrayerRequests() {
   const [setupRequired, setSetupRequired] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<PrayerRequest | null>(null);
   const [churches, setChurches] = useState<{ id: string; name: string }[]>([]);
+  
+  // Novos campos do formulário
+  const [requesterName, setRequesterName] = useState('');
+  const [contact, setContact] = useState('');
+  const [category, setCategory] = useState<'saude' | 'familia' | 'financeiro' | 'espiritual' | 'outros'>('outros');
+  const [assignedTo, setAssignedTo] = useState('');
+  const [assignedToName, setAssignedToName] = useState('');
+  const [returnDate, setReturnDate] = useState('');
+  const [testimony, setTestimony] = useState('');
+  const [members, setMembers] = useState<{ id: string; name: string }[]>([]);
 
   const loadRequests = useCallback(async () => {
     if (!effectiveChurchId) return;
@@ -74,6 +87,16 @@ export default function PrayerRequests() {
     }
   }, [isSuperAdmin, effectiveChurchId]);
 
+  // Carregar membros para o select de responsável
+  useEffect(() => {
+    if (!effectiveChurchId) return;
+    membersService.getAll()
+      .then((list: any[]) => {
+        setMembers(list.map((m) => ({ id: m.id, name: m.name })).sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => setMembers([]));
+  }, [effectiveChurchId]);
+
   useEffect(() => {
     if (!effectiveChurchId) return;
 
@@ -101,13 +124,29 @@ export default function PrayerRequests() {
 
     setSending(true);
     try {
+      const selectedMember = members.find(m => m.id === assignedTo);
       const newReq = await prayerRequestsService.create(effectiveChurchId, {
         content: content.trim(),
         isAnonymous: isAnonymous,
-        requesterName: user?.name,
+        requesterName: isAnonymous ? undefined : (requesterName || user?.name),
+        contact: isAnonymous ? undefined : contact,
+        category: category,
+        assignedTo: assignedTo || undefined,
+        assignedToName: selectedMember?.name,
+        returnDate: returnDate || undefined,
+        testimony: testimony.trim() || undefined,
       });
       setRequests((prev) => [newReq, ...prev]);
+      // Reset form
       setContent('');
+      setRequesterName('');
+      setContact('');
+      setCategory('outros');
+      setAssignedTo('');
+      setAssignedToName('');
+      setReturnDate('');
+      setTestimony('');
+      setIsAnonymous(false);
       toast({ title: 'Enviado!', description: 'Sua solicitação de oração foi publicada.' });
     } catch (e: any) {
       toast({ title: 'Erro ao enviar', description: e?.message, variant: 'destructive' });
@@ -186,16 +225,19 @@ export default function PrayerRequests() {
   return (
     <div className="max-w-2xl mx-auto space-y-6 pb-12">
       <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-background to-primary/5 border border-primary/10 p-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-xl bg-primary/10">
-            <HandHeart className="h-8 w-8 text-primary" />
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-primary/10">
+              <HandHeart className="h-8 w-8 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Solicitações de Oração</h1>
+              <p className="text-muted-foreground mt-1">
+                Envie pedidos e ore pelas necessidades da igreja. Atualização em tempo real.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Solicitações de Oração</h1>
-            <p className="text-muted-foreground mt-1">
-              Envie pedidos e ore pelas necessidades da igreja. Atualização em tempo real.
-            </p>
-          </div>
+          <ExcelPrayerMonthlyReportButton requests={requests} />
         </div>
       </div>
 
@@ -227,25 +269,144 @@ export default function PrayerRequests() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <Textarea
-                  placeholder="Escreva sua solicitação de oração..."
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={4}
-                  className="resize-y"
-                  maxLength={1000}
-                />
-                <div className="flex items-center gap-2">
+                {/* Linha 1: Solicitante e Contato */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="requesterName" className="flex items-center gap-2 text-sm">
+                      <User className="h-4 w-4 text-muted-foreground" />
+                      Solicitante
+                    </Label>
+                    <Input
+                      id="requesterName"
+                      placeholder="Nome completo"
+                      value={requesterName}
+                      onChange={(e) => setRequesterName(e.target.value)}
+                      disabled={isAnonymous}
+                      className="h-10"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="contact" className="flex items-center gap-2 text-sm">
+                      <Phone className="h-4 w-4 text-muted-foreground" />
+                      Contato
+                    </Label>
+                    <Input
+                      id="contact"
+                      placeholder="Telefone ou email"
+                      value={contact}
+                      onChange={(e) => setContact(e.target.value)}
+                      disabled={isAnonymous}
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Linha 2: Categoria, Responsável e Data de Retorno */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="category" className="flex items-center gap-2 text-sm">
+                      <Tag className="h-4 w-4 text-muted-foreground" />
+                      Categoria
+                    </Label>
+                    <Select value={category} onValueChange={(val) => setCategory(val as any)}>
+                      <SelectTrigger id="category" className="h-10">
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="saude">Saúde</SelectItem>
+                        <SelectItem value="familia">Família</SelectItem>
+                        <SelectItem value="financeiro">Financeiro</SelectItem>
+                        <SelectItem value="espiritual">Espiritual</SelectItem>
+                        <SelectItem value="outros">Outros</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="assignedTo" className="flex items-center gap-2 text-sm">
+                      <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                      Responsável
+                    </Label>
+                    <Select value={assignedTo} onValueChange={(val) => setAssignedTo(val)}>
+                      <SelectTrigger id="assignedTo" className="h-10">
+                        <SelectValue placeholder="Selecione..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {members.length === 0 ? (
+                          <div className="p-3 text-xs text-muted-foreground text-center">
+                            Nenhum membro cadastrado
+                          </div>
+                        ) : (
+                          members.map((member) => (
+                            <SelectItem key={member.id} value={member.id}>
+                              {member.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="returnDate" className="flex items-center gap-2 text-sm">
+                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                      Data Retorno
+                    </Label>
+                    <Input
+                      id="returnDate"
+                      type="date"
+                      value={returnDate}
+                      onChange={(e) => setReturnDate(e.target.value)}
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                {/* Pedido/Oração */}
+                <div className="space-y-2">
+                  <Label htmlFor="content" className="flex items-center gap-2 text-sm">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    Pedido de Oração
+                  </Label>
+                  <Textarea
+                    id="content"
+                    placeholder="Descreva seu pedido de oração em detalhes..."
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={4}
+                    className="resize-y"
+                    maxLength={1000}
+                  />
+                </div>
+
+                {/* Testemunho */}
+                <div className="space-y-2">
+                  <Label htmlFor="testimony" className="flex items-center gap-2 text-sm">
+                    <ClipboardList className="h-4 w-4 text-muted-foreground" />
+                    Testemunho (resposta da oração)
+                  </Label>
+                  <Textarea
+                    id="testimony"
+                    placeholder="Compartilhe como Deus respondeu esta oração (opcional)..."
+                    value={testimony}
+                    onChange={(e) => setTestimony(e.target.value)}
+                    rows={3}
+                    className="resize-y"
+                    maxLength={500}
+                  />
+                </div>
+
+                {/* Checkbox Anônimo */}
+                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
                   <Checkbox
                     id="anonymous"
                     checked={isAnonymous}
                     onCheckedChange={(c) => setIsAnonymous(!!c)}
                   />
                   <Label htmlFor="anonymous" className="text-sm cursor-pointer">
-                    Enviar como anônimo
+                    Enviar como anônimo (ocultar solicitante e contato)
                   </Label>
                 </div>
-                <Button type="submit" disabled={sending || !content.trim()}>
+
+                <Button type="submit" disabled={sending || !content.trim()} className="w-full sm:w-auto">
                   {sending ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (

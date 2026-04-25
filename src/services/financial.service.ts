@@ -62,11 +62,15 @@ async function create(data: CreateFinancialTransactionDTO, churchId: string) {
   return result;
 }
 
-async function list(startDate?: Date, endDate?: Date): Promise<Transaction[]> {
+async function list(startDate?: Date, endDate?: Date, churchId?: string | null): Promise<Transaction[]> {
   let query = supabase
     .from('financial_transactions')
     .select('*')
     .order('created_at', { ascending: false });
+
+  if (churchId) {
+    query = query.eq('church_id', churchId);
+  }
 
   if (startDate && endDate) {
     query = query

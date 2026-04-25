@@ -15,6 +15,7 @@ import { ptBR } from 'date-fns/locale';
 import { EmptyState } from '@/components/EmptyState';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { cn } from '@/lib/utils';
+import { ExcelConsolidacaoReportButton } from '@/components/ExcelConsolidacaoReport';
 
 interface NovoConvertido {
   id?: string;
@@ -107,11 +108,11 @@ export default function Consolidacao() {
             week4Date: consolidacaoData.week4Date || '',
             baptismDate: consolidacaoData.baptismDate || '',
             observations: consolidacaoData.observations || (m.notes && !m.notes.startsWith('{') ? m.notes : ''),
-            status: m.status === 'visitante' ? 'novo' : 'consolidado',
+            status: (m.status === 'visitante' ? 'novo' : 'consolidado') as NovoConvertido['status'],
             createdAt: m.created_at,
           };
         });
-      setNovosConvertidos(visitantes);
+      setNovosConvertidos(visitantes as NovoConvertido[]);
     } catch (error) {
       toast({
         title: 'Erro ao carregar',
@@ -520,9 +521,10 @@ export default function Consolidacao() {
             className="pl-9"
           />
         </div>
+        <ExcelConsolidacaoReportButton convertidos={novosConvertidos} />
       </div>
 
-      {/* Lista */}
+      {/* Lista - Cards removidos conforme solicitado */}
       {loading && novosConvertidos.length === 0 ? (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -534,86 +536,11 @@ export default function Consolidacao() {
           description="Clique em 'Novo Convertido' para começar o cadastro."
         />
       ) : (
-        <div className="grid gap-3">
-          {filteredConvertidos.map((convertido) => (
-            <Card key={convertido.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-lg truncate">{convertido.name}</h3>
-                      {getStatusBadge(convertido.status)}
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Phone className="h-3.5 w-3.5" />
-                        {convertido.phone || 'Sem telefone'}
-                      </span>
-                      {convertido.visitDay && (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="h-3.5 w-3.5" />
-                          {convertido.visitDay} - {convertido.visitService}
-                        </span>
-                      )}
-                      {convertido.baptismDate && (
-                        <span className="flex items-center gap-1 text-cyan-600 font-medium">
-                          <CheckCircle className="h-3.5 w-3.5" />
-                          Batismo: {format(new Date(convertido.baptismDate), 'dd/MM/yyyy', { locale: ptBR })}
-                        </span>
-                      )}
-                    </div>
-                    {/* Linha do tempo de acompanhamento */}
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {convertido.week1Contact && (
-                        <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
-                          1ª Sem: {convertido.week1Contact.length > 20 ? convertido.week1Contact.substring(0, 20) + '...' : convertido.week1Contact}
-                        </span>
-                      )}
-                      {convertido.week2InviteCell && (
-                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">
-                          2ª Sem: {convertido.week2InviteCell.length > 20 ? convertido.week2InviteCell.substring(0, 20) + '...' : convertido.week2InviteCell}
-                        </span>
-                      )}
-                      {convertido.week3InviteCult && (
-                        <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
-                          3ª Sem: {convertido.week3InviteCult.length > 20 ? convertido.week3InviteCult.substring(0, 20) + '...' : convertido.week3InviteCult}
-                        </span>
-                      )}
-                      {convertido.week4HomeVisit && (
-                        <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded">
-                          4ª Sem: {convertido.week4HomeVisit.length > 20 ? convertido.week4HomeVisit.substring(0, 20) + '...' : convertido.week4HomeVisit}
-                        </span>
-                      )}
-                    </div>
-                    {convertido.observations && (
-                      <p className="mt-2 text-sm text-muted-foreground bg-muted p-2 rounded">
-                        {convertido.observations}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => startEdit(convertido)}
-                      className="h-8 w-8"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setDeleteId(convertido.id || null)}
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <EmptyState
+          icon={UserPlus}
+          title={`${filteredConvertidos.length} convertido(s) cadastrado(s)`}
+          description="Use o formulário acima para gerenciar os registros."
+        />
       )}
 
       {/* Diálogo de confirmação */}
@@ -623,7 +550,7 @@ export default function Consolidacao() {
         onConfirm={handleDelete}
         title="Excluir registro?"
         description="Esta ação não pode ser desfeita. O registro do convertido será removido permanentemente."
-        confirmText="Excluir"
+        confirmLabel="Excluir"
         variant="destructive"
       />
     </div>

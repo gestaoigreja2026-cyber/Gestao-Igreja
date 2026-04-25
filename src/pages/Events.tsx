@@ -24,6 +24,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/EmptyState';
 import { supabase } from '@/lib/supabaseClient';
+import { getAppUrl } from '@/lib/utils';
 interface Event {
     id: string;
     title: string;
@@ -119,7 +120,9 @@ export default function Events() {
         try {
             setError(null);
             setLoading(true);
-            const { data, error } = await supabase
+            
+            // Buscar eventos filtrados por church_id
+            let query = supabase
                 .from('events')
                 .select(`
                     *,
@@ -128,6 +131,13 @@ export default function Events() {
                     serviceScale:service_scales(*, member:members(name, phone))
                 `)
                 .order('date', { ascending: false });
+            
+            // Filtrar por church_id se disponível
+            if (user?.churchId) {
+                query = query.eq('church_id', user.churchId);
+            }
+            
+            const { data, error } = await query;
 
             if (error) throw error;
 
@@ -813,7 +823,7 @@ function ServiceScaleView({ events, onToggleConfirmation }: { events: Event[], o
                                                 const phone = person.phone || '';
                                                 if (phone) {
                                                     const isGuest = person.role === 'Convidado';
-                                                    const confirmationUrl = `${window.location.origin}/confirmar/${person.id}`;
+                                                    const confirmationUrl = `${getAppUrl()}/confirmar/${person.id}`;
                                                     const text = isGuest
                                                         ? `Olá ${person.name}, Graça e Paz! Gostaria de te convidar para o evento *${event.title}* que teremos no dia ${formatDate(event.date)} às ${event.time}. Sua presença seria uma alegria para nós!\n\nConfirme sua presença clicando no link abaixo:\n${confirmationUrl}`
                                                         : `Olá ${person.name}, Graça e Paz! Você foi escalado para a função de *${person.role}* no evento *${event.title}* no dia ${formatDate(event.date)}. Poderia confirmar sua presença?\n\nConfirme clicando aqui:\n${confirmationUrl}`;
@@ -902,6 +912,7 @@ function CreateEventForm({ onClose, onSuccess, initialData }: { onClose: () => v
     const [memberSearch, setMemberSearch] = useState('');
     const [whatsappInviteConfirm, setWhatsappInviteConfirm] = useState<{ scaleResults: any[]; newEvent: any } | null>(null);
     const [sendNotify, setSendNotify] = useState(true);
+    const [type, setType] = useState(initialData?.type || 'evento');
 
     useEffect(() => {
         loadMembers();
@@ -930,7 +941,7 @@ function CreateEventForm({ onClose, onSuccess, initialData }: { onClose: () => v
 
             const eventPayload: any = {
                 title: formData.get('title') as string,
-                type: formData.get('type') as any,
+                type: type as any,
                 date: formData.get('date') as string,
                 time: formData.get('time') as string,
                 location: formData.get('location') as string,
@@ -994,7 +1005,7 @@ function CreateEventForm({ onClose, onSuccess, initialData }: { onClose: () => v
             if (member && member.phone) {
                 setTimeout(() => {
                     const firstName = member.name.split(' ')[0];
-                    const confirmationUrl = `${window.location.origin}/confirmar/${scaleEntry.id}`;
+                    const confirmationUrl = `${getAppUrl()}/confirmar/${scaleEntry.id}`;
                     const text = `Olá ${firstName}, Graça e Paz! Gostaria de te convidar para o evento *${newEvent.title}* que teremos no dia ${formatDate(newEvent.date)} às ${newEvent.time}. Sua presença seria uma alegria para nós!\n\nConfirme sua presença clicando no link abaixo:\n${confirmationUrl}`;
                     const cleanPhone = member.phone.replace(/\D/g, '');
                     const finalPhone = cleanPhone.startsWith('55') ? cleanPhone : `55${cleanPhone}`;
@@ -1017,18 +1028,19 @@ function CreateEventForm({ onClose, onSuccess, initialData }: { onClose: () => v
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="type">Tipo</Label>
-                    <Select name="type" defaultValue={initialData?.type || 'evento'}>
+                    <Select name="type" value={type} onValueChange={(val) => setType(val as Event['type'])}>
                         <SelectTrigger>
                             <SelectValue placeholder="Selecione o tipo" />
                         </SelectTrigger>
                         <SelectContent>
-                                <SelectItem value="culto">Culto</SelectItem>
-                                <SelectItem value="ensaio">Ensaio</SelectItem>
-                                <SelectItem value="evento">Evento</SelectItem>
-                                <SelectItem value="reuniao">Reunião</SelectItem>
-                                <SelectItem value="especial">Especial</SelectItem>
-                            </SelectContent>
+                            <SelectItem value="culto">Culto</SelectItem>
+                            <SelectItem value="ensaio">Ensaio</SelectItem>
+                            <SelectItem value="evento">Evento</SelectItem>
+                            <SelectItem value="reuniao">Reunião</SelectItem>
+                            <SelectItem value="especial">Especial</SelectItem>
+                        </SelectContent>
                     </Select>
+                    <input type="hidden" name="type" value={type} />
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="attendees">Expectativa de Público</Label>
@@ -1360,16 +1372,32 @@ function CreateChecklistForm({ onClose, events, onSuccess }: { onClose: () => vo
                 <Label>Selecione o Evento</Label>
                 <Select value={selectedEventId} onValueChange={setSelectedEventId}>
                     <SelectTrigger>
-                        <SelectValue placeholder="Selecione o evento..." />
+                        <SelectValue placeholder={events.length === 0 ? "Nenhum evento disponível" : "Selecione o evento..."} />
                     </SelectTrigger>
-                    <SelectContent>
-                        {events.map(event => (
-                            <SelectItem key={event.id} value={event.id}>
-                                {event.title} ({formatDate(event.date)})
-                            </SelectItem>
-                        ))}
+                    <SelectContent 
+                        className="z-[99999] max-h-[300px] overflow-y-auto"
+                        side="bottom"
+                        sideOffset={4}
+                        avoidCollisions={true}
+                    >
+                        {events.length === 0 ? (
+                            <div className="p-4 text-sm text-muted-foreground text-center">
+                                Nenhum evento cadastrado
+                            </div>
+                        ) : (
+                            events.map(event => (
+                                <SelectItem key={event.id} value={event.id}>
+                                    {event.title} ({formatDate(event.date)})
+                                </SelectItem>
+                            ))
+                        )}
                     </SelectContent>
                 </Select>
+                {events.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-1">
+                        Crie um evento primeiro antes de adicionar um checklist.
+                    </p>
+                )}
             </div>
             <div className="space-y-2">
                 <Label>Tarefas (Uma por linha)</Label>
@@ -1406,7 +1434,11 @@ function ManageScaleForm({ onClose, events, onSuccess }: { onClose: () => void; 
 
     async function loadMembers() {
         try {
+            console.log('=== LOAD MEMBERS ===');
+            console.log('effectiveChurchId:', effectiveChurchId);
             const data = await membersService.getAll(effectiveChurchId);
+            console.log('Dados retornados:', data);
+            console.log('Quantidade de membros:', data?.length);
             setMembers(data || []);
         } catch (error) {
             console.error('Error loading members:', error);
@@ -1460,16 +1492,32 @@ function ManageScaleForm({ onClose, events, onSuccess }: { onClose: () => void; 
                 <Label>Selecione o Evento</Label>
                 <Select value={selectedEventId} onValueChange={setSelectedEventId}>
                     <SelectTrigger>
-                        <SelectValue placeholder="Selecione o evento..." />
+                        <SelectValue placeholder={events.length === 0 ? "Nenhum evento disponível" : "Selecione o evento..."} />
                     </SelectTrigger>
-                    <SelectContent>
-                        {events.map(event => (
-                            <SelectItem key={event.id} value={event.id}>
-                                {event.title} ({formatDate(event.date)})
-                            </SelectItem>
-                        ))}
+                    <SelectContent 
+                        className="z-[99999] max-h-[300px] overflow-y-auto"
+                        side="bottom"
+                        sideOffset={4}
+                        avoidCollisions={true}
+                    >
+                        {events.length === 0 ? (
+                            <div className="p-4 text-sm text-muted-foreground text-center">
+                                Nenhum evento cadastrado
+                            </div>
+                        ) : (
+                            events.map(event => (
+                                <SelectItem key={event.id} value={event.id}>
+                                    {event.title} ({formatDate(event.date)})
+                                </SelectItem>
+                            ))
+                        )}
                     </SelectContent>
                 </Select>
+                {events.length === 0 && (
+                    <p className="text-xs text-amber-600 mt-1">
+                        Crie um evento primeiro antes de escalar uma equipe.
+                    </p>
+                )}
             </div>
 
             <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
@@ -1498,14 +1546,30 @@ function ManageScaleForm({ onClose, events, onSuccess }: { onClose: () => void; 
                                 <SelectTrigger className="h-8 text-sm">
                                     <SelectValue placeholder="Selecione..." />
                                 </SelectTrigger>
-                                <SelectContent>
-                                    {members.map(member => (
-                                        <SelectItem key={member.id} value={member.id}>
-                                            {member.name}
-                                        </SelectItem>
-                                    ))}
+                                <SelectContent
+                                    className="z-[99999] max-h-[250px] overflow-y-auto"
+                                    side="bottom"
+                                    sideOffset={4}
+                                    avoidCollisions={true}
+                                >
+                                    {members.length === 0 ? (
+                                        <div className="p-3 text-xs text-muted-foreground text-center">
+                                            Nenhum membro cadastrado
+                                        </div>
+                                    ) : (
+                                        members.map(member => (
+                                            <SelectItem key={member.id} value={member.id}>
+                                                {member.name}
+                                            </SelectItem>
+                                        ))
+                                    )}
                                 </SelectContent>
                             </Select>
+                            {members.length === 0 && (
+                                <p className="text-[10px] text-amber-600 mt-1">
+                                    Cadastre membros primeiro.
+                                </p>
+                            )}
                         </div>
                         {scaleEntries.length > 1 && (
                             <Button

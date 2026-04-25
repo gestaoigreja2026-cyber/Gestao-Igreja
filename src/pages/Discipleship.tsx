@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import {
+import { 
     Heart, Users, Calendar, Plus, Search,
     ChevronRight, Loader2, CheckCircle2, XCircle, Clock,
-    UserPlus, MessageSquare, Info, Trash2
+    UserPlus, MessageSquare, Info, Trash2, FileSpreadsheet
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -32,9 +32,11 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { canWriteInRestrictedModules } from '@/lib/permissions';
 import { discipleshipService } from '@/services/discipleship.service';
 import { membersService } from '@/services/members.service';
+import ExcelDiscipleshipMonthlyReportButton from '@/components/ExcelDiscipleshipMonthlyReport';
 import { Member } from '@/types';
 import { EmptyState } from '@/components/EmptyState';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
+
 export default function Discipleship() {
     useDocumentTitle('Discipulado');
     const [discipleships, setDiscipleships] = useState<any[]>([]);
@@ -254,56 +256,69 @@ export default function Discipleship() {
 
             <div className="flex justify-between items-center px-2">
                 <h2 className="text-xl font-bold">Acompanhamento Ativo</h2>
-                {canEdit && (
-                <Dialog open={isNewDialogOpen} onOpenChange={(open) => { setIsNewDialogOpen(open); if (!open) { setNewMentorId(''); setNewDiscipleId(''); } }}>
-                    <DialogTrigger asChild>
-                        <Button className="bg-primary text-primary-foreground hover:shadow-lg transition-all">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Novo Discipulado
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
-                        <form onSubmit={handleCreateDiscipleship}>
-                            <DialogHeader>
-                                <DialogTitle>Iniciar Novo Discipulado</DialogTitle>
-                                <DialogDescription>Conecte um mentor a um novo discípulo</DialogDescription>
-                            </DialogHeader>
-                            <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                    <Label>Mentor (Quem cuida)</Label>
-                                    <Select name="mentor_id" value={newMentorId || undefined} onValueChange={setNewMentorId}>
-                                        <SelectTrigger><SelectValue placeholder="Selecione o mentor..." /></SelectTrigger>
-                                        <SelectContent>
-                                            {members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Discípulo (Quem é cuidado)</Label>
-                                    <Select name="disciple_id" value={newDiscipleId || undefined} onValueChange={setNewDiscipleId}>
-                                        <SelectTrigger><SelectValue placeholder="Selecione o discípulo..." /></SelectTrigger>
-                                        <SelectContent>
-                                            {members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Data de Início</Label>
-                                    <Input name="start_date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Observações Iniciais</Label>
-                                    <Textarea name="notes" placeholder="Algum foco específico para este acompanhamento?" />
-                                </div>
-                            </div>
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsNewDialogOpen(false)}>Cancelar</Button>
-                                <Button type="submit">Começar Juntos</Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-                )}
+                <div className="flex gap-2">
+                    <ExcelDiscipleshipMonthlyReportButton />
+                    {canEdit && (
+                        <Dialog open={isNewDialogOpen} onOpenChange={(open) => { setIsNewDialogOpen(open); if (!open) { setNewMentorId(''); setNewDiscipleId(''); } }}>
+                            <DialogTrigger asChild>
+                                <Button className="bg-primary text-primary-foreground hover:shadow-lg transition-all">
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Novo Discipulado
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
+                                <form onSubmit={handleCreateDiscipleship}>
+                                    <DialogHeader>
+                                        <DialogTitle>Iniciar Novo Discipulado</DialogTitle>
+                                        <DialogDescription>Conecte um mentor a um novo discípulo</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-4 py-4">
+                                        <div className="space-y-2">
+                                            <Label>Mentor (Quem cuida)</Label>
+                                            <Select name="mentor_id" value={newMentorId || undefined} onValueChange={setNewMentorId}>
+                                                <SelectTrigger><SelectValue placeholder="Selecione o mentor..." /></SelectTrigger>
+                                                <SelectContent
+                                                    className="z-[99999] max-h-[300px] overflow-y-auto"
+                                                    side="bottom"
+                                                    sideOffset={4}
+                                                    avoidCollisions={true}
+                                                >
+                                                    {members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Discípulo (Quem é cuidado)</Label>
+                                            <Select name="disciple_id" value={newDiscipleId || undefined} onValueChange={setNewDiscipleId}>
+                                                <SelectTrigger><SelectValue placeholder="Selecione o discípulo..." /></SelectTrigger>
+                                                <SelectContent
+                                                    className="z-[99999] max-h-[300px] overflow-y-auto"
+                                                    side="bottom"
+                                                    sideOffset={4}
+                                                    avoidCollisions={true}
+                                                >
+                                                    {members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Data de Início</Label>
+                                            <Input name="start_date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label>Observações Iniciais</Label>
+                                            <Textarea name="notes" placeholder="Algum foco específico para este acompanhamento?" />
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button type="button" variant="outline" onClick={() => setIsNewDialogOpen(false)}>Cancelar</Button>
+                                        <Button type="submit">Começar Juntos</Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    )}
+                </div>
             </div>
 
             {/* Grid de Discipulados */}

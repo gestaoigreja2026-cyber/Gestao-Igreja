@@ -32,6 +32,7 @@ import { Ministry, Member } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import MinistryMonthlyReportExcel from '@/components/MinistryMonthlyReportExcel';
 export default function Ministries() {
   useDocumentTitle('Ministérios');
   const [ministries, setMinistries] = useState<Ministry[]>([]);
@@ -226,7 +227,12 @@ export default function Ministries() {
                     <SelectTrigger>
                       <SelectValue placeholder="Selecione o líder" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent
+                      className="z-[99999] max-h-[300px] overflow-y-auto"
+                      side="bottom"
+                      sideOffset={4}
+                      avoidCollisions={true}
+                    >
                       {members.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.name}
@@ -245,6 +251,7 @@ export default function Ministries() {
             </DialogContent>
           </Dialog>
         )}
+          <MinistryMonthlyReportExcel disabled={loading} />
         </div>
       </div>
 
@@ -486,7 +493,12 @@ function MinistryDetailsDialog({ open, onOpenChange, ministry, onSuccess }: {
                       <SelectTrigger className="flex-1">
                         <SelectValue placeholder="Selecione um membro para adicionar..." />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent
+                        className="z-[99999] max-h-[300px] overflow-y-auto"
+                        side="bottom"
+                        sideOffset={4}
+                        avoidCollisions={true}
+                      >
                         {allMembers
                           .filter(am => !members.some(m => m.member_id === am.id))
                           .map(m => (

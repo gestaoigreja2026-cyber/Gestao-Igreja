@@ -46,12 +46,6 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Title */}
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold leading-tight mb-6">
-              Gestão inteligente para a sua{' '}
-              <span className="text-primary font-bold">igreja</span>
-            </h1>
-
             {/* Subtitle */}
             <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
               Um sistema completo para administrar membros,

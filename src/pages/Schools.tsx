@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Loader2, GraduationCap, Users, Trash2, ClipboardList } from 'lucide-react';
+import { Plus, Loader2, GraduationCap, Users, Trash2, ClipboardList, FileSpreadsheet, Search, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { ExcelSchoolMonthlyReportButton } from '@/components/ExcelSchoolMonthlyReport';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { membersService } from '@/services/members.service';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface StudentToAdd {
   name: string;
@@ -68,7 +72,8 @@ export default function Schools() {
   async function loadStudents(schoolId: string) {
     try {
       const data = await schoolsService.getStudents(schoolId);
-      setSchoolStudents((prev) => ({ ...prev, [schoolId]: data }));
+      console.log('Alunos carregados para', schoolId, ':', data);
+      setSchoolStudents((prev) => ({ ...prev, [schoolId]: data || [] }));
     } catch (err) {
       console.error('Erro ao carregar alunos:', err);
     }
@@ -94,13 +99,23 @@ export default function Schools() {
   };
 
   const handleCreateSchool = async () => {
-    if (!newSchool.name.trim() || !effectiveChurchId) return;
+    if (!newSchool.name.trim()) {
+      toast({ title: 'Nome obrigatório', description: 'Digite o nome da escola.', variant: 'destructive' });
+      return;
+    }
+    if (!effectiveChurchId) {
+      toast({ title: 'Erro', description: 'ID da igreja não encontrado. Faça login novamente.', variant: 'destructive' });
+      console.error('effectiveChurchId is null:', { churchId, userChurchId: user?.churchId });
+      return;
+    }
     try {
       setSaving(true);
+      console.log('Criando escola:', { name: newSchool.name.trim(), churchId: effectiveChurchId });
       const school = await schoolsService.create(
         { name: newSchool.name.trim(), description: newSchool.description.trim() || undefined },
         effectiveChurchId
       );
+      console.log('Escola criada:', school);
       for (const s of studentsToAdd) {
         if (s.name.trim()) {
           await schoolsService.addStudent(school.id, {
@@ -120,6 +135,7 @@ export default function Schools() {
         description: `${school.name}${studentsToAdd.length ? ` com ${studentsToAdd.length} aluno(s)` : ''} foi adicionada com sucesso.`,
       });
     } catch (err: any) {
+      console.error('Erro ao criar escola:', err);
       toast({
         title: 'Erro ao criar',
         description: err.message || 'Ocorreu um problema.',
@@ -196,12 +212,15 @@ export default function Schools() {
           </h1>
           <p className="text-muted-foreground mt-1">Gerencie escolas (Bíblica, Líderes, etc.) e seus alunos.</p>
         </div>
-        {canCreate && (
-          <Button onClick={() => setDialogOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Criar nova escola
-          </Button>
-        )}
+        <div className="flex gap-2">
+          <ExcelSchoolMonthlyReportButton schools={schools} />
+          {canCreate && (
+            <Button onClick={() => setDialogOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Criar nova escola
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -378,8 +397,8 @@ export default function Schools() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleCreateSchool} disabled={saving || !newSchool.name.trim()} className="gap-2">
+            <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancelar</Button>
+            <Button type="button" onClick={handleCreateSchool} disabled={saving || !newSchool.name.trim()} className="gap-2">
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Criar escola
             </Button>
@@ -545,34 +564,183 @@ function AddStudentInline({ schoolId, onAdd }: { schoolId: string; onAdd: () => 
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
+  const [memberDialogOpen, setMemberDialogOpen] = useState(false);
+  const [members, setMembers] = useState<any[]>([]);
+  const [search, setSearch] = useState('');
+  const [loadingMembers, setLoadingMembers] = useState(false);
   const { toast } = useToast();
+  const { user, churchId } = useAuth();
+  const effectiveChurchId = churchId ?? user?.churchId;
 
   const handleAdd = async () => {
-    if (!name.trim()) return;
+    console.log('handleAdd chamado', { name, email, phone, schoolId });
+    if (!name.trim()) {
+      toast({ title: 'Nome obrigatório', description: 'Digite o nome do aluno.', variant: 'destructive' });
+      return;
+    }
     try {
       setLoading(true);
-      await schoolsService.addStudent(schoolId, { name: name.trim(), email: email.trim() || undefined, phone: phone.trim() || undefined });
+      console.log('Adicionando aluno:', { schoolId, name: name.trim(), email, phone });
+      const addedName = name.trim();
+      await schoolsService.addStudent(schoolId, { name: addedName, email: email.trim() || undefined, phone: phone.trim() || undefined });
+      console.log('Aluno adicionado com sucesso');
       setName('');
       setEmail('');
       setPhone('');
-      onAdd();
-      toast({ title: 'Aluno adicionado!', description: name });
+      await onAdd();
+      toast({ title: 'Aluno adicionado!', description: addedName });
     } catch (err: any) {
-      toast({ title: 'Erro', description: err.message, variant: 'destructive' });
+      console.error('Erro ao adicionar aluno:', err);
+      toast({ title: 'Erro ao adicionar', description: err.message || 'Verifique o console para mais detalhes.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAdd();
+    }
+  };
+
+  const loadMembers = async () => {
+    try {
+      setLoadingMembers(true);
+      const data = await membersService.getAll(effectiveChurchId);
+      setMembers(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar membros:', error);
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar a lista de membros.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingMembers(false);
+    }
+  };
+
+  const openMemberDialog = () => {
+    setMemberDialogOpen(true);
+    loadMembers();
+  };
+
+  const selectMember = (member: any) => {
+    setName(member.name);
+    setEmail(member.email || '');
+    setPhone(member.phone || '');
+    setMemberDialogOpen(false);
+    setSearch('');
+  };
+
+  const filteredMembers = members.filter(m =>
+    m.name.toLowerCase().includes(search.toLowerCase()) ||
+    m.email?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="flex gap-2 mt-2">
-      <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} className="flex-1" />
-      <Input placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} />
-      <Input placeholder="Telefone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-      <Button size="sm" onClick={handleAdd} disabled={loading || !name.trim()} className="gap-1">
-        {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
-        Adicionar
-      </Button>
-    </div>
+    <>
+      <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-1 min-w-[120px] gap-1">
+          <Input
+            placeholder="Nome"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1"
+          />
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={openMemberDialog}
+            title="Buscar membro"
+            className="shrink-0"
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        </div>
+        <Input placeholder="E-mail" value={email} onChange={(e) => setEmail(e.target.value)} onKeyDown={handleKeyDown} className="w-[140px]" />
+        <Input placeholder="Telefone" value={phone} onChange={(e) => setPhone(e.target.value)} onKeyDown={handleKeyDown} className="w-[140px]" />
+        <Button type="button" size="sm" onClick={handleAdd} disabled={loading || !name.trim()} className="gap-1">
+          {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+          Adicionar
+        </Button>
+      </div>
+
+      <Dialog open={memberDialogOpen} onOpenChange={setMemberDialogOpen}>
+        <DialogContent className="sm:max-w-md max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Selecionar Membro</DialogTitle>
+            <DialogDescription>
+              Escolha um membro da igreja para adicionar à escola.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por nome ou e-mail..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <ScrollArea className="h-[300px] pr-4">
+              {loadingMembers ? (
+                <div className="flex flex-col items-center justify-center h-full py-8 space-y-2">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-sm text-muted-foreground">Carregando...</p>
+                </div>
+              ) : filteredMembers.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full py-8 text-center text-muted-foreground">
+                  <p>Nenhum membro encontrado.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredMembers.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors"
+                      onClick={() => selectMember(member)}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-9 w-9 border">
+                          <AvatarImage src={member.photo_url} />
+                          <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">{member.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {member.email || member.phone || 'Sem contato'}
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 rounded-full hover:bg-primary hover:text-primary-foreground"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          selectMember(member);
+                        }}
+                      >
+                        <UserPlus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setMemberDialogOpen(false)}>
+              Cancelar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

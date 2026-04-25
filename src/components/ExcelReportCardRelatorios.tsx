@@ -2,8 +2,10 @@ import { FileSpreadsheet, Download } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 import * as XLSX from 'xlsx-js-style';
 import { saveAs } from 'file-saver';
+import { churchesService } from '@/services/churches.service';
 
 // ============================================
 // ESTILOS PROFISSIONAIS - RELATÓRIO ANUAL
@@ -155,13 +157,14 @@ const relatorioData = {
 
 export function RelatoriosReportCard({ disabled }: { disabled?: boolean }) {
   const { toast } = useToast();
+  const { user } = useAuth();
 
-  const criarAbaRelatorio = () => {
+  const criarAbaRelatorio = async (churchName: string) => {
     const { indicadores, meses, dados } = relatorioData;
     
     // Montar estrutura da planilha
     const wsData = [
-      ['RELATÓRIOS'],
+      [`RELATÓRIOS - ${churchName}`],
       ['Consolidado mensal de indicadores eclesiásticos'],
       [],
       ['RELATÓRIO ANUAL — 2026'],
@@ -255,7 +258,7 @@ export function RelatoriosReportCard({ disabled }: { disabled?: boolean }) {
   };
 
   // Aba 2: Dashboard Resumido
-  const criarAbaDashboard = () => {
+  const criarAbaDashboard = async (churchName: string) => {
     const { indicadores, dados } = relatorioData;
     
     // Calcular totais anuais
@@ -263,7 +266,7 @@ export function RelatoriosReportCard({ disabled }: { disabled?: boolean }) {
     const maxIndex = totais.indexOf(Math.max(...totais));
     
     const wsData = [
-      ['DASHBOARD - INDICADORES 2026'],
+      [`DASHBOARD - INDICADORES 2026 - ${churchName}`],
       [`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`],
       [],
       ['RESUMO EXECUTIVO'],
@@ -339,10 +342,21 @@ export function RelatoriosReportCard({ disabled }: { disabled?: boolean }) {
 
   const handleDownload = async () => {
     try {
+      // Buscar nome da igreja
+      let churchName = 'IGREJA LOCAL';
+      if (user?.churchId) {
+        try {
+          const church = await churchesService.getById(user.churchId);
+          if (church?.name) churchName = church.name.toUpperCase();
+        } catch (e) {
+          console.warn('Erro ao buscar dados da igreja:', e);
+        }
+      }
+
       const wb = XLSX.utils.book_new();
       
-      const wsRelatorio = criarAbaRelatorio();
-      const wsDashboard = criarAbaDashboard();
+      const wsRelatorio = await criarAbaRelatorio(churchName);
+      const wsDashboard = await criarAbaDashboard(churchName);
       
       XLSX.utils.book_append_sheet(wb, wsRelatorio, 'Relatório Anual');
       XLSX.utils.book_append_sheet(wb, wsDashboard, 'Dashboard');

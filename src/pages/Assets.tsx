@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Package, Plus, Pencil, Trash2, ShieldAlert, Image as ImageIcon, Wrench } from 'lucide-react';
+import { Package, Plus, Pencil, Trash2, ShieldAlert, Image as ImageIcon, Wrench, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +28,26 @@ import { Asset, AssetSource, AssetStatus } from '@/types';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AssetMaintenanceModal } from '@/components/AssetMaintenanceModal';
+import { ExcelPatrimonyReportButton } from '@/components/ExcelPatrimonyReport';
+
+// Formatadores de moeda brasileira
+const formatCurrencyInput = (value: string): string => {
+    const numericValue = value.replace(/[^\d]/g, '');
+    if (!numericValue) return '';
+    
+    const cents = parseInt(numericValue, 10);
+    const formatted = new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(cents / 100);
+    
+    return formatted;
+};
+
+const parseCurrencyInput = (value: string): string => {
+    if (!value) return '';
+    return value.replace(/[^\d,]/g, '').replace(',', '.');
+};
 
 export default function Assets() {
     const queryClient = useQueryClient();
@@ -139,7 +159,7 @@ export default function Assets() {
         setName(asset.name);
         setCategory(asset.category || '');
         setStatus(asset.status);
-        setValue(asset.value ? asset.value.toString() : '');
+        setValue(asset.value ? Math.round(asset.value * 100).toString() : '');
         setLocation(asset.location || '');
         setDescription(asset.description || '');
         setSerialNumber(asset.serialNumber || '');
@@ -155,7 +175,7 @@ export default function Assets() {
         setDepreciationEnabled(!!asset.depreciationEnabled);
         setUsefulLifeYears(asset.usefulLifeYears !== undefined && asset.usefulLifeYears !== null ? String(asset.usefulLifeYears) : '');
         setDepreciationRate(asset.depreciationRate !== undefined && asset.depreciationRate !== null ? String(asset.depreciationRate) : '');
-        setResidualValue(asset.residualValue !== undefined && asset.residualValue !== null ? String(asset.residualValue) : '');
+        setResidualValue(asset.residualValue !== undefined && asset.residualValue !== null ? Math.round(asset.residualValue * 100).toString() : '');
         setDepreciationStartDate(asset.depreciationStartDate || asset.acquisitionDate || '');
 
         setMaintenanceIntervalMonths(asset.maintenanceIntervalMonths !== undefined && asset.maintenanceIntervalMonths !== null ? String(asset.maintenanceIntervalMonths) : '');
@@ -176,7 +196,7 @@ export default function Assets() {
             category,
             status,
             location,
-            value: value ? parseFloat(value) : undefined,
+            value: value ? parseFloat(value) / 100 : undefined,
             serialNumber: serialNumber || undefined,
             acquisitionDate: acquisitionDate || undefined,
             photoUrl: photoUrl || undefined,
@@ -192,7 +212,7 @@ export default function Assets() {
             depreciationStartDate: depreciationEnabled ? (depreciationStartDate || acquisitionDate || undefined) : undefined,
             usefulLifeYears: depreciationEnabled && usefulLifeYears ? parseInt(usefulLifeYears, 10) : undefined,
             depreciationRate: depreciationEnabled && depreciationRate ? parseFloat(depreciationRate) : undefined,
-            residualValue: depreciationEnabled && residualValue ? parseFloat(residualValue) : undefined,
+            residualValue: depreciationEnabled && residualValue ? parseFloat(residualValue) / 100 : undefined,
 
             maintenanceIntervalMonths: maintenanceIntervalMonths ? parseInt(maintenanceIntervalMonths, 10) : undefined,
             nextMaintenanceDate: nextMaintenanceDate || undefined,
@@ -223,13 +243,13 @@ export default function Assets() {
     };
 
     const computeDepreciationPreview = () => {
-        const initial = value ? parseFloat(value) : undefined;
+        const initial = value ? parseFloat(value) / 100 : undefined;
         if (!depreciationEnabled || !initial || Number.isNaN(initial)) return null;
         const start = (depreciationStartDate || acquisitionDate) ? new Date(depreciationStartDate || acquisitionDate) : null;
         if (!start || Number.isNaN(start.getTime())) return null;
         const now = new Date();
         const years = Math.max(0, (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
-        const residual = residualValue ? parseFloat(residualValue) : 0;
+        const residual = residualValue ? parseFloat(residualValue) / 100 : 0;
         const rate = depreciationRate ? (parseFloat(depreciationRate) / 100) : null;
         const life = usefulLifeYears ? parseFloat(usefulLifeYears) : null;
 
@@ -292,13 +312,14 @@ export default function Assets() {
                 </Button>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <Input
                     placeholder="Buscar patrimônio ou categoria..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="max-w-md"
                 />
+                <ExcelPatrimonyReportButton assets={assets} />
             </div>
 
             {isLoading ? (
@@ -480,10 +501,13 @@ export default function Assets() {
                                             <div className="space-y-2">
                                                 <label className="text-sm font-medium">Valor Estimado</label>
                                                 <Input
-                                                    type="number"
-                                                    step="0.01"
-                                                    value={value}
-                                                    onChange={(e) => setValue(e.target.value)}
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    value={value ? formatCurrencyInput(value) : ''}
+                                                    onChange={(e) => {
+                                                        const rawValue = e.target.value.replace(/[^\d]/g, '');
+                                                        setValue(rawValue);
+                                                    }}
                                                     placeholder="R$ 0,00"
                                                 />
                                             </div>
@@ -527,10 +551,13 @@ export default function Assets() {
                                                     <div className="space-y-2">
                                                         <label className="text-sm font-medium">Valor Residual</label>
                                                         <Input
-                                                            type="number"
-                                                            step="0.01"
-                                                            value={residualValue}
-                                                            onChange={(e) => setResidualValue(e.target.value)}
+                                                            type="text"
+                                                            inputMode="numeric"
+                                                            value={residualValue ? formatCurrencyInput(residualValue) : ''}
+                                                            onChange={(e) => {
+                                                                const rawValue = e.target.value.replace(/[^\d]/g, '');
+                                                                setResidualValue(rawValue);
+                                                            }}
                                                             placeholder="R$ 0,00"
                                                         />
                                                     </div>

@@ -60,7 +60,8 @@
       console.log('PWA disponível e evento capturado no index.html');
     });
 
-    if ('serviceWorker' in navigator) {
+    // Registrar ServiceWorker apenas em produção (sw.js só existe após build)
+    if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
       window.addEventListener('load', () => {
         navigator.serviceWorker
           .register('/sw.js')

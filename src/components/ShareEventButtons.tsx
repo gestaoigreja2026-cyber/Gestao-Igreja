@@ -31,7 +31,7 @@ interface ShareEventButtonsProps {
 
 export function ShareEventButtons({ title, date, time, location = '', description = '', variant = 'outline', size = 'sm', iconOnly = false, className = '' }: ShareEventButtonsProps) {
     const text = `${title} — ${formatDate(date)} às ${time}${location ? ` | ${location}` : ''}`;
-    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    const shareUrl = 'https://church-gest-oficial.vercel.app';
     const shareTextEncoded = encodeURIComponent(text);
     const shareUrlEncoded = encodeURIComponent(shareUrl);
 

@@ -15,11 +15,12 @@ import {
   FileDown,
   BarChart3,
   MapPin,
+  Pencil,
+  Trash2,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { ExcelCompleteReportButton } from '@/components/ExcelCompleteReport';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -36,6 +37,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -151,7 +153,7 @@ export default function Reports() {
       // Inclui TODAS as categorias de saída (não apenas top 5) para permitir criar metas para todas
       setExpenseCategories(Array.from(expenseMap.entries()).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value));
 
-      const budgetData = await budgetsService.listByMonth(currentMonth);
+      const budgetData = await budgetsService.listByMonth(currentMonth, user?.churchId);
       setBudgets(budgetData || []);
     } catch (e) {
       console.error('Erro ao carregar dados financeiros:', e);
@@ -461,7 +463,6 @@ export default function Reports() {
                 <Printer className="h-5 w-5" />
                 Imprimir
               </Button>
-              <ExcelCompleteReportButton />
               <Button variant="outline" size="sm" onClick={handleDownloadPDF} className="gap-2 h-11 min-h-[44px] text-base px-4">
                 <FileDown className="h-5 w-5" />
                 Baixar PDF
@@ -847,6 +848,8 @@ function ChurchHealthReport({ data }: { data: any }) {
 function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: { budgets: any[], expenseCategories: any[], onRefresh: () => void, currentMonth: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [editBudget, setEditBudget] = useState<any>(null);
+  const [deleteBudgetId, setDeleteBudgetId] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -855,6 +858,33 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
     ...expenseCategories.map((c: any) => c.name),
     ...DEFAULT_EXPENSE_CATEGORIES
   ])).sort();
+
+  const handleEdit = (budget: any) => {
+    setEditBudget(budget);
+    setIsOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteBudgetId) return;
+    
+    try {
+      await budgetsService.delete(deleteBudgetId);
+      toast({
+        title: "Orçamento excluído",
+        description: "O orçamento foi removido com sucesso.",
+      });
+      onRefresh();
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o orçamento.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleteBudgetId(null);
+    }
+  };
 
   const handleSaveBudget = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -869,9 +899,8 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
     }
 
     try {
-      // In a real scenario, we'd get churchId from a context or the user profile
-      const churchId = (user as any)?.church_id;
-      if (!churchId) throw new Error("Church ID not found");
+      const churchId = user?.churchId;
+      if (!churchId) throw new Error("Igreja não identificada");
 
       await budgetsService.upsert({
         category,
@@ -908,7 +937,7 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
             </CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <Dialog open={isOpen} onOpenChange={(open) => { setIsOpen(open); if (!open) setEditBudget(null); }}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2 border-primary/30 text-primary hover:bg-primary/5">
                   <TrendingUp className="h-4 w-4" />
@@ -917,7 +946,7 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
               </DialogTrigger>
               <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
                 <DialogHeader>
-                  <DialogTitle>Configurar Meta de Gasto</DialogTitle>
+                  <DialogTitle>{editBudget ? 'Editar Orçamento' : 'Configurar Meta de Gasto'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSaveBudget} className="space-y-4 py-4">
                   <div className="space-y-2">
@@ -927,6 +956,8 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
                       name="category"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       required
+                      defaultValue={editBudget?.category || ''}
+                      disabled={!!editBudget}
                     >
                       <option value="">Selecione uma categoria</option>
                       {allAvailableCategories.map(category => (
@@ -936,7 +967,7 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="amount">Valor da Meta (R$)</Label>
-                    <Input id="amount" name="amount" type="number" step="0.01" placeholder="0,00" required />
+                    <Input id="amount" name="amount" type="number" step="0.01" placeholder="0,00" required defaultValue={editBudget?.amount || ''} />
                   </div>
                   <DialogFooter>
                     <Button type="submit" disabled={loading}>
@@ -962,12 +993,32 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
 
               return (
                 <div key={budget.id} className="space-y-2 p-3 rounded-lg border border-primary/5 bg-background/50">
-                  <div className="flex justify-between items-end">
+                  <div className="flex justify-between items-start">
                     <div>
                       <span className="text-sm font-semibold">{budget.category}</span>
                       <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Meta: R$ {budget.amount.toLocaleString('pt-BR')}</p>
                     </div>
-                    <div className="text-right">
+                    <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-primary"
+                        onClick={() => handleEdit(budget)}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        onClick={() => setDeleteBudgetId(budget.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <div className="text-right flex-1">
                       <span className={cn("text-sm font-bold", isOver ? "text-destructive" : "text-primary")}>
                         R$ {actual.toLocaleString('pt-BR')}
                       </span>
@@ -987,6 +1038,17 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
           </div>
         )}
       </CardContent>
+
+      {/* Diálogo de confirmação de exclusão */}
+      <ConfirmDialog
+        open={!!deleteBudgetId}
+        onOpenChange={(o) => !o && setDeleteBudgetId(null)}
+        title="Excluir orçamento"
+        description="Tem certeza que deseja excluir este orçamento? Esta ação não pode ser desfeita."
+        onConfirm={handleDelete}
+        confirmLabel="Excluir"
+        variant="destructive"
+      />
     </Card>
   );
 }

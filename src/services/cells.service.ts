@@ -9,8 +9,8 @@ export const cellsService = {
     /**
      * Get all cells
      */
-    async getAll() {
-        const { data, error } = await supabase
+    async getAll(churchId?: string | null) {
+        let query = supabase
             .from('cells')
             .select(`
         *,
@@ -18,6 +18,12 @@ export const cellsService = {
         host:members!cells_host_id_fkey(id, name, phone, email)
       `)
             .order('name');
+        
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
         return data;
