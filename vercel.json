@@ -16,7 +16,11 @@
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/((?!api/|.*\\.(js|css|json|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico|webmanifest)).*)", "destination": "/index.html" }
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/manifest.json", "destination": "/manifest.json" },
+    { "source": "/registerSW.js", "destination": "/registerSW.js" },
+    { "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico|webmanifest))", "destination": "/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "crons": [
     {
