@@ -1,26 +1,46 @@
 {
-  "framework": "vite",
   "installCommand": "npm install --legacy-peer-deps",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "headers": [
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/manifest.json",
+      "destination": "/manifest.json"
+    },
+    {
+      "source": "/sw.js",
+      "destination": "/sw.js"
+    },
+    {
+      "source": "/logo-(.*)",
+      "destination": "/logo-$1"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/favicon.ico"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/assets/$1"
+    },
+    {
+      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico|webmanifest|json))",
+      "destination": "/$1"
+    },
     {
       "source": "/(.*)",
-      "headers": [
-        {
-          "key": "Content-Security-Policy",
-          "value": "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; object-src 'self'; base-uri 'self';"
-        }
-      ]
+      "destination": "/index.html"
     }
-  ],
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/assets/(.*)", "destination": "/assets/$1" },
-    { "source": "/manifest.json", "destination": "/manifest.json" },
-    { "source": "/registerSW.js", "destination": "/registerSW.js" },
-    { "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico|webmanifest))", "destination": "/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
   ],
   "crons": [
     {
