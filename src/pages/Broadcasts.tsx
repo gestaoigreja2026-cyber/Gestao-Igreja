@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Send, FileText, Megaphone, BookOpen, Loader2, Users, Shield } from 'lucide-react';
+import { Send, FileText, Megaphone, BookOpen, Loader2, Users, Shield, FileUp, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -46,6 +46,7 @@ export default function Broadcasts() {
   const [recipientCount, setRecipientCount] = useState(0);
   const [leadersCount, setLeadersCount] = useState(0);
   const [sending, setSending] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (effectiveChurchId) {
@@ -64,6 +65,19 @@ export default function Broadcasts() {
       setLeadersCount(0);
     }
   }, [effectiveChurchId]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'application/pdf') {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({ title: 'Arquivo muito grande', description: 'Máximo 5MB', variant: 'destructive' });
+        return;
+      }
+      setPdfFile(file);
+    } else if (file) {
+      toast({ title: 'Apenas PDF permitido', variant: 'destructive' });
+    }
+  };
 
   const handleSend = async () => {
     if (!effectiveChurchId || !title.trim() || !message.trim()) {
@@ -194,6 +208,47 @@ export default function Broadcasts() {
               rows={8}
               className="resize-y min-h-[160px] text-base"
             />
+          </div>
+
+          {/* Upload de PDF */}
+          <div className="space-y-2">
+            <Label htmlFor="pdf-upload">Anexar PDF (opcional)</Label>
+            <div className="flex items-center gap-2">
+              <label
+                htmlFor="pdf-upload"
+                className="flex items-center gap-2 px-4 py-2 rounded-md border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 cursor-pointer transition-colors"
+              >
+                <FileUp className="h-4 w-4 text-primary" />
+                <span className="text-sm text-primary">
+                  {pdfFile ? 'Trocar PDF' : 'Selecionar PDF'}
+                </span>
+                <input
+                  id="pdf-upload"
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+              </label>
+              {pdfFile && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-secondary/50">
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground truncate max-w-[200px]">
+                    {pdfFile.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPdfFile(null)}
+                    className="p-1 rounded-full hover:bg-destructive/20 hover:text-destructive transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Máximo 5MB. Apenas arquivos PDF.
+            </p>
           </div>
 
           <div className="space-y-2">
