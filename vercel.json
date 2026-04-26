@@ -15,7 +15,8 @@
     }
   ],
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/((?!api/|.*\\.(js|css|json|png|jpg|jpeg|gif|svg|woff|woff2|ttf|ico|webmanifest)).*)", "destination": "/index.html" }
   ],
   "crons": [
     {
