@@ -10,6 +10,10 @@
       "dest": "/api/$1"
     },
     {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
       "src": "/manifest.json",
       "dest": "/manifest.json"
     },
@@ -26,20 +30,8 @@
       "dest": "/robots.txt"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(.*\\.js)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*\\.css)",
-      "dest": "/$1"
-    },
-    {
-      "src": "/(.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.ico|.*\\.webmanifest|.*\\.json)",
-      "dest": "/$1"
+      "src": "/logo-(.*)",
+      "dest": "/logo-$1"
     },
     {
       "src": "/(.*)",
