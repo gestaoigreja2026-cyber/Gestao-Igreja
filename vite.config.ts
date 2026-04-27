@@ -22,7 +22,7 @@ function envCheck(mode: string) {
 }
 
 export default defineConfig(({ mode }) => ({
-  base: './',
+  base: '/',
   plugins: [
     envCheck(mode),
     react(),
