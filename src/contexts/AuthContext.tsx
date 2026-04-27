@@ -325,7 +325,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setChurchId(undefined);
         setViewingChurch(null);
-        if (window.location.pathname !== '/login' && window.location.pathname !== '/' && !window.location.pathname.startsWith('/reset-password')) {
+        if (window.location.pathname !== '/login' && window.location.pathname !== '/' && !window.location.pathname.startsWith('/reset-password') && !window.location.pathname.startsWith('/confirmar/')) {
           window.location.href = '/login';
         }
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
