@@ -150,7 +150,7 @@ export default function Blog() {
       <footer className="border-t py-8">
         <div className="container mx-auto max-w-4xl px-4 text-center">
           <Link to="/" className="font-medium hover:underline" style={{ color: BLOG_BLUE }}>
-            Conheça o Gestão Igreja e teste grátis por 30 dias →
+            Conheça o Gestão Igreja e teste grátis por 7 dias →
           </Link>
         </div>
       </footer>

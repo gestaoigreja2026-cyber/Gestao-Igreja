@@ -64,12 +64,13 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { churchesService, Church } from '@/services/churches.service';
 import { SUBSCRIPTION_PIX } from '@/lib/subscriptionConfig';
+import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const MAX_CHURCHES = 100;
 
-type TabValue = 'gestao' | 'relatorios' | 'mensalidades';
+type TabValue = 'gestao' | 'relatorios' | 'mensalidades' | 'logs_asaas';
 
 export default function SuperAdmin() {
     useDocumentTitle('Painel Root - 100 Igrejas');
@@ -95,6 +96,9 @@ export default function SuperAdmin() {
     const [removeChurchConfirm, setRemoveChurchConfirm] = useState<{ id: string; name: string } | null>(null);
     const [historyDialog, setHistoryDialog] = useState<{ churchId: string; churchName: string } | null>(null);
     const [paymentHistory, setPaymentHistory] = useState<{ paid_at: string; amount: number; registered_by_name: string; source: string }[]>([]);
+    const [asaasDialog, setAsaasDialog] = useState<{ churchId: string; churchName: string; customerId: string; subscriptionId: string } | null>(null);
+    const [asaasLogs, setAsaasLogs] = useState<any[]>([]);
+    const [selectedLog, setSelectedLog] = useState<any | null>(null);
 
     useEffect(() => {
         loadData();
@@ -104,7 +108,22 @@ export default function SuperAdmin() {
     useEffect(() => {
         if (activeTab === 'relatorios') loadReports();
         if (activeTab === 'mensalidades') loadSubscriptions();
+        if (activeTab === 'logs_asaas') loadAsaasLogs();
     }, [activeTab]);
+
+    async function loadAsaasLogs() {
+        try {
+            const { data, error } = await supabase
+                .from('asaas_webhooks')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(50);
+            if (error) throw error;
+            setAsaasLogs(data || []);
+        } catch (e) {
+            console.error('Erro ao carregar logs:', e);
+        }
+    }
 
     useEffect(() => {
         if (historyDialog) {
@@ -319,7 +338,7 @@ export default function SuperAdmin() {
             )}
 
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
-                <TabsList className="grid w-full grid-cols-3 max-w-lg">
+                <TabsList className="grid w-full grid-cols-4 max-w-2xl">
                     <TabsTrigger value="gestao" className="gap-2">
                         <Building2 className="h-4 w-4" /> Gestão
                     </TabsTrigger>
@@ -328,6 +347,9 @@ export default function SuperAdmin() {
                     </TabsTrigger>
                     <TabsTrigger value="mensalidades" className="gap-2">
                         <DollarSign className="h-4 w-4" /> Mensalidades
+                    </TabsTrigger>
+                    <TabsTrigger value="logs_asaas" className="gap-2">
+                        <History className="h-4 w-4" /> Logs Asaas
                     </TabsTrigger>
                 </TabsList>
 
@@ -378,7 +400,9 @@ export default function SuperAdmin() {
                                                         <code className="px-2 py-1 bg-muted rounded text-xs font-mono">{church.slug}</code>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400">Ativa</Badge>
+                                                        <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-400">
+                                                            {(church as any).status || 'ATIVA'}
+                                                        </Badge>
                                                     </TableCell>
                                                     <TableCell className="text-muted-foreground text-sm">
                                                         {format(new Date(church.created_at), "dd 'de' MMM, yyyy", { locale: ptBR })}
@@ -507,30 +531,9 @@ export default function SuperAdmin() {
                     <Card className="border-none shadow-md">
                         <CardHeader>
                             <CardTitle>Acompanhamento de Mensalidades</CardTitle>
-                            <CardDescription>7 dias grátis para testar. Hotmart vende o app. Mensalidades via PIX direto. 50 primeiras igrejas: R$ 75/mês. Demais: R$ 150/mês. Vencimento 30 dias + 5 de tolerância; após isso, suspensão.</CardDescription>
+                            <CardDescription>Gestão de assinaturas integrada ao Asaas.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <Card className="border-primary/30 bg-primary/5">
-                                <CardHeader className="pb-3">
-                                    <CardTitle className="text-base flex items-center gap-2">
-                                        <DollarSign className="h-5 w-5" />
-                                        Pagamento via PIX (mensalidades)
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Instruções para as igrejas: 1) Informe o nome da igreja no PIX antes de pagar. 2) Envie o comprovante para gestaoigreja@gmail.com. Após receber, registre o pagamento no botão abaixo.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-2 text-sm">
-                                    <p><strong>Chave PIX (celular):</strong> <span className="font-mono bg-muted px-2 py-1 rounded">{SUBSCRIPTION_PIX.pixKey}</span>
-                                    <Button variant="ghost" size="sm" className="ml-2 h-7" onClick={() => { navigator.clipboard?.writeText(SUBSCRIPTION_PIX.pixKey); toast({ title: 'Chave PIX copiada!', duration: 2000 }); }}>
-                                        <Copy className="h-3.5 w-3.5 mr-1" /> Copiar
-                                    </Button>
-                                    </p>
-                                    <p><strong>Titular:</strong> {SUBSCRIPTION_PIX.holderName}</p>
-                                    <p><strong>Banco:</strong> {SUBSCRIPTION_PIX.bank}</p>
-                                    <p className="text-muted-foreground pt-2">50 primeiras igrejas: R$ {SUBSCRIPTION_PIX.promoPrice}/mês · Demais: R$ {SUBSCRIPTION_PIX.fullPrice}/mês</p>
-                                </CardContent>
-                            </Card>
                             {loadingSubs ? (
                                 <div className="flex items-center justify-center py-20">
                                     <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -554,11 +557,11 @@ export default function SuperAdmin() {
                                                 const churchId = sub.church_id ?? sub.churchId;
                                                 const status = sub.status ?? 'ativa';
                                                 const nextDue = sub.next_due_at ?? sub.nextDueAt;
-                                                const isActive = status === 'ativa' || status === 'trial';
-                                                const isSuspended = status === 'suspensa' || status === 'inadimplente';
-                                                const isCanceled = status === 'cancelada';
+                                                const isActive = status === 'ativa' || status === 'ATIVO' || status === 'trial' || status === 'TRIAL';
+                                                const isSuspended = status === 'suspensa' || status === 'SUSPENSO' || status === 'inadimplente' || status === 'INADIMPLENTE';
+                                                const isCanceled = status === 'cancelada' || status === 'CANCELADO';
                                                 const loading = actionChurchId === churchId;
-                                                const statusLabel = status === 'ativa' ? 'Adimplente' : status === 'inadimplente' ? 'Inadimplente' : status === 'suspensa' ? 'Suspensa' : status === 'cancelada' ? 'Cancelada' : status;
+                                                const statusLabel = status.toUpperCase();
                                                 return (
                                                     <TableRow key={churchId ?? sub.id ?? Math.random()}>
                                                         <TableCell className="font-medium">{churchName}</TableCell>
@@ -595,6 +598,15 @@ export default function SuperAdmin() {
                                                                                 <DropdownMenuItem onClick={() => setHistoryDialog({ churchId, churchName })} disabled={loading}>
                                                                                     <History className="h-4 w-4 mr-2" />
                                                                                     Ver histórico de pagamentos
+                                                                                </DropdownMenuItem>
+                                                                                <DropdownMenuItem onClick={() => setAsaasDialog({ 
+                                                                                    churchId, 
+                                                                                    churchName, 
+                                                                                    customerId: sub.asaas_customer_id || '', 
+                                                                                    subscriptionId: sub.asaas_subscription_id || '' 
+                                                                                })} disabled={loading}>
+                                                                                    <ShieldCheck className="h-4 w-4 mr-2" />
+                                                                                    Configurar Asaas
                                                                                 </DropdownMenuItem>
                                                                                 <DropdownMenuSeparator />
                                                                                 <DropdownMenuItem onClick={() => handleSubscriptionAction(churchId, churchName, 'registerPayment')} disabled={loading}>
@@ -638,6 +650,58 @@ export default function SuperAdmin() {
                                     </Table>
                                 </div>
                             )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="logs_asaas" className="mt-6">
+                    <Card className="border-none shadow-md">
+                        <CardHeader>
+                            <CardTitle>Histórico de Webhooks Asaas</CardTitle>
+                            <CardDescription>Acompanhe as notificações enviadas pelo gateway em tempo real.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Data/Hora</TableHead>
+                                            <TableHead>Evento</TableHead>
+                                            <TableHead>Cliente (Asaas)</TableHead>
+                                            <TableHead className="text-right">Ações</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {asaasLogs.map((log) => (
+                                            <TableRow key={log.id}>
+                                                <TableCell className="text-sm">
+                                                    {format(new Date(log.created_at), "dd/MM HH:mm:ss")}
+                                                </TableCell>
+                                                <TableCell>
+                                                    <Badge variant="secondary" className="font-mono text-[10px]">
+                                                        {log.event}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="text-xs font-mono text-muted-foreground">
+                                                    {log.payload?.payment?.customer || '—'}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button variant="ghost" size="sm" onClick={() => setSelectedLog(log)}>
+                                                        <Search className="h-4 w-4" />
+                                                    </Button>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                        {asaasLogs.length === 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                                    Nenhum evento registrado ainda.
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -708,6 +772,76 @@ export default function SuperAdmin() {
                 confirmLabel="Sim, remover"
                 variant="destructive"
             />
+
+            <Dialog open={!!asaasDialog} onOpenChange={(o) => !o && setAsaasDialog(null)}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Configurar Integração Asaas</DialogTitle>
+                        <DialogDescription>
+                            {asaasDialog ? `Vincule a igreja "${asaasDialog.churchName}" aos IDs do Asaas para automação.` : ''}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">ID do Cliente (Asaas)</label>
+                            <Input 
+                                placeholder="Ex: cus_000005123456" 
+                                value={asaasDialog?.customerId || ''} 
+                                onChange={(e) => setAsaasDialog(prev => prev ? { ...prev, customerId: e.target.value } : null)}
+                            />
+                            <p className="text-[10px] text-muted-foreground">Opcional. Usado para identificar o cliente nos Webhooks.</p>
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">ID da Assinatura (Asaas)</label>
+                            <Input 
+                                placeholder="Ex: sub_000005123456" 
+                                value={asaasDialog?.subscriptionId || ''} 
+                                onChange={(e) => setAsaasDialog(prev => prev ? { ...prev, subscriptionId: e.target.value } : null)}
+                            />
+                            <p className="text-[10px] text-muted-foreground">Opcional. Usado para controle de recorrência.</p>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setAsaasDialog(null)}>Cancelar</Button>
+                        <Button onClick={async () => {
+                            if (!asaasDialog) return;
+                            try {
+                                setSubmitting(true);
+                                const { error } = await supabase.from('church_subscriptions').update({
+                                    asaas_customer_id: asaasDialog.customerId,
+                                    asaas_subscription_id: asaasDialog.subscriptionId
+                                }).eq('church_id', asaasDialog.churchId);
+                                
+                                if (error) throw error;
+                                toast({ title: 'Sucesso', description: 'Dados do Asaas atualizados.' });
+                                setAsaasDialog(null);
+                                loadSubscriptions();
+                            } catch (e: any) {
+                                toast({ title: 'Erro', description: e.message, variant: 'destructive' });
+                            } finally {
+                                setSubmitting(false);
+                            }
+                        }} disabled={submitting}>
+                            {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                            Salvar Configuração
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={!!selectedLog} onOpenChange={(o) => !o && setSelectedLog(null)}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Detalhes do Webhook</DialogTitle>
+                        <DialogDescription>Dados brutos recebidos do Asaas.</DialogDescription>
+                    </DialogHeader>
+                    <div className="bg-muted p-4 rounded-lg overflow-auto max-h-[500px]">
+                        <pre className="text-[10px] font-mono leading-relaxed">
+                            {JSON.stringify(selectedLog?.payload, null, 2)}
+                        </pre>
+                    </div>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={!!historyDialog} onOpenChange={(o) => !o && setHistoryDialog(null)}>
                 <DialogContent className="max-w-lg">

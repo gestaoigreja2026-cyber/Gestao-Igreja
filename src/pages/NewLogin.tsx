@@ -195,14 +195,14 @@ export default function NewLogin() {
             className="min-h-screen flex items-center justify-center relative px-4 py-4 sm:py-6"
             style={{ minHeight: '100vh', backgroundColor: 'hsl(var(--background))' }}
         >
-            <div className="w-full max-w-md relative z-10 my-auto">
+            <div className="w-full max-w-[352px] relative z-10 my-auto">
                 {/* TELA 1: BOAS-VINDAS */}
                 {step === 1 && (
                     <Card className="shadow-2xl border-primary/10 overflow-hidden">
-                        <CardContent className="p-5 sm:p-6">
+                        <CardContent className="p-4 sm:p-6">
                             <div className="text-center mb-5">
-                                <div className="flex justify-center mb-4 overflow-visible" style={{ transform: 'scale(1.26)', transformOrigin: 'center' }}>
-                                    <Logo size="md" showText={false} />
+                                <div className="flex justify-center mb-3 overflow-visible" style={{ transform: 'scale(1.1)', transformOrigin: 'center' }}>
+                                    <Logo size="sm" showText={false} />
                                 </div>
                             </div>
 
@@ -259,7 +259,7 @@ export default function NewLogin() {
                                     )
                                 )}
 
-                                <Button type="submit" className="w-full h-12 text-sm font-bold" size="lg">
+                                <Button type="submit" className="w-full h-10 text-xs font-bold" size="lg">
                                     Continuar
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
@@ -354,19 +354,19 @@ export default function NewLogin() {
                 {/* TELA 2: LOGIN/CADASTRO */}
                 {step === 2 && (
                     <Card className="shadow-2xl border-primary/10 overflow-hidden">
-                        <CardContent className="p-5 sm:p-6">
+                        <CardContent className="p-4 sm:p-6">
                             <div className="text-center mb-5">
-                                <h2 className="text-xl font-black text-foreground mb-1">Acesso Seguro</h2>
-                                <p className="text-sm text-muted-foreground">Escolha seu perfil e digite seu PIN</p>
+                                <h2 className="text-lg font-black text-foreground mb-1">Acesso Seguro</h2>
+                                <p className="text-[11px] text-muted-foreground">Escolha seu perfil e digite seu PIN</p>
                             </div>
 
-                            <form onSubmit={handleFinalSubmit} className="space-y-5">
+                            <form onSubmit={handleFinalSubmit} className="space-y-6">
                                 {/* PIN Container */}
                                 <div className="space-y-4">
-                                    <label className="text-sm font-bold text-foreground/70 text-center block uppercase tracking-widest">
+                                    <label className="text-xs font-bold text-foreground/70 text-center block uppercase tracking-widest">
                                         Sua Senha PIN (6 dígitos)
                                     </label>
-                                    <div className="flex justify-between gap-2 max-w-[280px] mx-auto">
+                                    <div className="flex justify-between gap-1.5 max-w-[240px] mx-auto">
                                         {formData.pin.map((digit, i) => (
                                             <input
                                                 key={i}
@@ -376,7 +376,7 @@ export default function NewLogin() {
                                                 value={digit}
                                                 onChange={(e) => handlePinChange(i, e.target.value)}
                                                 onKeyDown={(e) => handleKeyDown(i, e)}
-                                                className="w-10 h-12 text-center text-xl font-bold bg-muted/40 border-2 border-primary/10 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                                className="w-8 h-10 text-center text-lg font-bold bg-muted/40 border-2 border-primary/10 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                             />
                                         ))}
                                     </div>
@@ -384,10 +384,10 @@ export default function NewLogin() {
 
                                 {/* Seleção de Perfil */}
                                 <div className="space-y-4">
-                                    <label className="text-sm font-bold text-foreground/70 block uppercase tracking-widest mb-4">
+                                    <label className="text-xs font-bold text-foreground/70 block uppercase tracking-widest mb-3">
                                         Selecione seu Perfil
                                     </label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                                         <RoleCard
                                             icon={<Shield className="h-5 w-5" />}
                                             label="Pastor"
@@ -472,10 +472,10 @@ export default function NewLogin() {
                                     )
                                 )}
 
-                                <div className="flex flex-col gap-3">
+                                <div className="flex flex-col gap-4">
                                     <Button
                                         type="submit"
-                                        className="w-full h-14 text-base font-bold shadow-lg shadow-primary/20"
+                                        className="w-full h-11 text-sm font-bold shadow-lg shadow-primary/20"
                                         size="lg"
                                         disabled={formData.pin.some(digit => !digit)}
                                     >
@@ -528,16 +528,16 @@ function RoleCard({
         <button
             type="button"
             onClick={onClick}
-            className={`flex flex-col items-center justify-center p-4 gap-2 rounded-xl border-2 transition-all duration-300
+            className={`flex flex-col items-center justify-center p-3 gap-1.5 rounded-xl border-2 transition-all duration-300
                 ${active
                     ? 'border-primary bg-primary/10 text-primary shadow-md scale-105'
                     : 'border-muted/50 hover:border-primary/30 hover:bg-primary/5 text-muted-foreground font-medium'
                 }`}
         >
-            <div className={`p-2 rounded-lg transition-colors ${active ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+            <div className={`p-1.5 rounded-lg transition-colors ${active ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                 {icon}
             </div>
-            <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>
         </button>
     );
 }

@@ -10,9 +10,17 @@ export const SUBSCRIPTION_PIX = {
   /** Chave PIX - Celular */
   pixKey: '(91) 99383-7093',
   /** Titular da conta */
-  holderName: 'Luiz Eduardo Santos da Silva',
+  holderName: '65.589.068 LUIZ EDUARDO SANTOS DA SILVA',
   /** Banco */
-  bank: 'Nubank',
+  bank: '461 - Asaas I.P S.A',
+  /** Agência */
+  agency: '0001',
+  /** Conta */
+  account: '285302-2',
+  /** Tipo */
+  accountType: 'Conta de Pagamento',
+  /** CPF/CNPJ */
+  document: '65.589.068/0001-01',
   /** E-mail para enviar comprovante */
   receiptEmail: 'gestaoigreja@gmail.com',
   /** Valor normal (após 50 primeiras igrejas) */

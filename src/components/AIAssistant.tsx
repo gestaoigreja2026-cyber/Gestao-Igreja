@@ -195,7 +195,7 @@ Acesso: Menu → Consolidação`
     response: `📖 **Planos de Leitura Bíblica**
 
 Engajamento espiritual:
-• Planos personalizados (30 dias, 90 dias, ano)
+• Planos personalizados (7 dias, 90 dias, ano)
 • Acompanhamento de progresso
 • Notificações diárias
 • Versículo do dia automático
@@ -360,7 +360,7 @@ Níveis de acesso:
 • Usuários ilimitados
 
 **Teste Grátis:**
-• 30 dias gratuitos
+• 7 dias gratuitos
 • Sem cartão de crédito
 • Acesso completo
 • Migração de dados assistida

@@ -345,8 +345,36 @@ export function ExcelConsolidacaoReportButton({ disabled, convertidos }: ExcelCo
       weeklyRows.push([{ v: `ACOMPANHAMENTO SEMANAL DETALHADO - ${format(new Date(), 'dd/MM/yyyy')}`, s: sStyle() }, {}, {}, {}]);
       weeklyRows.push(['']);
 
-      // Semana 1
-      weeklyRows.push([{ v: '1ª SEMANA - CONTATO TELEFÔNICO/VISITA', s: hStyleLight(C.INFO) }, {}, {}, {}]);
+      // Semana 2 (Exibida como 1ª)
+      weeklyRows.push([{ v: '1ª SEMANA - CONVITE PARA CÉLULA', s: hStyleLight(C.INFO) }, {}, {}, {}]);
+      weeklyRows.push(['']);
+      weeklyRows.push([
+        { v: 'NOME', s: hStyle(C.INFO) },
+        { v: 'CONVITE REALIZADO', s: hStyle(C.INFO) },
+        { v: 'DATA', s: hStyle(C.INFO) },
+        { v: 'STATUS', s: hStyle(C.INFO) }
+      ]);
+
+      const week2List = convertidos.filter(c => c.week2InviteCell || c.week2Date);
+      if (week2List.length === 0) {
+        weeklyRows.push([{ v: 'Nenhum registro para esta etapa', s: { ...cStyle(), font: { ...cStyle().font, italic: true, color: { rgb: C.GRAY } } } }, {}, {}, {}]);
+      } else {
+        week2List.forEach((c, index) => {
+          const bgColor = index % 2 === 0 ? C.WHITE : C.GRAY_LIGHT;
+          weeklyRows.push([
+            { v: c.name, s: cStyle(false, bgColor) },
+            { v: c.week2InviteCell, s: cStyle(false, bgColor) },
+            { v: formatDate(c.week2Date), s: cStyle(true, bgColor) },
+            { v: getStatusLabel(c.status), s: { ...cStyle(true, bgColor), font: { ...cStyle(true, bgColor).font, color: { rgb: getStatusColor(c.status) } } } }
+          ]);
+        });
+      }
+      
+      weeklyRows.push(['']);
+      weeklyRows.push(['']);
+
+      // Semana 1 (Exibida como 2ª)
+      weeklyRows.push([{ v: '2ª SEMANA - CONTATO TELEFÔNICO/VISITA', s: hStyleLight(C.INFO) }, {}, {}, {}]);
       weeklyRows.push(['']);
       weeklyRows.push([
         { v: 'NOME', s: hStyle(C.INFO) },
@@ -355,61 +383,48 @@ export function ExcelConsolidacaoReportButton({ disabled, convertidos }: ExcelCo
         { v: 'STATUS', s: hStyle(C.INFO) }
       ]);
 
-      convertidos.filter(c => c.week1Contact || c.week1Date).forEach((c, index) => {
-        const bgColor = index % 2 === 0 ? C.WHITE : C.GRAY_LIGHT;
-        weeklyRows.push([
-          { v: c.name, s: cStyle(false, bgColor) },
-          { v: c.week1Contact, s: cStyle(false, bgColor) },
-          { v: formatDate(c.week1Date), s: cStyle(true, bgColor) },
-          { v: getStatusLabel(c.status), s: { ...cStyle(true, bgColor), font: { ...cStyle(true, bgColor).font, color: { rgb: getStatusColor(c.status) } } } }
-        ]);
-      });
-      
-      weeklyRows.push(['']);
-      weeklyRows.push(['']);
-
-      // Semana 2
-      weeklyRows.push([{ v: '2ª SEMANA - CONVITE PARA CÉLULA', s: hStyleLight(C.WARNING) }, {}, {}, {}]);
-      weeklyRows.push(['']);
-      weeklyRows.push([
-        { v: 'NOME', s: hStyle(C.WARNING) },
-        { v: 'CONVITE REALIZADO', s: hStyle(C.WARNING) },
-        { v: 'DATA', s: hStyle(C.WARNING) },
-        { v: 'STATUS', s: hStyle(C.WARNING) }
-      ]);
-
-      convertidos.filter(c => c.week2InviteCell || c.week2Date).forEach((c, index) => {
-        const bgColor = index % 2 === 0 ? C.WHITE : C.GRAY_LIGHT;
-        weeklyRows.push([
-          { v: c.name, s: cStyle(false, bgColor) },
-          { v: c.week2InviteCell, s: cStyle(false, bgColor) },
-          { v: formatDate(c.week2Date), s: cStyle(true, bgColor) },
-          { v: getStatusLabel(c.status), s: { ...cStyle(true, bgColor), font: { ...cStyle(true, bgColor).font, color: { rgb: getStatusColor(c.status) } } } }
-        ]);
-      });
+      const week1List = convertidos.filter(c => c.week1Contact || c.week1Date);
+      if (week1List.length === 0) {
+        weeklyRows.push([{ v: 'Nenhum registro para esta etapa', s: { ...cStyle(), font: { ...cStyle().font, italic: true, color: { rgb: C.GRAY } } } }, {}, {}, {}]);
+      } else {
+        week1List.forEach((c, index) => {
+          const bgColor = index % 2 === 0 ? C.WHITE : C.GRAY_LIGHT;
+          weeklyRows.push([
+            { v: c.name, s: cStyle(false, bgColor) },
+            { v: c.week1Contact, s: cStyle(false, bgColor) },
+            { v: formatDate(c.week1Date), s: cStyle(true, bgColor) },
+            { v: getStatusLabel(c.status), s: { ...cStyle(true, bgColor), font: { ...cStyle(true, bgColor).font, color: { rgb: getStatusColor(c.status) } } } }
+          ]);
+        });
+      }
       
       weeklyRows.push(['']);
       weeklyRows.push(['']);
 
       // Semana 3
-      weeklyRows.push([{ v: '3ª SEMANA - CONVITE PARA CULTO', s: hStyleLight(C.ACCENT) }, {}, {}, {}]);
+      weeklyRows.push([{ v: '3ª SEMANA - CONVITE PARA CULTO', s: hStyleLight(C.INFO) }, {}, {}, {}]);
       weeklyRows.push(['']);
       weeklyRows.push([
-        { v: 'NOME', s: hStyle(C.ACCENT) },
-        { v: 'CONVITE REALIZADO', s: hStyle(C.ACCENT) },
-        { v: 'DATA', s: hStyle(C.ACCENT) },
-        { v: 'STATUS', s: hStyle(C.ACCENT) }
+        { v: 'NOME', s: hStyle(C.INFO) },
+        { v: 'CONVITE REALIZADO', s: hStyle(C.INFO) },
+        { v: 'DATA', s: hStyle(C.INFO) },
+        { v: 'STATUS', s: hStyle(C.INFO) }
       ]);
 
-      convertidos.filter(c => c.week3InviteCult || c.week3Date).forEach((c, index) => {
-        const bgColor = index % 2 === 0 ? C.WHITE : C.GRAY_LIGHT;
-        weeklyRows.push([
-          { v: c.name, s: cStyle(false, bgColor) },
-          { v: c.week3InviteCult, s: cStyle(false, bgColor) },
-          { v: formatDate(c.week3Date), s: cStyle(true, bgColor) },
-          { v: getStatusLabel(c.status), s: { ...cStyle(true, bgColor), font: { ...cStyle(true, bgColor).font, color: { rgb: getStatusColor(c.status) } } } }
-        ]);
-      });
+      const week3List = convertidos.filter(c => c.week3InviteCult || c.week3Date);
+      if (week3List.length === 0) {
+        weeklyRows.push([{ v: 'Nenhum registro para esta etapa', s: { ...cStyle(), font: { ...cStyle().font, italic: true, color: { rgb: C.GRAY } } } }, {}, {}, {}]);
+      } else {
+        week3List.forEach((c, index) => {
+          const bgColor = index % 2 === 0 ? C.WHITE : C.GRAY_LIGHT;
+          weeklyRows.push([
+            { v: c.name, s: cStyle(false, bgColor) },
+            { v: c.week3InviteCult, s: cStyle(false, bgColor) },
+            { v: formatDate(c.week3Date), s: cStyle(true, bgColor) },
+            { v: getStatusLabel(c.status), s: { ...cStyle(true, bgColor), font: { ...cStyle(true, bgColor).font, color: { rgb: getStatusColor(c.status) } } } }
+          ]);
+        });
+      }
       
       weeklyRows.push(['']);
       weeklyRows.push(['']);
@@ -424,23 +439,50 @@ export function ExcelConsolidacaoReportButton({ disabled, convertidos }: ExcelCo
         { v: 'STATUS', s: hStyle(C.PRIMARY) }
       ]);
 
-      convertidos.filter(c => c.week4HomeVisit || c.week4Date).forEach((c, index) => {
-        const bgColor = index % 2 === 0 ? C.WHITE : C.GRAY_LIGHT;
-        weeklyRows.push([
-          { v: c.name, s: cStyle(false, bgColor) },
-          { v: c.week4HomeVisit, s: cStyle(false, bgColor) },
-          { v: formatDate(c.week4Date), s: cStyle(true, bgColor) },
-          { v: getStatusLabel(c.status), s: { ...cStyle(true, bgColor), font: { ...cStyle(true, bgColor).font, color: { rgb: getStatusColor(c.status) } } } }
-        ]);
-      });
+      const week4List = convertidos.filter(c => c.week4HomeVisit || c.week4Date);
+      if (week4List.length === 0) {
+        weeklyRows.push([{ v: 'Nenhum registro para esta etapa', s: { ...cStyle(), font: { ...cStyle().font, italic: true, color: { rgb: C.GRAY } } } }, {}, {}, {}]);
+      } else {
+        week4List.forEach((c, index) => {
+          const bgColor = index % 2 === 0 ? C.WHITE : C.GRAY_LIGHT;
+          weeklyRows.push([
+            { v: c.name, s: cStyle(false, bgColor) },
+            { v: c.week4HomeVisit, s: cStyle(false, bgColor) },
+            { v: formatDate(c.week4Date), s: cStyle(true, bgColor) },
+            { v: getStatusLabel(c.status), s: { ...cStyle(true, bgColor), font: { ...cStyle(true, bgColor).font, color: { rgb: getStatusColor(c.status) } } } }
+          ]);
+        });
+      }
 
       const wsWeekly = XLSX.utils.aoa_to_sheet(weeklyRows);
-      wsWeekly['!merges'] = [
-        { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } },
-        { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } },
-        { s: { r: 3, c: 0 }, e: { r: 3, c: 3 } },
-        { s: { r: 7 + (convertidos.filter(c => c.week1Contact || c.week1Date).length || 1), c: 0 }, e: { r: 7 + (convertidos.filter(c => c.week1Contact || c.week1Date).length || 1), c: 3 } }
+      
+      // Cálculo dinâmico de merges para garantir que todos os títulos ocupem colunas A-D
+      const merges: any[] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }, // Título Igreja
+        { s: { r: 1, c: 0 }, e: { r: 1, c: 3 } }  // Subtítulo Relatório
       ];
+
+      let currentRow = 3; // Início após título/espaço
+      
+      // Merge Semana 2 (que agora é a 1ª na lista)
+      merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: 3 } });
+      const week2Rows = Math.max(convertidos.filter(c => c.week2InviteCell || c.week2Date).length, 1);
+      currentRow += 5 + week2Rows;
+
+      // Merge Semana 1 (que agora é a 2ª na lista)
+      merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: 3 } });
+      const week1RowsCount = Math.max(convertidos.filter(c => c.week1Contact || c.week1Date).length, 1);
+      currentRow += 5 + week1RowsCount;
+
+      // Merge Semana 3
+      merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: 3 } });
+      const week3RowsCount = Math.max(convertidos.filter(c => c.week3InviteCult || c.week3Date).length, 1);
+      currentRow += 5 + week3RowsCount;
+
+      // Merge Semana 4
+      merges.push({ s: { r: currentRow, c: 0 }, e: { r: currentRow, c: 3 } });
+
+      wsWeekly['!merges'] = merges;
       wsWeekly['!cols'] = [{ wch: 30 }, { wch: 35 }, { wch: 12 }, { wch: 16 }];
       XLSX.utils.book_append_sheet(wb, wsWeekly, 'Acompanhamento Semanal');
 

@@ -27,7 +27,7 @@ const CTA_BOX = (
     <div className="mt-4">
       <Link to="/cadastro-igreja-trial">
         <Button size="lg" className="gap-2 border-0 text-white hover:opacity-90" style={{ backgroundColor: BLOG_BLUE }}>
-          Testar grátis por 30 dias
+          Testar grátis por 7 dias
           <ArrowLeft className="h-4 w-4 rotate-180" />
         </Button>
       </Link>
@@ -174,7 +174,7 @@ export default function Artigo() {
                   <div className="mt-4">
                     <Link to="/cadastro-igreja-trial">
                       <Button size="lg" className="gap-2 border-0 text-white hover:opacity-90" style={{ backgroundColor: BLOG_BLUE }}>
-                        Testar grátis por 30 dias
+                        Testar grátis por 7 dias
                         <ArrowLeft className="h-4 w-4 rotate-180" />
                       </Button>
                     </Link>

@@ -20,7 +20,7 @@ import { APP_NAME } from '@/lib/constants';
 import { motion } from 'framer-motion';
 import { AIAssistant } from '@/components/AIAssistant';
 
-const HOTMART_CHECKOUT_URL = import.meta.env.VITE_HOTMART_CHECKOUT_URL || 'https://pay.hotmart.com/O104666619F?bid=1772219819580';
+// Checkout automatizado via Asaas agora é tratado internamente pela rota /checkout
 
 /** ID do vídeo YouTube para a página de vendas. Use VITE_LANDING_VIDEO_ID no .env para trocar. */
 const LANDING_VIDEO_ID = import.meta.env.VITE_LANDING_VIDEO_ID || 'tg6745ZFLVw';
@@ -73,26 +73,35 @@ const PurchaseCard = ({ timeLeft }: { timeLeft: number }) => (
           Tempo estipulado para compra com desconto. Agarre a oportunidade!
         </p>
         <p className="text-2xl font-bold text-foreground">
-          Por apenas <span className="text-primary">R$ 75,00</span>/mês
-          <span className="text-sm font-normal text-muted-foreground ml-2 line-through">R$ 150,00</span>
+          Assinatura <span className="text-muted-foreground line-through">R$ 150,00</span>
+          <br />
+          <span className="text-primary">R$ 75,00/mês</span> nos 3 primeiros meses
         </p>
+        <div className="flex flex-col gap-1 mt-2">
+          <p className="text-xs font-medium text-emerald-600 flex items-center justify-center gap-1">
+            <Check className="h-3 w-3" /> 7 dias grátis para testar
+          </p>
+          <p className="text-xs font-medium text-muted-foreground flex items-center justify-center gap-1">
+            <Shield className="h-3 w-3" /> Cancele a qualquer momento
+          </p>
+        </div>
       </div>
 
-      <a href={HOTMART_CHECKOUT_URL} target="_blank" rel="noopener noreferrer" className="w-full block">
+      <Link to="/checkout" className="w-full block">
         <Button
           size="lg"
           className="w-full text-sm sm:text-base md:text-lg min-h-[52px] sm:min-h-[56px] md:h-16 rounded-xl font-bold gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 group transition-all duration-300 hover:scale-[1.02] flex items-center justify-center flex-wrap overflow-hidden bg-blue-900 hover:bg-blue-800 text-white border-0"
         >
-          <span className="text-center leading-tight break-words max-w-full">Assinar com 50% OFF por R$ 75,00/mês</span>
+          <span className="text-center leading-tight break-words max-w-full">Assinar: 3 meses por R$ 75,00/mês</span>
           <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 shrink-0 ml-0.5 group-hover:translate-x-1 transition-transform" />
         </Button>
-      </a>
+      </Link>
     </div>
   </div>
 );
 
 export default function Landing() {
-  useDocumentTitle(`${APP_NAME} — Gestão de Excelência`);
+  useDocumentTitle(APP_NAME);
   const { isAuthenticated } = useAuth();
   const { canInstall, install, isInstalled } = useInstallPWA();
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
@@ -195,18 +204,11 @@ export default function Landing() {
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background pt-6 sm:pt-8 pb-24 border-b border-primary/10">
         <div className="container px-4 mx-auto text-center z-10 relative">
 
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-4 sm:py-2 rounded-full bg-blue-900 border border-blue-800 text-white font-bold mb-6 sm:mb-8 text-[10px] sm:text-sm text-center justify-center mx-auto whitespace-nowrap sm:whitespace-normal"
-          >
-            <Gift className="w-3 h-3 sm:w-4 sm:h-4 animate-pulse shrink-0" />
-            50 primeiras assinaturas: 50% de Desconto!
-          </motion.div>
+
 
           <h1 className="text-[2rem] sm:text-[2.5rem] md:text-[3rem] font-black mb-4 sm:mb-6 max-w-4xl mx-auto leading-[1.15] tracking-tighter">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-cyan-400 to-blue-500 drop-shadow-sm">
-              Gestão de Excelência
+              Gestão Igreja
             </span>
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-8">
@@ -617,10 +619,18 @@ export default function Landing() {
             <ArrowRight className="h-5 w-5 shrink-0 text-primary opacity-70 transition group-hover:translate-x-1 sm:ml-2" />
           </Link>
 
-          <Logo size="sm" showText={true} className="justify-center opacity-70 mb-4" />
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Gestão Igreja. Todos os direitos reservados.
-          </p>
+          <div className="flex flex-col items-center justify-center text-center gap-4">
+            <Logo size="sm" showText={false} className="opacity-70" />
+            <div className="text-xs text-muted-foreground space-y-1">
+              <p>CNPJ: 65.589.068/0001-01</p>
+              <p>Telefone: (91) 99383-7093 | E-mail: edukadoshmda@gmail.com</p>
+            </div>
+          </div>
+          <div className="mt-8">
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Gestão Igreja. Todos os direitos reservados.
+            </p>
+          </div>
         </div>
       </footer>
 

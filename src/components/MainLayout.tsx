@@ -93,7 +93,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                                 <Info className="h-5 w-5 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
                                 <div className="text-sm space-y-1 min-w-0">
                                     <p className="font-medium">
-                                        <strong>Assinatura:</strong> 7 dias grátis para testar. Mensalidades via PIX. 50 primeiras igrejas: R$ 75/mês. Demais: R$ 150/mês. Vencimento 30 dias + 5 de tolerância.
+                                        <strong>Assinatura:</strong> 7 dias grátis para testar. Mensalidades via Asaas. 50 primeiras igrejas: R$ 75/mês. Demais: R$ 150/mês. Vencimento 30 dias + 5 de tolerância.
                                     </p>
                                     <p>
                                         <strong>PIX:</strong> <span className="font-mono bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 rounded">(91) 99383-7093</span> — Luiz Eduardo · Nubank.

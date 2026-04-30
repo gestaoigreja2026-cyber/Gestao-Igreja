@@ -59,24 +59,7 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
         </div>
       </div>
 
-      {showText && (
-        <div className="flex flex-col gap-0.5">
-          <div
-            className={cn(
-              "font-black tracking-tight leading-none flex items-center gap-1.5 text-primary",
-              textSizeClasses[size]
-            )}
-          >
-            <span>Gestão</span>
-            <span>Igreja</span>
-          </div>
-          {size === 'lg' && (
-            <span className="text-xs tracking-widest font-bold text-muted-foreground mt-1 uppercase">
-              Gestão de Excelência
-            </span>
-          )}
-        </div>
-      )}
+
     </div>
   );
 }

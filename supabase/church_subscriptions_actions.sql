@@ -90,33 +90,35 @@ BEGIN
 END;
 $$;
 
--- RPC para usuário ver se sua igreja está bloqueada (retorna status e blocked)
+-- RPC para usuário ver se sua igreja está bloqueada (retorna status, blocked e asaas_customer_id)
+DROP FUNCTION IF EXISTS get_my_church_subscription_status();
 CREATE OR REPLACE FUNCTION get_my_church_subscription_status()
-RETURNS TABLE(status text, blocked boolean)
+RETURNS TABLE(status text, blocked boolean, asaas_customer_id text)
 LANGUAGE plpgsql
 SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
   my_church_id uuid;
   sub_status text;
+  v_asaas_customer_id text;
 BEGIN
   SELECT church_id INTO my_church_id FROM profiles WHERE id = auth.uid();
   IF my_church_id IS NULL THEN
-    RETURN QUERY SELECT 'ativa'::text, false;  -- Sem igreja = não bloqueia
+    RETURN QUERY SELECT 'ativa'::text, false, null::text;  -- Sem igreja = não bloqueia
     RETURN;
   END IF;
   IF EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'superadmin') THEN
-    RETURN QUERY SELECT 'ativa'::text, false;  -- Superadmin nunca bloqueado
+    RETURN QUERY SELECT 'ativa'::text, false, null::text;  -- Superadmin nunca bloqueado
     RETURN;
   END IF;
-  SELECT cs.status INTO sub_status
+  SELECT cs.status, cs.asaas_customer_id INTO sub_status, v_asaas_customer_id
   FROM church_subscriptions cs
   WHERE cs.church_id = my_church_id
   LIMIT 1;
   IF sub_status IS NULL THEN
-    RETURN QUERY SELECT 'ativa'::text, false;  -- Sem assinatura = não bloqueia (fallback)
+    RETURN QUERY SELECT 'ativa'::text, false, null::text;  -- Sem assinatura = não bloqueia (fallback)
     RETURN;
   END IF;
-  RETURN QUERY SELECT sub_status, (sub_status IN ('suspensa', 'inadimplente'));
+  RETURN QUERY SELECT sub_status, (sub_status IN ('suspensa', 'SUSPENSA', 'inadimplente', 'INADIMPLENTE')), v_asaas_customer_id;
 END;
 $$;

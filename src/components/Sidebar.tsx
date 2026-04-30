@@ -63,7 +63,7 @@ const navGroups: NavGroup[] = [
       { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'superadmin', 'diretor_patrimonio'] },
       { icon: Share2, label: 'Redes Sociais', href: '/redes-sociais', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
       { icon: CreditCard, label: 'Contas e PIX Igreja', href: '/pix-donacoes', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-      { icon: Gift, label: 'Cadastrar Igreja - Teste 30 dias', href: '/cadastro-igreja-trial', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], openInNewTab: true },
+      { icon: Gift, label: 'Cadastrar Igreja - Teste 7 dias', href: '/cadastro-igreja-trial', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], openInNewTab: true },
     ],
   },
 ];

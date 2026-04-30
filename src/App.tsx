@@ -10,6 +10,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import NewLogin from "./pages/NewLogin";
 import CadastroIgrejaTrial from "./pages/CadastroIgrejaTrial";
 import Landing from "./pages/Landing";
+import Checkout from "./pages/Checkout";
 import HotmartSuccess from "./pages/HotmartSuccess";
 import ConfirmScale from "./pages/ConfirmScale";
 import ResetPassword from "./pages/ResetPassword";
@@ -166,7 +167,7 @@ function AppRoutes() {
       <InstallPWA />
       <Routes>
         <Route path="/" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <Landing />} />
-        <Route path="/checkout" element={<Navigate to="/" replace />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/hotmart-success" element={<HotmartSuccess />} />
         <Route path="/cadastro-igreja-trial" element={<CadastroIgrejaTrial />} />
         <Route path="/blog" element={<Suspense fallback={<PageFallback />}><Blog /></Suspense>} />

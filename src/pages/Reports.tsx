@@ -60,7 +60,8 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
-  Tooltip
+  Tooltip,
+  Legend
 } from 'recharts';
 
 import { financialService } from '@/services/financial.service';
@@ -95,11 +96,185 @@ const DEFAULT_EXPENSE_CATEGORIES = [
   "Outros"
 ];
 
+// Mapeamento de cores fixas por categoria para consistência visual
+const getCategoryColor = (name: string, index: number) => {
+  const colorMap: Record<string, string> = {
+    // Entradas
+    'Dízimos': '#22c55e', // Verde
+    'Ofertas': '#6366f1', // Azul
+    'Outras Entradas': '#f59e0b', // Laranja
+    
+    // Saídas Comuns
+    'Aluguel': '#ef4444', // Vermelho
+    'Água / Luz': '#06b6d4', // Ciano
+    'Internet / Telefone': '#8b5cf6', // Roxo
+    'Manutenção': '#f59e0b', // Laranja
+    'Eventos': '#ec4899', // Rosa
+    'Ministério de Louvor': '#22c55e', // Verde
+    'Escola Bíblica': '#facc15', // Amarelo
+    'Salários / Preletores': '#475569', // Cinza
+    'Outras Saídas': '#6366f1', // Azul
+    'Outros': '#94a3b8', // Cinza claro
+  };
+
+  return colorMap[name] || COLORS[index % COLORS.length];
+};
+
+// --- NOVO COMPONENTE: DISTRIBUIÇÃO MENSAL (PIZZA) ---
+function MonthlyDistributionReport({ financialData, transactions }: { financialData: any[], transactions: any[] }) {
+  const [selectedMonth, setSelectedMonth] = useState<string>('');
+
+  // Ordenar meses disponíveis (decrescente)
+  const availableMonths = [...financialData].sort((a, b) => b.rawMonth.localeCompare(a.rawMonth));
+
+  // Definir mês inicial se não selecionado
+  useEffect(() => {
+    if (!selectedMonth && availableMonths.length > 0) {
+      setSelectedMonth(availableMonths[0].rawMonth);
+    }
+  }, [availableMonths, selectedMonth]);
+
+  const currentMonthData = financialData.find(f => f.rawMonth === selectedMonth);
+  const currentMonthTransactions = transactions.filter(t => t?.date?.startsWith?.(selectedMonth));
+
+  // Processar Despesas por Categoria para o mês selecionado
+  const expenseMap = new Map<string, number>();
+  currentMonthTransactions.filter(t => t?.type === 'saida').forEach(t => {
+    const cat = t?.category || 'Outros';
+    expenseMap.set(cat, (expenseMap.get(cat) || 0) + (t?.amount || 0));
+  });
+  const expenseCategories = Array.from(expenseMap.entries())
+    .map(([name, value]) => ({ name, value }))
+    .filter(e => e.value > 0)
+    .sort((a, b) => b.value - a.value);
+
+  // Processar Composição de Entradas para o mês selecionado
+  const tithes = currentMonthTransactions.filter(t => t?.category === 'Dízimos').reduce((sum, t) => sum + (t?.amount || 0), 0);
+  const offerings = currentMonthTransactions.filter(t => t?.category?.includes('Ofertas')).reduce((sum, t) => sum + (t?.amount || 0), 0);
+  const otherIncome = currentMonthTransactions.filter(t => t?.type === 'entrada' && t?.category !== 'Dízimos' && !t?.category?.includes('Ofertas')).reduce((sum, t) => sum + (t?.amount || 0), 0);
+
+  const incomeComposition = [
+    { name: 'Dízimos', value: tithes },
+    { name: 'Ofertas', value: offerings },
+    { name: 'Outras Entradas', value: otherIncome }
+  ].filter(i => i.value > 0);
+
+  if (!selectedMonth) return <div className="py-12 text-center text-muted-foreground">Carregando dados mensais...</div>;
+
+  return (
+    <div className="space-y-6">
+      {/* Seletor de Mês */}
+      <Card className="border-primary/20 shadow-md">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <PieChartIcon className="h-5 w-5 text-primary" />
+              <h2 className="font-semibold text-lg">Distribuição Mensal</h2>
+            </div>
+            <select 
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value)}
+              className="flex h-10 w-full sm:w-64 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              {availableMonths.map(m => (
+                <option key={m.rawMonth} value={m.rawMonth}>
+                  {format(new Date(m.rawMonth + '-02'), 'MMMM yyyy', { locale: ptBR })}
+                </option>
+              ))}
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Pizza de Despesas */}
+        <Card className="shadow-lg border-primary/10">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <DollarSign className="h-4 w-4 text-destructive" />
+              Onde foi gasto (Saídas)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {expenseCategories.length > 0 ? (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={expenseCategories}
+                      cx="40%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {expenseCategories.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name, index)} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number, name: string) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, name]} />
+                    <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', lineHeight: '20px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm italic">
+                Nenhuma despesa registrada neste mês.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Pizza de Entradas */}
+        <Card className="shadow-lg border-primary/10">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-green-600" />
+              Composição das Entradas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {incomeComposition.length > 0 ? (
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={incomeComposition}
+                      cx="40%"
+                      cy="50%"
+                      innerRadius={55}
+                      outerRadius={80}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {incomeComposition.map((entry, index) => (
+                        <Cell key={`cell-income-${index}`} fill={getCategoryColor(entry.name, index)} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number, name: string) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, name]} />
+                    <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ fontSize: '11px', lineHeight: '20px' }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-muted-foreground text-sm italic">
+                Nenhuma entrada registrada neste mês.
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 export default function Reports() {
   useDocumentTitle('Relatórios');
   const [selectedTab, setSelectedTab] = useState('evolucao');
   const [loading, setLoading] = useState(true);
   const [financialData, setFinancialData] = useState<any[]>([]);
+  const [financialDataRawTransactions, setFinancialDataRawTransactions] = useState<any[]>([]);
   const [expenseCategories, setExpenseCategories] = useState<any[]>([]);
   const [evolutionData, setEvolutionData] = useState<any[]>([]);
   const [churchHealthData, setChurchHealthData] = useState<any>({
@@ -129,6 +304,7 @@ export default function Reports() {
       const rawTransactions = await financialService.getTransactionsForPeriod(6);
       const summaryList = Array.isArray(finSummary) ? finSummary : [];
       const txList = Array.isArray(rawTransactions) ? rawTransactions : [];
+      setFinancialDataRawTransactions(txList);
 
       const formatMonth = (yyyyMM: string) => {
         if (!yyyyMM) return '';
@@ -494,6 +670,10 @@ export default function Reports() {
             <span className="hidden sm:inline">Crescimento</span>
             <span className="sm:hidden">Cresc.</span>
           </TabsTrigger>
+          <TabsTrigger value="distribuicao" className="gap-2 text-sm">
+            <PieChartIcon className="h-[20px] w-[20px]" />
+            <span className="hidden sm:inline">Mensal</span>
+          </TabsTrigger>
         </TabsList>
 
         {/* Evolução da Igreja - Gráficos coloridos */}
@@ -532,6 +712,14 @@ export default function Reports() {
         {/* Crescimento Espiritual Tab */}
         <TabsContent value="crescimento" className="space-y-6">
           <SpiritualGrowthReport data={spiritualGrowthData} />
+        </TabsContent>
+
+        {/* Distribuição Mensal Tab */}
+        <TabsContent value="distribuicao" className="space-y-6">
+          <MonthlyDistributionReport 
+            financialData={financialData} 
+            transactions={financialDataRawTransactions} // Precisaremos garantir que temos isso
+          />
         </TabsContent>
       </Tabs>
       </div>
@@ -686,20 +874,25 @@ function EvolutionReport({
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={safeExpense}
-                      cx="50%"
+                      data={safeExpense.filter(e => e.value > 0).slice(0, 6)}
+                      cx="40%"
                       cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={70}
-                      fill="#8884d8"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
                       dataKey="value"
                     >
-                      {safeExpense.map((_: any, index: number) => (
+                      {safeExpense.filter(e => e.value > 0).slice(0, 6).map((_: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value: number) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, '']} />
+                    <Legend 
+                      layout="vertical" 
+                      verticalAlign="middle" 
+                      align="right"
+                      wrapperStyle={{ fontSize: '11px' }}
+                    />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -1169,23 +1362,28 @@ function FinancialReport({ data, totalIncome, totalExpenses, balance, chartConfi
             {safeExpenseCategories.length > 0 ? (
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={safeExpenseCategories}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {safeExpenseCategories.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `R$ ${Number(value).toLocaleString('pt-BR')}`} />
-                  </PieChart>
+                    <PieChart>
+                      <Pie
+                        data={safeExpenseCategories.filter(e => e.value > 0).slice(0, 6)}
+                        cx="40%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {safeExpenseCategories.filter(e => e.value > 0).slice(0, 6).map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name, index)} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value: number, name: string) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, name]} />
+                      <Legend 
+                        layout="vertical" 
+                        verticalAlign="middle" 
+                        align="right"
+                        wrapperStyle={{ fontSize: '11px' }}
+                      />
+                    </PieChart>
                 </ResponsiveContainer>
               </div>
             ) : (

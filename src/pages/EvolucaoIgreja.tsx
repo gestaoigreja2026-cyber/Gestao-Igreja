@@ -30,7 +30,8 @@ import {
   YAxis,
   CartesianGrid,
   ResponsiveContainer,
-  Tooltip
+  Tooltip,
+  Legend
 } from 'recharts';
 import { ExcelCompleteReportButton } from '@/components/ExcelCompleteReport';
 
@@ -40,6 +41,25 @@ import { cellsService } from '@/services/cells.service';
 import { DEFAULT_CHURCH_NAME } from '@/lib/constants';
 
 const COLORS = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#84cc16'];
+
+// Mapeamento de cores fixas por categoria para consistência visual
+const getCategoryColor = (name: string, index: number) => {
+  const colorMap: Record<string, string> = {
+    // Saídas Comuns
+    'Aluguel': '#ef4444', // Vermelho
+    'Água / Luz': '#06b6d4', // Ciano
+    'Internet / Telefone': '#8b5cf6', // Roxo
+    'Manutenção': '#f59e0b', // Laranja
+    'Eventos': '#ec4899', // Rosa
+    'Ministério de Louvor': '#22c55e', // Verde
+    'Escola Bíblica': '#facc15', // Amarelo
+    'Salários / Preletores': '#475569', // Cinza
+    'Outras Saídas': '#6366f1', // Azul
+    'Outros': '#94a3b8', // Cinza claro
+  };
+
+  return colorMap[name] || COLORS[index % COLORS.length];
+};
 
 export default function EvolucaoIgreja() {
   useDocumentTitle('Evolução da Igreja');
@@ -385,20 +405,25 @@ export default function EvolucaoIgreja() {
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
-                        data={safeExpense.slice(0, 5)}
-                        cx="50%"
+                        data={safeExpense.filter(e => e.value > 0).slice(0, 6)}
+                        cx="40%"
                         cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={70}
-                        fill="#8884d8"
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
                         dataKey="value"
                       >
-                        {safeExpense.slice(0, 5).map((_: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        {safeExpense.filter(e => e.value > 0).slice(0, 6).map((entry: any, index: number) => (
+                          <Cell key={`cell-${index}`} fill={getCategoryColor(entry.name, index)} />
                         ))}
                       </Pie>
                       <Tooltip formatter={(value: number) => [`R$ ${Number(value).toLocaleString('pt-BR')}`, '']} />
+                      <Legend 
+                        layout="vertical" 
+                        verticalAlign="middle" 
+                        align="right"
+                        wrapperStyle={{ fontSize: '12px' }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>

@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabaseClient';
 import { churchesService } from './churches.service';
 
-const HOTMART_CHECKOUT_URL = import.meta.env.VITE_HOTMART_CHECKOUT_URL || 'https://pay.hotmart.com/O104666619F?bid=1772219819580';
+// Checkout automatizado agora é interno via /checkout
 const STORAGE_KEY = 'trial_church_form_data';
 
 export function getTrialFormData(): TrialChurchFormData | null {
@@ -127,6 +127,6 @@ export const trialService = {
 
   /** URL da página de venda (Hotmart) */
   getSalesUrl(): string {
-    return HOTMART_CHECKOUT_URL;
+    return '/checkout';
   },
 };

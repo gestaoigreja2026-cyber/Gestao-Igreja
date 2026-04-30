@@ -37,17 +37,16 @@ export const churchesService = {
      * Cria um novo tenant (Igreja) com um admin inicial opcional
      */
     /**
-     * Cria igreja via checkout (chamada por usuário anônimo após pagamento)
+     * Cria igreja via checkout (chamada após confirmação de pagamento)
      * Usa RPC create_church_from_checkout se existir
-     * Suporta integração com Hotmart através do hotmartTransactionId
      */
-    async createFromCheckout(churchName: string, churchSlug: string, adminEmail?: string, hotmartTransactionId?: string) {
+    async createFromCheckout(churchName: string, churchSlug: string, adminEmail?: string, transactionId?: string) {
         try {
             const { data, error } = await (supabase as any).rpc('create_church_from_checkout', {
                 church_name: churchName,
                 church_slug: churchSlug,
                 admin_email: adminEmail || null,
-                hotmart_transaction_id: hotmartTransactionId || null,
+                external_transaction_id: transactionId || null,
             });
             if (!error && data) {
                 const { data: created } = await supabase.from('churches').select('*').eq('id', data).single();
@@ -247,12 +246,14 @@ export const churchesService = {
     },
 
     /** Status da assinatura da igreja do usuário (para bloqueio) */
-    async getMyChurchSubscriptionStatus(): Promise<{ status: string; blocked: boolean }> {
+    async getMyChurchSubscriptionStatus(): Promise<{ status: string; blocked: boolean; asaas_customer_id?: string }> {
         try {
             const { data, error } = await (supabase as any).rpc('get_my_church_subscription_status');
             if (error) return { status: 'ativa', blocked: false };
             const row = Array.isArray(data) ? data[0] : data;
-            if (row && typeof row === 'object' && 'status' in row) return row as { status: string; blocked: boolean };
+            if (row && typeof row === 'object' && 'status' in row) {
+                return row as { status: string; blocked: boolean; asaas_customer_id?: string };
+            }
         } catch { }
         return { status: 'ativa', blocked: false };
     },

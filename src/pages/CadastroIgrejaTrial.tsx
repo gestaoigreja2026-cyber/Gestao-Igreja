@@ -28,7 +28,7 @@ const initialForm: TrialChurchFormData = {
 };
 
 export default function CadastroIgrejaTrial() {
-  useDocumentTitle('Cadastrar Igreja - Teste 30 dias');
+  useDocumentTitle('Cadastrar Igreja - Teste 7 dias');
   const navigate = useNavigate();
   const { toast } = useToast();
   const [form, setForm] = useState<TrialChurchFormData>(initialForm);
@@ -89,7 +89,7 @@ export default function CadastroIgrejaTrial() {
           <div className="text-center">
             <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
               <Gift className="h-7 w-7 text-primary" />
-              Cadastrar Igreja - Teste 30 dias
+              Cadastrar Igreja - Teste 7 dias
             </h1>
             <p className="text-muted-foreground mt-1">
               Preencha os dados da sua igreja e comece o período de teste gratuito.
