@@ -1,0 +1,23 @@
+{
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/send-tips",
+      "schedule": "0 12 * * 1"
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+import { supabase } from '@/lib/supabaseClient';
+
+/* =========================
+   TIPOS
+========================= */
+
+export interface Transaction {
+  id: string;
+  type: 'entrada' | 'saida';
+  category: string;
+  amount: number;
+  description: string | null;
+  date: string;
+  created_at: string;
+}
+
+export interface CreateFinancialTransactionDTO {
+  type: 'entrada' | 'saida';
+  category: string;
+  amount: number;
+  description?: string | null;
+  date: string; // YYYY-MM-DD
+}
+
+export interface FinancialSummary {
+  month: string;
+  total_income: number;
+  total_expenses: number;
+  balance: number;
+}
+
+/* =========================
+   SERVIÇO
+========================= */
+
+async function create(data: CreateFinancialTransactionDTO, churchId: string) {
+  console.log('Criando transação:', { data, churchId });
+  
+  const insertData = {
+    type: data.type,
+    category: data.category,
+    amount: data.amount,
+    description: data.description ?? null,
+    date: data.date,
+    church_id: churchId
+  };
+  
+  console.log('Dados a inserir:', insertData);
+  
+  const { data: result, error } = await supabase
+    .from('financial_transactions')
+    .insert(insertData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Erro Supabase (create):', error);
+    throw new Error(error.message || 'Erro ao criar transação');
+  }
+  
+  console.log('Transação criada:', result);
+  return result;
+}
+
+async function list(startDate?: Date, endDate?: Date, churchId?: string | null): Promise<Transaction[]> {
+  let query = supabase
+    .from('financial_transactions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (churchId) {
+    query = query.eq('church_id', churchId);
+  }
+
+  if (startDate && endDate) {
+    query = query
+      .gte('date', startDate.toISOString().split('T')[0])
+      .lte('date', endDate.toISOString().split('T')[0]);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error('Erro Supabase (list):', error);
+    throw error;
+  }
+
+  return data ?? [];
+}
+
+async function remove(id: string) {
+  const { error } = await supabase
+    .from('financial_transactions')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Erro Supabase (delete):', error);
+    throw error;
+  }
+}
+
+async function update(id: string, data: Partial<CreateFinancialTransactionDTO>) {
+  const { error } = await (supabase.from('financial_transactions') as any)
+    .update({
+      type: data.type,
+      category: data.category,
+      amount: data.amount,
+      description: data.description ?? null,
+      date: data.date,
+    } as any)
+    .eq('id', id);
+
+  if (error) {
+    console.error('Erro Supabase (update):', error);
+    throw error;
+  }
+}
+
+async function getSummary(): Promise<FinancialSummary[]> {
+  const { data, error } = await supabase
+    .from('financial_summary')
+    .select('*')
+    .order('month', { ascending: false })
+    .limit(12);
+
+  if (error) {
+    console.error('Erro ao carregar resumo financeiro:', error);
+    return [];
+  }
+
+  return data ?? [];
+}
+
+// Function to get transactions for detailed reporting (e.g. breakdown by category for a period)
+async function getTransactionsForPeriod(monthsBack: number = 6): Promise<Transaction[]> {
+  const today = new Date();
+  const startDate = new Date(today.getFullYear(), today.getMonth() - monthsBack, 1);
+
+  const { data, error } = await supabase
+    .from('financial_transactions')
+    .select('*')
+    .gte('date', startDate.toISOString().split('T')[0])
+    .order('date', { ascending: true });
+
+  if (error) {
+    console.error('Erro ao carregar transações para relatório:', error);
+    return [];
+  }
+
+  return data ?? [];
+}
+
+/* =========================
+   EXPORT
+========================= */
+
+export const financialService = {
+  create,
+  list,
+  update,
+  delete: remove,
+  getSummary,
+  getTransactionsForPeriod
+};

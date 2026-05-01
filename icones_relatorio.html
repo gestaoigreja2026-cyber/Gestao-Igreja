@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ícones - Gestão Igreja</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #dbeafe;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+        
+        .icons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .icon-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .icon-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .icon-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 3em;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .icon-circle.blue {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+        }
+        
+        .icon-circle.green {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: white;
+        }
+        
+        .icon-circle.gold {
+            background: linear-gradient(135deg, #d4af37, #fbbf24);
+            color: white;
+        }
+        
+        .icon-circle.purple {
+            background: linear-gradient(135deg, #7c3aed, #a78bfa);
+            color: white;
+        }
+        
+        .icon-circle.red {
+            background: linear-gradient(135deg, #dc2626, #f87171);
+            color: white;
+        }
+        
+        .icon-circle.orange {
+            background: linear-gradient(135deg, #ea580c, #fb923c);
+            color: white;
+        }
+        
+        .icon-card h3 {
+            color: #1e3a8a;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+        
+        .icon-card p {
+            color: #6b7280;
+            font-size: 0.9em;
+        }
+        
+        .excel-section {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .excel-section h2 {
+            color: #1e3a8a;
+            font-size: 1.8em;
+            margin-bottom: 30px;
+            text-align: center;
+            border-bottom: 3px solid #d4af37;
+            padding-bottom: 15px;
+        }
+        
+        .emoji-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .emoji-table th {
+            background: #1e3a8a;
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .emoji-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .emoji-table tr:hover {
+            background: #f3f4f6;
+        }
+        
+        .emoji-cell {
+            font-size: 2em;
+            text-align: center;
+        }
+        
+        .copy-btn {
+            background: #1e3a8a;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #3b82f6;
+        }
+        
+        .instructions {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            margin-top: 30px;
+            border-radius: 0 10px 10px 0;
+        }
+        
+        .instructions h3 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            color: #374151;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .color-palette {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .color-box {
+            text-align: center;
+        }
+        
+        .color-sample {
+            width: 80px;
+            height: 80px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .color-sample.blue { background: #1e3a8a; }
+        .color-sample.gold { background: #d4af37; }
+        .color-sample.green { background: #059669; }
+        .color-sample.light-blue { background: #3b82f6; }
+        
+        .color-box span {
+            font-size: 0.85em;
+            color: #6b7280;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🕊️ GESTÃO IGREJA</h1>
+        <p class="subtitle">Sistema de Ícones para Relatórios Excel</p>
+        
+        <div class="icons-grid">
+            <div class="icon-card">
+                <div class="icon-circle blue">📊</div>
+                <h3>Relatórios</h3>
+                <p>Dashboard e indicadores</p>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-circle gold">🙏</div>
+                <h3>Ministérios</h3>
+                <p>Gestão de ministérios</p>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-circle green">🏠</div>
+                <h3>Células</h3>
+                <p>Células de crescimento</p>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-circle purple">👥</div>
+                <h3>Secretaria</h3>
+                <p>Cadastro de membros</p>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-circle blue">📚</div>
+                <h3>Escolas</h3>
+                <p>EBD e formação</p>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-circle gold">🎯</div>
+                <h3>Discipulado</h3>
+                <p>Trilha de crescimento</p>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-circle green">💰</div>
+                <h3>Caixa Diário</h3>
+                <p>Controle financeiro</p>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-circle red">🎉</div>
+                <h3>Eventos</h3>
+                <p>Cultos e atividades</p>
+            </div>
+            
+            <div class="icon-card">
+                <div class="icon-circle orange">🙏</div>
+                <h3>Oração</h3>
+                <p>Solicitações de intercessão</p>
+            </div>
+        </div>
+        
+        <div class="excel-section">
+            <h2>📋 Tabela de Ícones para Excel</h2>
+            <p style="text-align: center; color: #6b7280; margin-bottom: 20px;">
+                Clique em "Copiar" para usar o emoji no Excel
+            </p>
+            
+            <table class="emoji-table">
+                <thead>
+                    <tr>
+                        <th>Módulo</th>
+                        <th>Ícone</th>
+                        <th>Emoji</th>
+                        <th>Código</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Relatórios</strong></td>
+                        <td class="emoji-cell">📊</td>
+                        <td>Gráfico</td>
+                        <td><code>U+1F4CA</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('📊')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ministérios</strong></td>
+                        <td class="emoji-cell">🙏</td>
+                        <td>Oração</td>
+                        <td><code>U+1F64F</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('🙏')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Células</strong></td>
+                        <td class="emoji-cell">🏠</td>
+                        <td>Casa</td>
+                        <td><code>U+1F3E0</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('🏠')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Secretaria</strong></td>
+                        <td class="emoji-cell">👥</td>
+                        <td>Pessoas</td>
+                        <td><code>U+1F465</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('👥')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Escolas</strong></td>
+                        <td class="emoji-cell">📚</td>
+                        <td>Livros</td>
+                        <td><code>U+1F4DA</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('📚')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Discipulado</strong></td>
+                        <td class="emoji-cell">🎯</td>
+                        <td>Alvo</td>
+                        <td><code>U+1F3AF</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('🎯')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Caixa Diário</strong></td>
+                        <td class="emoji-cell">💰</td>
+                        <td>Dinheiro</td>
+                        <td><code>U+1F4B0</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('💰')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Eventos</strong></td>
+                        <td class="emoji-cell">🎉</td>
+                        <td>Celebração</td>
+                        <td><code>U+1F389</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('🎉')">Copiar</button></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Oração</strong></td>
+                        <td class="emoji-cell">🕊️</td>
+                        <td>Pomba</td>
+                        <td><code>U+1F54A</code></td>
+                        <td><button class="copy-btn" onclick="copyEmoji('🕊️')">Copiar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="color-palette">
+                <div class="color-box">
+                    <div class="color-sample blue"></div>
+                    <span>Azul Royal<br>#1E3A8A</span>
+                </div>
+                <div class="color-box">
+                    <div class="color-sample gold"></div>
+                    <span>Dourado<br>#D4AF37</span>
+                </div>
+                <div class="color-box">
+                    <div class="color-sample green"></div>
+                    <span>Verde<br>#059669</span>
+                </div>
+                <div class="color-box">
+                    <div class="color-sample light-blue"></div>
+                    <span>Azul Claro<br>#3B82F6</span>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3>📝 Como Usar no Excel</h3>
+                <ol>
+                    <li>Abra o arquivo Excel <strong>Gestao_Igreja_Modelo_Completo.xlsx</strong></li>
+                    <li>Clique com botão direito na aba que deseja renomear</li>
+                    <li>Selecione "Renomear"</li>
+                    <li>Copie o emoji desejado desta página</li>
+                    <li>Cole antes do nome da aba (ex: <code>🙏 Ministérios</code>)</li>
+                    <li>Pressione Enter para confirmar</li>
+                </ol>
+                <p style="margin-top: 15px; color: #6b7280;">
+                    <strong>Dica:</strong> No Windows, você também pode usar o atalho <code>Win + .</code> (ponto) 
+                    para abrir o teclado de emojis diretamente no Excel.
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function copyEmoji(emoji) {
+            navigator.clipboard.writeText(emoji).then(function() {
+                alert('Emoji ' + emoji + ' copiado para a área de transferência!');
+            }, function(err) {
+                console.error('Erro ao copiar: ', err);
+                // Fallback para navegadores antigos
+                const textArea = document.createElement("textarea");
+                textArea.value = emoji;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+                alert('Emoji ' + emoji + ' copiado!');
+            });
+        }
+    </script>
+</body>
+</html>
