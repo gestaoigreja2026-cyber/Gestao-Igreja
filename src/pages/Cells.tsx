@@ -1,0 +1,863 @@
+import { useState, useEffect } from 'react';
+import { MapPin, Users, Calendar, FileText, Plus, Trash2, Loader2, Home, ShieldCheck, MapPinned, Navigation, ChevronDown, ChevronUp, FileSpreadsheet } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { cellsService } from '@/services/cells.service';
+import { membersService } from '@/services/members.service';
+import { Member } from '@/types';
+import { geocodeAddress, openStreetMapUrl, googleMapsUrl } from '@/lib/geocoding';
+import { CellMapPicker, CellMapView, CellsMapAll } from '@/components/CellMap';
+import { ExcelCellMonthlyReportButton } from '@/components/ExcelCellMonthlyReport';
+interface Cell {
+  id: string;
+  name: string;
+  leader: string;
+  host: string;
+  address: string;
+  meetingDay: string;
+  meetingTime: string | null;
+  memberCount: number;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export default function Cells() {
+  const [cells, setCells] = useState<Cell[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [newCell, setNewCell] = useState({
+    name: '',
+    address: '',
+    meetingDay: '',
+    meetingTime: '',
+    leaderId: '',
+    hostId: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
+  });
+  const [geocoding, setGeocoding] = useState(false);
+  const [deleteCellConfirm, setDeleteCellConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
+  const [filterDay, setFilterDay] = useState<string>('todos');
+  const [error, setError] = useState<string | null>(null);
+
+  const { toast } = useToast();
+  const { user, churchId } = useAuth();
+  const effectiveChurchId = churchId ?? user?.churchId;
+
+  const canReport = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'lider_celula';
+  const isAdmin = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'lider_celula';
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  async function loadData() {
+    try {
+      setError(null);
+      setLoading(true);
+      const [cellsData, membersData] = await Promise.all([
+        cellsService.getActive(effectiveChurchId),
+        membersService.getAll(effectiveChurchId)
+      ]);
+
+      const mappedCells = await Promise.all((cellsData || []).map(async (c: any) => {
+        const count = await cellsService.getMemberCount(c.id);
+        const rawTime = c.meeting_time;
+        const meetingTime = rawTime ? String(rawTime).substring(0, 5) : null;
+        return {
+          id: c.id,
+          name: c.name,
+          leader: c.leader?.name || 'Sem líder',
+          host: c.host?.name || 'Sem anfitrião',
+          address: c.address || 'Sem endereço',
+          meetingDay: c.meeting_day || 'A definir',
+          meetingTime,
+          memberCount: count,
+          latitude: c.latitude ?? null,
+          longitude: c.longitude ?? null,
+        };
+      }));
+
+      setCells(mappedCells);
+      setMembers(membersData as any || []);
+    } catch (err: any) {
+      console.error('Erro ao carregar dados:', err);
+      setCells([]);
+      setMembers([]);
+      const msg = err?.message || '';
+      const isSessionOrPerm = /session|permission|RLS|401|403|PGRST/i.test(msg) || msg.includes('fetch');
+      setError(isSessionOrPerm ? 'Sessão expirada ou sem permissão.' : (msg || 'Não foi possível carregar.'));
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível carregar as informações.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleCreateCell = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (!user?.churchId) throw new Error('Igreja não identificada.');
+
+      const data = {
+        name: newCell.name,
+        address: newCell.address,
+        meeting_day: newCell.meetingDay,
+        meeting_time: newCell.meetingTime,
+        leader_id: newCell.leaderId || null,
+        host_id: newCell.hostId || null,
+        latitude: newCell.latitude,
+        longitude: newCell.longitude,
+        active: true,
+      };
+
+      await cellsService.create(data, user.churchId);
+
+      toast({
+        title: 'Célula criada!',
+        description: `${newCell.name} foi adicionada com sucesso.`,
+      });
+
+      setCreateOpen(false);
+      setNewCell({
+        name: '',
+        address: '',
+        meetingDay: '',
+        meetingTime: '',
+        leaderId: '',
+        hostId: '',
+        latitude: null,
+        longitude: null,
+      });
+      loadData();
+    } catch (error: any) {
+      toast({
+        title: 'Erro ao criar célula',
+        description: error.message || 'Ocorreu um erro ao criar a célula.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteCell = (id: string, name: string) => {
+    setDeleteCellConfirm({ open: true, id, name });
+  };
+
+  const executeDeleteCell = async () => {
+    const { id } = deleteCellConfirm;
+    try {
+      await cellsService.delete(id);
+      loadData();
+      setDeleteCellConfirm(prev => ({ ...prev, open: false }));
+      toast({ title: 'Célula excluída', description: 'O registro foi removido com sucesso.' });
+    } catch (error) {
+      toast({ title: 'Erro ao excluir', description: 'Não foi possível remover a célula.', variant: 'destructive' });
+    }
+  };
+
+  const handleSubmitReport = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget as HTMLFormElement);
+
+    try {
+      if (!user?.churchId || !selectedCell) throw new Error('Informações incompletas.');
+
+      const reportData = {
+        cell_id: selectedCell.id,
+        date: formData.get('date'),
+        members_present: attendance.length,
+        visitors: Number(formData.get('visitors')),
+        study_topic: formData.get('study'),
+        notes: `Chamada: ${attendance.length} presentes. \nObservações: ${formData.get('notes')}`
+      };
+
+      await cellsService.createReport(reportData, user.churchId);
+
+      setReportOpen(false);
+      setSelectedCell(null);
+      setAttendance([]);
+
+      toast({ title: 'Relatório enviado!', description: 'O relatório foi registrado com sucesso.' });
+    } catch (error: any) {
+      toast({ title: 'Erro ao enviar', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  const [attendance, setAttendance] = useState<string[]>([]);
+  const [membersInCell, setMembersInCell] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (reportOpen && selectedCell) {
+      cellsService.getMembers(selectedCell.id).then(setMembersInCell);
+    }
+  }, [reportOpen, selectedCell]);
+
+  if (error && cells.length === 0 && !loading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <Button onClick={() => loadData()}>Tentar novamente</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-8">
+        <Skeleton className="h-32 w-full rounded-3xl" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-48 rounded-2xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-8">
+      {/* Header Premium */}
+      <div className="bg-white p-8 rounded-3xl border border-primary/20 overflow-hidden relative group shadow-sm">
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-primary/5 rounded-full blur-3xl transition-colors duration-500" />
+        <div className="relative">
+          <h1 className="text-4xl font-extrabold tracking-tight text-primary">Multiplicação & Células</h1>
+          <p className="text-muted-foreground mt-2 text-lg max-w-2xl">
+            Acompanhe o crescimento da igreja através dos pequenos grupos. Gerencie líderes, anfitriões e relatórios de frequência.
+          </p>
+        </div>
+      </div>
+
+      {/* Mapa com todas as células que têm localização */}
+      <div className="space-y-2 px-2">
+        <div className="flex items-center gap-2 text-lg font-semibold">
+          <MapPin className="h-5 w-5 text-primary" />
+          <span>Localização das Células</span>
+        </div>
+        <CellsMapAll
+          cells={cells
+            .filter((c): c is Cell & { latitude: number; longitude: number } =>
+              c.latitude != null && c.longitude != null
+            )
+            .map((c) => ({
+              id: c.id,
+              name: c.name,
+              address: c.address,
+              latitude: c.latitude,
+              longitude: c.longitude,
+            }))}
+          height="380px"
+          onCellClick={(cell) => {
+            const full = cells.find((x) => x.id === cell.id);
+            if (full) {
+              setSelectedCell(full);
+              setDetailsOpen(true);
+            }
+          }}
+        />
+      </div>
+
+      <div className="flex flex-col gap-4 px-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-white border border-primary/20 p-2 rounded-lg shadow-sm">
+              <Home className="h-5 w-5 text-primary" />
+            </div>
+            <p className="font-semibold text-lg">{cells.length} Células Ativas</p>
+          </div>
+          <div className="flex gap-2">
+            <ExcelCellMonthlyReportButton />
+            {isAdmin && (
+              <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-primary text-primary-foreground hover:shadow-lg transition-all rounded-full h-12 w-12 p-0 sm:w-auto sm:px-4 sm:rounded-xl" title="Nova Célula">
+                    <Plus className="h-6 w-6 sm:mr-2" />
+                    <span className="hidden sm:inline">Nova Célula</span>
+                  </Button>
+                </DialogTrigger>
+              <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+                <form onSubmit={handleCreateCell}>
+                  <DialogHeader>
+                    <DialogTitle>Cadastrar Nova Célula</DialogTitle>
+                    <DialogDescription>Inicie um novo grupo de comunhão</DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="cell-name">Nome da Célula</Label>
+                      <Input id="cell-name" value={newCell.name} onChange={(e) => setNewCell({ ...newCell, name: e.target.value })} required placeholder="Ex: Célua Peniel" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="cell-address">Endereço da Reunião</Label>
+                      <div className="flex gap-2">
+                        <Input id="cell-address" value={newCell.address} onChange={(e) => setNewCell({ ...newCell, address: e.target.value })} required placeholder="Rua, Número, Bairro, Cidade" className="flex-1" />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={!newCell.address.trim() || geocoding}
+                          onClick={async () => {
+                            setGeocoding(true);
+                            try {
+                              const result = await geocodeAddress(newCell.address);
+                              if (result) {
+                                setNewCell(prev => ({ ...prev, latitude: result.lat, longitude: result.lng }));
+                                toast({ title: 'Localização encontrada', description: 'Ajuste o pin no mapa se necessário.' });
+                              } else {
+                                toast({ title: 'Endereço não encontrado', description: 'Tente outro endereço ou defina no mapa.', variant: 'destructive' });
+                              }
+                            } catch {
+                              toast({ title: 'Erro ao buscar', description: 'Tente novamente.', variant: 'destructive' });
+                            } finally {
+                              setGeocoding(false);
+                            }
+                          }}
+                        >
+                          {geocoding ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPinned className="h-4 w-4" />}
+                          <span className="hidden sm:inline ml-1">Buscar no mapa</span>
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Localização (opcional)</Label>
+                      <CellMapPicker
+                        latitude={newCell.latitude}
+                        longitude={newCell.longitude}
+                        onSelect={(lat, lng) => setNewCell(prev => ({ ...prev, latitude: lat, longitude: lng }))}
+                        height="220px"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="cell-day">Dia da Semana</Label>
+                        <Input id="cell-day" value={newCell.meetingDay} onChange={(e) => setNewCell({ ...newCell, meetingDay: e.target.value })} placeholder="Ex: Quinta-feira" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="cell-time">Horário</Label>
+                        <Input id="cell-time" type="time" value={newCell.meetingTime} onChange={(e) => setNewCell({ ...newCell, meetingTime: e.target.value })} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Líder</Label>
+                        <Select value={newCell.leaderId} onValueChange={(v) => setNewCell({ ...newCell, leaderId: v })}>
+                          <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                          <SelectContent
+                            className="z-[99999] max-h-[300px] overflow-y-auto"
+                            side="bottom"
+                            sideOffset={4}
+                            avoidCollisions={true}
+                          >{members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Anfitrião</Label>
+                        <Select value={newCell.hostId} onValueChange={(v) => setNewCell({ ...newCell, hostId: v })}>
+                          <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                          <SelectContent
+                            className="z-[99999] max-h-[300px] overflow-y-auto"
+                            side="bottom"
+                            sideOffset={4}
+                            avoidCollisions={true}
+                          >{members.map(m => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}</SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button type="button" variant="outline" onClick={() => setCreateOpen(false)}>Cancelar</Button>
+                    <Button type="submit">Cadastrar Célula</Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={filterDay} onValueChange={setFilterDay}>
+            <SelectTrigger className="w-full sm:w-[180px] h-9">
+              <SelectValue placeholder="Dia da reunião" />
+            </SelectTrigger>
+            <SelectContent
+              className="z-[99999] max-h-[300px] overflow-y-auto"
+              side="bottom"
+              sideOffset={4}
+              avoidCollisions={true}
+            >
+              <SelectItem value="todos">Todos os dias</SelectItem>
+              <SelectItem value="Segunda-feira">Segunda-feira</SelectItem>
+              <SelectItem value="Terça-feira">Terça-feira</SelectItem>
+              <SelectItem value="Quarta-feira">Quarta-feira</SelectItem>
+              <SelectItem value="Quinta-feira">Quinta-feira</SelectItem>
+              <SelectItem value="Sexta-feira">Sexta-feira</SelectItem>
+              <SelectItem value="Sábado">Sábado</SelectItem>
+              <SelectItem value="Domingo">Domingo</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {cells.filter(c => filterDay === 'todos' || c.meetingDay === filterDay).map((cell) => (
+          <Card
+            key={cell.id}
+            className="hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 cursor-pointer group border-primary/10 overflow-hidden bg-card"
+            onClick={() => {
+              setSelectedCell(cell);
+              setDetailsOpen(true);
+            }}
+          >
+            <div className="h-1.5 bg-primary" />
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <div className="rounded-xl bg-secondary/10 p-2.5 group-hover:bg-secondary/20 transition-colors">
+                  <Home className="h-6 w-6 text-secondary" />
+                </div>
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-destructive/60 hover:text-destructive hover:bg-destructive/10 transition-all rounded-full"
+                    title="Excluir Célula"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteCell(cell.id, cell.name);
+                    }}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors">{cell.name}</CardTitle>
+                <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  {cell.address}
+                </p>
+                {cell.latitude != null && cell.longitude != null && (
+                  <div className="flex gap-2 mt-2">
+                    <a
+                      href={openStreetMapUrl(cell.latitude, cell.longitude)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs inline-flex items-center gap-1 text-primary hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Navigation className="h-3.5 w-3.5" />
+                      Ver no mapa
+                    </a>
+                    <a
+                      href={googleMapsUrl(cell.latitude, cell.longitude)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-muted-foreground hover:text-primary hover:underline"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Google Maps
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <ShieldCheck className="h-4 w-4 text-primary/60" />
+                  <span className="font-medium">Líder: {cell.leader}</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Calendar className="h-4 w-4 text-primary/60" />
+                  <span>{cell.meetingTime ? `${cell.meetingDay}, ${cell.meetingTime}` : cell.meetingDay}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center gap-1.5 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 text-primary font-bold">
+                  <Users className="h-4 w-4" />
+                  {cell.memberCount} membros
+                </div>
+                {canReport && (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="text-xs group-hover:bg-primary group-hover:text-white transition-all gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCell(cell);
+                      setReportOpen(true);
+                    }}
+                  >
+                    <FileText className="h-3.5 w-3.5" />
+                    Relatório
+                  </Button>
+                )}
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <span>Frequência Média</span>
+                  <span>92%</span>
+                </div>
+                <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
+                  <div className="h-full bg-primary w-[92%] rounded-full" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Relatório de Reunião Dialog */}
+      {selectedCell && reportOpen && (
+        <Dialog open={reportOpen} onOpenChange={setReportOpen}>
+          <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto px-4 py-5 pt-[max(1.5rem,env(safe-area-inset-top))] sm:p-6 rounded-none sm:rounded-lg">
+            <form onSubmit={handleSubmitReport}>
+              <DialogHeader className="pb-2">
+                <DialogTitle className="break-words pr-8">Relatório de Reunião - {selectedCell.name}</DialogTitle>
+                <DialogDescription>Digite os números reais da última reunião</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-1 sm:pr-2">
+                <div className="space-y-2">
+                  <Label>Data da Reunião</Label>
+                  <Input name="date" type="date" required defaultValue={new Date().toISOString().split('T')[0]} className="w-full min-w-0" />
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                  <Label className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Chamada (Marque os presentes)
+                  </Label>
+                  <div className="grid gap-2 border rounded-xl p-3 bg-muted/5 max-h-48 overflow-y-auto">
+                    {membersInCell.length === 0 ? (
+                      <p className="text-xs text-muted-foreground text-center py-4">Nenhum membro vinculado a esta célula.</p>
+                    ) : (
+                      membersInCell.map((m: any) => (
+                        <div key={m.member?.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10">
+                          <input
+                            type="checkbox"
+                            id={`m-${m.member?.id}`}
+                            className="w-4 h-4 rounded border-primary/30 text-primary focus:ring-primary"
+                            checked={attendance.includes(m.member?.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) setAttendance([...attendance, m.member?.id]);
+                              else setAttendance(attendance.filter(id => id !== m.member?.id));
+                            }}
+                          />
+                          <label htmlFor={`m-${m.member?.id}`} className="text-sm font-medium cursor-pointer flex-1">
+                            {m.member?.name}
+                          </label>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Membros Presentes</Label>
+                    <Input name="members" type="number" min="0" value={attendance.length} readOnly className="bg-muted w-full min-w-0" />
+                    <p className="text-xs text-muted-foreground">Calculado pela chamada</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Visitantes</Label>
+                    <Input name="visitors" type="number" min="0" required placeholder="0" className="w-full min-w-0" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Tema Estudado</Label>
+                  <Input name="study" placeholder="Ex: Santidade ao Senhor" required className="w-full min-w-0" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Observações / Pedidos de Oração</Label>
+                  <Textarea name="notes" placeholder="Algum evento especial ou testemunho?" className="w-full min-w-0" />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setReportOpen(false)}>Cancelar</Button>
+                <Button type="submit">Enviar Dados</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      <ConfirmDialog
+        open={deleteCellConfirm.open}
+        onOpenChange={(o) => setDeleteCellConfirm(prev => ({ ...prev, open: o }))}
+        title="Excluir célula"
+        description={`Deseja realmente excluir a célula ${deleteCellConfirm.name}?`}
+        onConfirm={executeDeleteCell}
+        confirmLabel="Excluir"
+        variant="destructive"
+      />
+
+      {/* Detalhes da Célula e Gestão de Membros */}
+      {selectedCell && detailsOpen && (
+        <CellDetailsDialog
+          open={detailsOpen}
+          onOpenChange={(v) => {
+            setDetailsOpen(v);
+            if (!v) setSelectedCell(null);
+          }}
+          cell={selectedCell}
+          onSuccess={loadData}
+        />
+      )}
+    </div>
+  );
+}
+
+function CellDetailsDialog({ open, onOpenChange, cell, onSuccess }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  cell: Cell;
+  onSuccess: () => void;
+}) {
+  const [members, setMembers] = useState<any[]>([]);
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [allMembers, setAllMembers] = useState<Member[]>([]);
+  const [addingMember, setAddingMember] = useState(false);
+  const [removeMemberConfirm, setRemoveMemberConfirm] = useState<{ open: boolean; memberId: string }>({ open: false, memberId: '' });
+  const { toast } = useToast();
+  const { user, churchId } = useAuth();
+  const effectiveChurchId = churchId ?? user?.churchId;
+
+  useEffect(() => {
+    if (open) loadDetails();
+  }, [open, cell.id]);
+
+  async function loadDetails() {
+    try {
+      setLoading(true);
+      const [cellMembers, membersList, allReports] = await Promise.all([
+        cellsService.getMembers(cell.id),
+        membersService.getAll(effectiveChurchId),
+        cellsService.getAllReports()
+      ]);
+      setMembers(cellMembers || []);
+      setAllMembers(membersList as any || []);
+      setReports((allReports || []).filter((r: any) => r.cell_id === cell.id));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleAddPerson = async (memberId: string) => {
+    try {
+      setAddingMember(true);
+      await cellsService.addMember(cell.id, memberId);
+      toast({ title: 'Sucesso', description: 'Membro adicionado à célula.' });
+      loadDetails();
+      onSuccess();
+    } catch (error: any) {
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    } finally {
+      setAddingMember(false);
+    }
+  };
+
+  const handleRemovePerson = (memberId: string) => {
+    setRemoveMemberConfirm({ open: true, memberId });
+  };
+
+  const executeRemoveMember = async () => {
+    const { memberId } = removeMemberConfirm;
+    try {
+      await cellsService.removeMember(cell.id, memberId);
+      setRemoveMemberConfirm(prev => ({ ...prev, open: false }));
+      toast({ title: 'Removido', description: 'Membro removido da célula.' });
+      loadDetails();
+      onSuccess();
+    } catch (error: any) {
+      toast({ title: 'Erro', description: error.message, variant: 'destructive' });
+    }
+  };
+
+  return (
+    <>
+      <ConfirmDialog
+        open={removeMemberConfirm.open}
+        onOpenChange={(o) => setRemoveMemberConfirm(prev => ({ ...prev, open: o }))}
+        title="Remover membro"
+        description="Deseja remover este membro da célula?"
+        onConfirm={executeRemoveMember}
+        confirmLabel="Remover"
+        variant="destructive"
+      />
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col p-4 sm:p-6 rounded-none sm:rounded-lg">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <Home className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <DialogTitle className="text-2xl font-bold text-primary">
+                  {cell.name}
+                </DialogTitle>
+                <DialogDescription>{cell.address}</DialogDescription>
+                <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  {cell.meetingTime ? `${cell.meetingDay}, ${cell.meetingTime}` : cell.meetingDay}
+                </p>
+                {cell.latitude != null && cell.longitude != null && (
+                  <div className="flex gap-2 mt-2 flex-wrap">
+                    <a href={openStreetMapUrl(cell.latitude, cell.longitude)} target="_blank" rel="noopener noreferrer" className="text-sm inline-flex items-center gap-1 text-primary hover:underline">
+                      <Navigation className="h-4 w-4" />
+                      Abrir no OpenStreetMap
+                    </a>
+                    <a href={googleMapsUrl(cell.latitude, cell.longitude)} target="_blank" rel="noopener noreferrer" className="text-sm text-muted-foreground hover:text-primary hover:underline">
+                      Google Maps
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto space-y-6 py-4">
+            {cell.latitude != null && cell.longitude != null && (
+              <div className="space-y-2">
+                <Label className="text-lg font-bold flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Localização
+                </Label>
+                <CellMapView latitude={cell.latitude} longitude={cell.longitude} name={cell.name} height="200px" />
+              </div>
+            )}
+            <div className="space-y-4">
+              <Label className="text-lg font-bold flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                Membros Integrados ({members.length})
+              </Label>
+              <div className="grid gap-2">
+                {members.length === 0 ? (
+                  <p className="text-center py-8 text-muted-foreground border-2 border-dashed rounded-xl">
+                    Nenhum membro vinculado a esta célula.
+                  </p>
+                ) : (
+                  members.map((m: any) => (
+                    <div key={m.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center font-bold text-primary">
+                          {m.member?.name?.[0]}
+                        </div>
+                        <div>
+                          <p className="font-bold">{m.member?.name}</p>
+                          <p className="text-xs text-muted-foreground">{m.member?.phone || 'Sem telefone'}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => handleRemovePerson(m.member_id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <Label className="text-lg font-bold flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                Histórico de Relatórios
+              </Label>
+              <div className="space-y-3">
+                {reports.length === 0 ? (
+                  <p className="text-center py-4 text-muted-foreground text-sm">Nenhum relatório enviado ainda.</p>
+                ) : (
+                  reports.map((r: any) => (
+                    <div key={r.id} className="p-4 rounded-xl bg-muted/30 border text-sm space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold">{new Date(r.date).toLocaleDateString('pt-BR')}</span>
+                        <Badge variant="secondary">{r.members_present} Membros | {r.visitors} Visitantes</Badge>
+                      </div>
+                      <p className="font-medium text-primary">Tema: {r.study_topic}</p>
+                      {r.notes && <p className="text-xs text-muted-foreground line-clamp-2">{r.notes}</p>}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="space-y-4">
+              <Label className="text-lg font-bold">Adicionar Novo Membro</Label>
+              <Select onValueChange={handleAddPerson} disabled={addingMember}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Busque por nome ou e-mail..." />
+                </SelectTrigger>
+                <SelectContent
+                  className="z-[99999] max-h-[300px] overflow-y-auto"
+                  side="bottom"
+                  sideOffset={4}
+                  avoidCollisions={true}
+                >
+                  {allMembers
+                    .filter(am => !members.some(m => m.member_id === am.id))
+                    .map(m => (
+                      <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground italic">* O membro selecionado passará a fazer parte das estatísticas de frequência desta célula.</p>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">Fechar Detalhes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

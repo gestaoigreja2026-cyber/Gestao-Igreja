@@ -1,0 +1,280 @@
+import { supabase } from '@/lib/supabaseClient';
+import type { Database } from '@/lib/database.types';
+
+type Event = Database['public']['Tables']['events']['Row'];
+type EventInsert = Database['public']['Tables']['events']['Insert'];
+type EventUpdate = Database['public']['Tables']['events']['Update'];
+
+export const eventsService = {
+    /**
+     * Get all events
+     */
+    async getAll() {
+        const { data, error } = await supabase
+            .from('events')
+            .select('*')
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Get upcoming events
+     */
+    async getUpcoming() {
+        const today = new Date().toISOString().split('T')[0];
+
+        const { data, error } = await supabase
+            .from('events')
+            .select('*')
+            .gte('date', today)
+            .order('date', { ascending: true });
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Get events by type
+     */
+    async getByType(type: Event['type']) {
+        const { data, error } = await supabase
+            .from('events')
+            .select('*')
+            .eq('type', type)
+            .order('date', { ascending: false });
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Get events by date range
+     */
+    async getByDateRange(startDate: string, endDate: string) {
+        const { data, error } = await supabase
+            .from('events')
+            .select('*')
+            .gte('date', startDate)
+            .lte('date', endDate)
+            .order('date', { ascending: true });
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Get a single event by ID
+     */
+    async getById(id: string) {
+        const { data, error } = await supabase
+            .from('events')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Create a new event
+     */
+    async create(event: EventInsert, churchId: string) {
+        const { data, error } = await (supabase.from('events') as any)
+            .insert({
+                ...event,
+                church_id: churchId
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Update an event
+     */
+    async update(id: string, updates: EventUpdate) {
+        const { data, error } = await (supabase.from('events') as any)
+            .update(updates as any)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Notifica todos os usuários da igreja sobre um evento
+     */
+    async notifyChurchAboutEvent(churchId: string, event: { title: string; date: string; time: string; type?: string }, link?: string) {
+        try {
+            const message = `${event.title} — ${event.date} às ${event.time}`;
+            const { data, error } = await (supabase as any).rpc('notify_church_about_event', {
+                p_church_id: churchId,
+                p_title: '📅 Novo evento na agenda',
+                p_message: message,
+                p_link: link || null,
+            });
+            if (error) throw error;
+            return data as number;
+        } catch (e) {
+            console.warn('notify_church_about_event:', e);
+            return 0;
+        }
+    },
+
+    /**
+     * Delete an event
+     */
+    async delete(id: string) {
+        const { error } = await supabase
+            .from('events')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+    },
+
+    /**
+     * Get event checklists
+     */
+    async getChecklists(eventId: string) {
+        const { data, error } = await supabase
+            .from('event_checklists')
+            .select('*')
+            .eq('event_id', eventId);
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Add checklist item
+     */
+    async addChecklistItem(eventId: string, task: string, responsibleId?: string) {
+        const { data, error } = await supabase
+            .from('event_checklists')
+            .insert({
+                event_id: eventId,
+                task,
+                responsible_id: responsibleId,
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Toggle checklist item completion
+     */
+    async toggleChecklistItem(id: string, completed: boolean) {
+        const { data, error } = await supabase
+            .from('event_checklists')
+            .update({ completed })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Get service scale for event
+     */
+    async getServiceScale(eventId: string) {
+        const { data, error } = await supabase
+            .from('service_scales')
+            .select(`
+        *,
+        member:members(name, phone, email)
+      `)
+            .eq('event_id', eventId);
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Add person to service scale
+     */
+    async addToServiceScale(eventId: string, memberId: string, role: string) {
+        const { data, error } = await supabase
+            .from('service_scales')
+            .insert({
+                event_id: eventId,
+                member_id: memberId,
+                role,
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Confirm service scale participation
+     */
+    async confirmServiceScale(id: string, confirmed: boolean) {
+        const { data, error } = await supabase
+            .from('service_scales')
+            .update({ confirmed })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Get a single scale item with details
+     */
+    async getScaleItem(id: string) {
+        const { data, error } = await supabase
+            .from('service_scales')
+            .select(`
+                *,
+                member:members(name),
+                event:events(title, date, time)
+            `)
+            .eq('id', id)
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Get scale details via public RPC
+     */
+    async getScaleDetailsPublic(scaleId: string) {
+        const { data, error } = await supabase.rpc('get_scale_details_public' as any, {
+            scale_id: scaleId
+        });
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
+     * Confirm participation via public RPC (bypasses RLS)
+     */
+    async confirmParticipationPublic(scaleId: string, confirmed: boolean = true) {
+        const { data, error } = await supabase.rpc('confirm_participation' as any, {
+            scale_id: scaleId,
+            p_confirmed: confirmed
+        });
+
+        if (error) throw error;
+        return data;
+    }
+};
