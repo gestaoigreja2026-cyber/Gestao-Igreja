@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { ChatProvider } from "@/hooks/useChat";
 import NewLogin from "./pages/NewLogin";
 import CadastroIgrejaTrial from "./pages/CadastroIgrejaTrial";
 import Landing from "./pages/Landing";
@@ -48,6 +49,7 @@ const Discipleship = lazy(() => import("./pages/Discipleship"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Artigo = lazy(() => import("./pages/Artigo"));
 const Consolidacao = lazy(() => import("./pages/Consolidacao"));
+const Chat = lazy(() => import("./pages/Chat"));
 
 function PageFallback() {
   return (
@@ -197,6 +199,7 @@ function AppRoutes() {
         <Route path="/escolas" element={<ProtectedRoute><Schools /></ProtectedRoute>} />
         <Route path="/discipulado" element={<ProtectedRoute><Discipleship /></ProtectedRoute>} />
         <Route path="/superadmin" element={<RoleProtectedRoute roles={['superadmin']}><SuperAdmin /></RoleProtectedRoute>} />
+        <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
         <Route path="/confirmar/:id" element={<ConfirmScale />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />
@@ -217,9 +220,11 @@ function App() {
           <ThemeProvider>
             <TooltipProvider>
               <AuthProvider>
-                <Toaster />
-                <Sonner />
-                <AppRoutes />
+                <ChatProvider>
+                  <Toaster />
+                  <Sonner />
+                  <AppRoutes />
+                </ChatProvider>
               </AuthProvider>
             </TooltipProvider>
           </ThemeProvider>

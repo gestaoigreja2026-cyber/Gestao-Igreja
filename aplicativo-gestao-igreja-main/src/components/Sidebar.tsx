@@ -23,6 +23,7 @@ import {
   Gift,
   BarChart3,
   UserPlus,
+  MessageSquare,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -56,6 +57,7 @@ const navGroups: NavGroup[] = [
   {
     title: '',
     items: [
+      { icon: MessageSquare, label: 'Chat', href: '/chat', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'] },
       { icon: Users, label: 'Membros e Congregados', href: '/membros', roles: ['pastor', 'secretario', 'superadmin'] },
       { icon: UserPlus, label: 'Consolidação', href: '/consolidacao', roles: ['pastor', 'secretario', 'lider_celula', 'superadmin'] },
       { icon: Send, label: 'Boletins e Avisos', href: '/boletins', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },

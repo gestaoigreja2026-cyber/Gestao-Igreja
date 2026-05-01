@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -19,8 +19,23 @@ import {
   Calendar,
   CheckSquare,
   Square,
-  X
+  X,
+  PieChart as PieChartIcon,
+  BarChart as BarChartIcon
 } from 'lucide-react';
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer, 
+  Legend, 
+  Tooltip as RechartsTooltip,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid
+} from 'recharts';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { DEFAULT_CHURCH_NAME, DEFAULT_CNPJ } from '@/lib/constants';
@@ -131,7 +146,6 @@ const DailyCash = () => {
 
   const createMutation = useMutation({
     mutationFn: (data: CreateFinancialTransactionDTO) => {
-      console.log('=== CREATE MUTATION ===');
       console.log('Dados:', data);
       console.log('ChurchId:', user?.churchId);
       if (!user?.churchId) throw new Error('Igreja não identificada.');
@@ -173,6 +187,25 @@ const DailyCash = () => {
       return await financialService.list(date, date);
     }
   });
+
+  // Data for charts - Moved after transactions query
+  const incomeData = useMemo(() => {
+    const categories: Record<string, number> = {};
+    transactions.filter(t => t.type === 'entrada').forEach(t => {
+      categories[t.category] = (categories[t.category] || 0) + t.amount;
+    });
+    return Object.entries(categories).map(([name, value]) => ({ name, value }));
+  }, [transactions]);
+
+  const expenseData = useMemo(() => {
+    const categories: Record<string, number> = {};
+    transactions.filter(t => t.type === 'saida').forEach(t => {
+      categories[t.category] = (categories[t.category] || 0) + t.amount;
+    });
+    return Object.entries(categories).map(([name, value]) => ({ name, value }));
+  }, [transactions]);
+
+  const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => financialService.delete(id),
@@ -1286,6 +1319,42 @@ const DailyCash = () => {
           </div>
 
           <div className="flex gap-2 w-full sm:w-auto">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              accept=".ofx,.csv,.txt"
+              className="hidden" 
+            />
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => fileInputRef.current?.click()} 
+              title="Importar Extrato Bancário (OFX/CSV)"
+              disabled={isProcessingFile}
+            >
+              {isProcessingFile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => setIsClosingModalOpen(true)} 
+              title="Fechamento Mensal"
+              className="border-primary text-primary hover:bg-primary/10"
+            >
+              <CalendarCheck className="h-4 w-4" />
+            </Button>
+
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={handlePrint}
+              title="Relatório de Transparência (PDF/Imprimir)"
+            >
+              <Printer className="h-4 w-4" />
+            </Button>
+            
             <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
               <DialogTrigger asChild>
                 <Button className="flex-1 sm:flex-none">
@@ -1435,25 +1504,6 @@ const DailyCash = () => {
               accept=".ofx,.csv,.txt"
               className="hidden"
             />
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={() => fileInputRef.current?.click()} 
-              title="Importar Extrato Bancário (OFX/CSV)"
-              disabled={isProcessingFile}
-            >
-              {isProcessingFile ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={() => setIsClosingModalOpen(true)} 
-              title="Fechamento Mensal"
-              className="border-primary text-primary hover:bg-primary/10"
-            >
-              <CalendarCheck className="h-4 w-4" />
-            </Button>
           </div>
         </div>
       </div>
@@ -1466,6 +1516,83 @@ const DailyCash = () => {
         </p>
       </div>
 
+      {/* Gráficos de Resumo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 print:hidden">
+        <Card className="bg-white border-primary/10 shadow-sm overflow-hidden">
+          <CardHeader className="pb-2 bg-primary/5 border-b border-primary/5">
+            <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-primary">
+              <PieChartIcon className="h-4 w-4" />
+              Origem das Entradas
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="h-[200px] w-full">
+              {incomeData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={incomeData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {incomeData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <RechartsTooltip formatter={(value: number) => formatCurrency(value)} />
+                    <Legend verticalAlign="bottom" height={36} wrapperStyle={{ fontSize: '10px' }}/>
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground text-xs italic">
+                  Nenhuma entrada registrada
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white border-primary/10 shadow-sm overflow-hidden">
+          <CardHeader className="pb-2 bg-red-500/5 border-b border-red-500/5">
+            <CardTitle className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-red-600">
+              <BarChartIcon className="h-4 w-4" />
+              Maiores Gastos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <div className="h-[200px] w-full">
+              {expenseData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={expenseData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f0f0f0" />
+                    <XAxis type="number" hide />
+                    <YAxis 
+                      dataKey="name" 
+                      type="category" 
+                      width={100} 
+                      axisLine={false} 
+                      tickLine={false}
+                      tick={{ fontSize: 10 }}
+                    />
+                    <RechartsTooltip formatter={(value: number) => formatCurrency(value)} />
+                    <Bar dataKey="value" fill="#ef4444" radius={[0, 4, 4, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-full text-muted-foreground text-xs italic">
+                  Nenhuma saída registrada
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Estatísticas Rápidas */}
       <div className="grid gap-4 md:grid-cols-3 print:grid-cols-3" translate="no">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

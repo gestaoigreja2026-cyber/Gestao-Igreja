@@ -15,9 +15,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="icon" type="image/png" href="/logo-app.png" />
-  <link rel="apple-touch-icon" href="/logo-192.png" sizes="180x180" />
+  <link rel="manifest" id="manifest-link" />
+  <link rel="icon" type="image/png" href="/logo-app.png?v=123" />
+  <link rel="apple-touch-icon" href="/logo-192.png?v=123" sizes="180x180" />
   <meta name="google" content="notranslate" />
   <title>Gestão Igreja</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -60,15 +60,12 @@
       console.log('PWA disponível e evento capturado no index.html');
     });
 
-    // Registrar ServiceWorker apenas em produção (sw.js só existe após build)
-    if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker
-          .register('/sw.js')
-          .then((reg) => console.log('SW registrado com sucesso:', reg.scope))
-          .catch((err) => console.error('Erro ao registrar SW:', err));
-      });
+    // Atualizar manifest dinamicamente
+    const link = document.getElementById("manifest-link");
+    if (link) {
+      link.setAttribute("href", `/api/manifest?v=${Date.now()}`);
     }
+
 
     // Se o app não montar em 8s, mostra mensagem de ajuda (erro de import/rede/etc.)
     setTimeout(function () {

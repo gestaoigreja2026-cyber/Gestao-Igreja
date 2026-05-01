@@ -1,6 +1,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Church, User, Mail, CreditCard, ArrowRight, Loader2, CheckCircle2, ShieldCheck, Globe } from 'lucide-react';
+import { Church, User, Mail, CreditCard, ArrowRight, Loader2, CheckCircle2, ShieldCheck, Globe, AlertCircle } from 'lucide-react';
+import { 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogDescription, 
+    DialogFooter 
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,6 +20,7 @@ export default function Checkout() {
     const navigate = useNavigate();
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
+    const [showFallback, setShowFallback] = useState(false);
     const [formData, setFormData] = useState({
         churchName: '',
         churchSlug: '',
@@ -57,13 +66,45 @@ export default function Checkout() {
             }
         } catch (error: any) {
             console.error('Erro no checkout:', error);
-            toast({
-                title: 'Erro no cadastro',
-                description: error.message || 'Ocorreu um erro ao processar sua solicitação.',
-                variant: 'destructive'
-            });
+            const isEdgeError = error.message?.includes('Edge Function') || error.message?.includes('failed to fetch') || error.message?.includes('invoke');
+            
+            if (isEdgeError) {
+                setShowFallback(true);
+            } else {
+                toast({
+                    title: 'Erro no cadastro',
+                    description: error.message || 'Ocorreu um erro ao processar sua solicitação.',
+                    variant: 'destructive'
+                });
+            }
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleTrialFallback = () => {
+        try {
+            // Simula o comportamento do CadastroIgrejaTrial.tsx
+            const trialData = {
+                name: formData.churchName,
+                slug: formData.churchSlug,
+                email: formData.adminEmail,
+                pastorName: formData.adminName,
+                // outros campos vazios
+            };
+            sessionStorage.setItem('trial_church_form_data', JSON.stringify(trialData));
+            sessionStorage.setItem('trial_signup', '1');
+            
+            toast({
+                title: 'Modo de Teste Ativado',
+                description: 'A integração financeira está offline. Redirecionando para o teste gratuito de 7 dias...',
+            });
+            
+            setTimeout(() => {
+                navigate('/login?trial=1');
+            }, 2000);
+        } catch (e) {
+            console.error(e);
         }
     };
 
@@ -222,6 +263,30 @@ export default function Checkout() {
                     </form>
                 </Card>
             </div>
+
+            <Dialog open={showFallback} onOpenChange={setShowFallback}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <AlertCircle className="h-5 w-5 text-orange-500" />
+                            Integração Offline
+                        </DialogTitle>
+                        <DialogDescription className="py-4">
+                            O servidor de pagamentos (Edge Function) não está respondendo no momento. 
+                            <br /><br />
+                            Deseja continuar criando sua igreja no <strong>Modo de Teste Grátis (7 dias)</strong>? Você poderá configurar o pagamento depois.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => setShowFallback(false)}>
+                            Tentar novamente
+                        </Button>
+                        <Button onClick={handleTrialFallback} className="bg-emerald-600 hover:bg-emerald-700">
+                            Continuar como Teste Grátis
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

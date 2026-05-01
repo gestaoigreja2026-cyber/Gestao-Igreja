@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users, Church, FileText, DollarSign, Calendar, Shield, Check, ArrowRight, Download, Menu, Lock, Key, Home,
-  Clock, Heart, Smartphone, BookOpen, PenTool, BarChart, FileBox, LogIn, LayoutDashboard, Fingerprint, Video, UserCog, Link as LinkIcon, Edit, UserPlus, Gift, Send, Phone, Mail
+  Clock, Heart, Smartphone, BookOpen, PenTool, BarChart, FileBox, LogIn, LayoutDashboard, Fingerprint, Video, UserCog, Link as LinkIcon, Edit, UserPlus, Gift, Send, Phone, Mail,
+  MessageSquare, TrendingUp, PieChart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,6 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { Logo } from '@/components/Logo';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/contexts/AuthContext';
@@ -390,6 +392,109 @@ export default function Landing() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Novidades da Versão - Baseado no Plano de Implementação */}
+      <section className="py-24 bg-gradient-to-br from-primary/5 via-background to-cyan-500/5 relative overflow-hidden border-y border-primary/10">
+        <div className="container mx-auto px-4 max-w-6xl relative z-10">
+          <div className="text-center mb-16">
+            <Badge variant="outline" className="mb-4 border-primary/30 text-primary px-4 py-1 rounded-full bg-primary/5 font-bold uppercase tracking-widest text-[10px]">
+              Atualização Disponível
+            </Badge>
+            <h2 className="text-4xl md:text-5xl font-black mb-6 tracking-tight">
+              O que há de <span className="text-primary">Novo?</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Acabamos de liberar uma série de melhorias poderosas para transformar a gestão da sua igreja em uma experiência de alta tecnologia.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Chat Pro */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-card p-8 rounded-[2rem] border border-primary/20 shadow-xl shadow-primary/5 relative group overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <MessageSquare className="w-24 h-24 text-primary" />
+              </div>
+              <div className="p-4 bg-primary/10 rounded-2xl w-max mb-6">
+                <MessageSquare className="w-8 h-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Chat Ministerial Pro</h3>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Envio de Áudio e Imagens reais
+                </li>
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Notificações Push no celular
+                </li>
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  Confirmação de leitura (Vistos)
+                </li>
+              </ul>
+            </motion.div>
+
+            {/* Inteligência Pastoral */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-card p-8 rounded-[2rem] border border-cyan-500/20 shadow-xl shadow-cyan-500/5 relative group overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <TrendingUp className="w-24 h-24 text-cyan-500" />
+              </div>
+              <div className="p-4 bg-cyan-500/10 rounded-2xl w-max mb-6">
+                <TrendingUp className="w-8 h-8 text-cyan-500" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Inteligência Pastoral</h3>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+                  Gráficos de Crescimento Mensal
+                </li>
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+                  Métricas de Novos Convertidos
+                </li>
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-cyan-500" />
+                  Dashboard Analítico em Tempo Real
+                </li>
+              </ul>
+            </motion.div>
+
+            {/* Transparência Financeira */}
+            <motion.div 
+              whileHover={{ y: -5 }}
+              className="bg-card p-8 rounded-[2rem] border border-emerald-500/20 shadow-xl shadow-emerald-500/5 relative group overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <PieChart className="w-24 h-24 text-emerald-500" />
+              </div>
+              <div className="p-4 bg-emerald-500/10 rounded-2xl w-max mb-6">
+                <PieChart className="w-8 h-8 text-emerald-500" />
+              </div>
+              <h3 className="text-2xl font-bold mb-4">Gestão Transparente</h3>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Gráficos de Entradas vs Saídas
+                </li>
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Relatórios Prontos para Impressão
+                </li>
+                <li className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Importação Automática de Extratos
+                </li>
+              </ul>
+            </motion.div>
           </div>
         </div>
       </section>

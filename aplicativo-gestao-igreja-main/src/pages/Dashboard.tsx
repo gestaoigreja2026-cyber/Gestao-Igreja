@@ -30,6 +30,7 @@ import { StatsOverview } from '@/components/dashboard/StatsOverview';
 import { UpcomingEvents } from '@/components/dashboard/UpcomingEvents';
 import { RecentConverts } from '@/components/dashboard/RecentConverts';
 import { FinanceSummary } from '@/components/dashboard/FinanceSummary';
+import { GrowthChart } from '@/components/dashboard/GrowthChart';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import {
@@ -112,6 +113,10 @@ export default function Dashboard() {
 
       {/* Estatísticas Gerais - Sempre visíveis */}
       <StatsOverview />
+
+      <div className="grid grid-cols-1 gap-4">
+        <GrowthChart />
+      </div>
 
       {/* Widgets configuráveis */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
