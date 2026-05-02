@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
 const LOGO_SRC = '/logo-app.png';
@@ -17,13 +18,23 @@ const sizeStyles: Record<string, { width: string; height: string }> = {
 };
 
 export function Logo({ size = 'md', showText = true }: LogoProps) {
-  const textSizeClasses = {
-    xs: 'text-[1.04rem]',
-    sm: 'text-[1.79rem] md:text-[1.61rem]',
-    md: 'text-[2.15rem]',
-    lg: 'text-[3.22rem]',
-    xl: 'text-[5.37rem]',
-  };
+  // Estado para armazenar a logo dinâmica
+  const [logoSrc, setLogoSrc] = useState(LOGO_SRC);
+
+  useEffect(() => {
+    // Tenta pegar a logo que o script do index.html salvou ou buscar no manifest
+    const updateLogo = () => {
+      const favicon = document.querySelector('link[rel="icon"]');
+      if (favicon && favicon.getAttribute('href') && !favicon.getAttribute('href')?.includes('logo-app.png')) {
+        setLogoSrc(favicon.getAttribute('href') || LOGO_SRC);
+      }
+    };
+    
+    updateLogo();
+    // Pequeno delay para garantir que o script do index.html já rodou
+    const timer = setTimeout(updateLogo, 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className={cn(
@@ -34,32 +45,13 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
         className="flex items-center justify-center rounded-xl transition-all duration-500 z-10 overflow-hidden"
         style={{ ...sizeStyles[size] }}
       >
-        <div
-          className="w-full h-full relative bg-primary"
-          style={{
-            WebkitMaskImage: `url(${LOGO_SRC})`,
-            maskImage: `url(${LOGO_SRC})`,
-            WebkitMaskSize: 'contain',
-            maskSize: 'contain',
-            WebkitMaskRepeat: 'no-repeat',
-            maskRepeat: 'no-repeat',
-            WebkitMaskPosition: 'center',
-            maskPosition: 'center',
-            minHeight: '100%',
-            minWidth: '100%',
-          }}
-          title="Gestão Igreja"
-        >
-          <img
-            src={LOGO_SRC}
-            alt="Gestão Igreja"
-            className="w-full h-full object-contain opacity-0 pointer-events-none"
-            style={{ maxWidth: '100%', maxHeight: '100%' }}
-          />
-        </div>
+        <img
+          src={logoSrc}
+          alt="Gestão Igreja"
+          className="church-logo w-full h-full object-contain"
+          style={{ maxWidth: '100%', maxHeight: '100%' }}
+        />
       </div>
-
-
     </div>
   );
 }

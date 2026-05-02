@@ -60,10 +60,64 @@
       console.log('PWA disponível e evento capturado no index.html');
     });
 
-    // Atualizar manifest dinamicamente
+    // Atualizar branding dinamicamente
     const link = document.getElementById("manifest-link");
     if (link) {
-      link.setAttribute("href", `/api/manifest?v=${Date.now()}`);
+      const version = Date.now();
+      const host = window.location.hostname;
+      const mainDomain = 'church-gest-oficial.com.br';
+      
+      let subdomain = "";
+      if (host.includes(mainDomain)) {
+        subdomain = host.replace(mainDomain, "").replace(/\.$/, "").replace(/^\./, "").split(".")[0];
+      } else {
+        subdomain = host.split(".")[0];
+      }
+
+      const isMainDomain = !subdomain || subdomain === 'www' || subdomain === 'church-gest-oficial';
+      
+      link.setAttribute("href", `/api/manifest?v=${version}`);
+
+      // Função para aplicar o branding na página
+      const applyBranding = (name, logo) => {
+        if (name) document.title = name;
+        if (logo) {
+          const favicon = document.querySelector('link[rel="icon"]');
+          if (favicon) favicon.href = `${logo}?v=${version}`;
+          
+          const logoImgs = document.querySelectorAll('img[src*="logo"], .church-logo');
+          logoImgs.forEach(img => { 
+            if (img.tagName === 'IMG' && !img.src.includes('data:')) img.src = logo; 
+          });
+        }
+      };
+
+      if (!isMainDomain) {
+        // 1. Tentar pegar do manifest (Funciona na Vercel)
+        fetch(`/api/manifest?v=${version}`)
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.name !== "Gestão Igreja") {
+              applyBranding(data.name, data.icons?.[0]?.src);
+            } else {
+              throw new Error("Fallback needed");
+            }
+          })
+          .catch(() => {
+            // 2. Fallback Local: Buscar direto no Supabase
+            const supabaseUrl = "https://amgpwwdhqtoaxkrvakzg.supabase.co";
+            const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZ3B3d2RocXRvYXhrcnZha3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNTYzODMsImV4cCI6MjA4NTgzMjM4M30.36DWRC6AEL_KkGlV9Em8XHVVrO4R-eCEPbdN15MPzRo"; 
+            
+            fetch(`${supabaseUrl}/rest/v1/churches?slug=eq.${subdomain}`, {
+              headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+            })
+            .then(r => r.json())
+            .then(data => {
+              const igreja = data?.[0];
+              if (igreja) applyBranding(igreja.name, igreja.logo_url);
+            });
+          });
+      }
     }
 
 

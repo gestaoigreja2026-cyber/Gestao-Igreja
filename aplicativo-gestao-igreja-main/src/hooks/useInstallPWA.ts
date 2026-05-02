@@ -17,19 +17,37 @@ export function useInstallPWA() {
 
     const handler = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      const promptEvent = e as BeforeInstallPromptEvent;
+      setDeferredPrompt(promptEvent);
+      (window as any).deferredPrompt = promptEvent;
     };
+
+    // Tentar recuperar do global se já foi capturado pelo index.html
+    if ((window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+    }
 
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   const install = useCallback(async () => {
-    if (!deferredPrompt) return false;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    return outcome === 'accepted';
+    const prompt = deferredPrompt || (window as any).deferredPrompt;
+    if (!prompt) return false;
+    
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      (window as any).deferredPrompt = null;
+      return true;
+    }
+    return false;
   }, [deferredPrompt]);
 
-  return { canInstall: !!deferredPrompt && !isInstalled, install, isInstalled };
+  return { 
+    canInstall: (!!deferredPrompt || !!(window as any).deferredPrompt) && !isInstalled, 
+    install, 
+    isInstalled 
+  };
 }
