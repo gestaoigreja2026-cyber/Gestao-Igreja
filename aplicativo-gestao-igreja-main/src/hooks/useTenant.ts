@@ -30,6 +30,8 @@ export function useTenant() {
               document.querySelectorAll('img.church-logo, img[src*="logo-app"]').forEach((img) => {
                 (img as HTMLImageElement).src = church.logo_url!;
               });
+              // Dispara evento para o componente Logo.tsx
+              window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
             }
           }
           setLoading(false);
@@ -73,6 +75,7 @@ export function useTenant() {
           if (church.logo_url) {
             const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
             if (favicon) favicon.href = church.logo_url;
+            window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
           }
         } else {
           // Se o subdomínio não existe no banco, tratamos como domínio principal ou erro

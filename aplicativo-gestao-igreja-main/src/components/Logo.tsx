@@ -22,6 +22,15 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
   const [logoSrc, setLogoSrc] = useState(LOGO_SRC);
 
   useEffect(() => {
+    const handleLogoUpdate = (e: any) => {
+      if (e.detail) {
+        setLogoSrc(e.detail);
+      }
+    };
+    
+    // Escuta evento customizado disparado pelo useTenant
+    window.addEventListener('churchLogoUpdated', handleLogoUpdate);
+
     // Tenta pegar a logo que o script do index.html salvou ou buscar no manifest
     const updateLogo = () => {
       const favicon = document.querySelector('link[rel="icon"]');
@@ -33,7 +42,11 @@ export function Logo({ size = 'md', showText = true }: LogoProps) {
     updateLogo();
     // Pequeno delay para garantir que o script do index.html já rodou
     const timer = setTimeout(updateLogo, 1000);
-    return () => clearTimeout(timer);
+    
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('churchLogoUpdated', handleLogoUpdate);
+    };
   }, []);
 
   return (
