@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
+import { globalChurchLogo } from "@/hooks/useTenant";
 import {
   Dialog,
   DialogContent,
@@ -24,6 +25,7 @@ export function InstallPWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
+  const [logoSrc, setLogoSrc] = useState(globalChurchLogo || '/logo-app.png');
   const { currentTheme } = useTheme();
 
   const logoColor = currentTheme?.primaryHex || "#3B82F6";
@@ -51,8 +53,15 @@ export function InstallPWA() {
     // 3. Sempre mostra o banner após 1.5s (independente do evento nativo)
     const timer = setTimeout(() => setShowBanner(true), 1500);
 
+    // 4. Escutar atualizações dinâmicas da logo
+    const handleLogoUpdate = (e: any) => {
+      if (e.detail) setLogoSrc(e.detail);
+    };
+    window.addEventListener("churchLogoUpdated", handleLogoUpdate);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("churchLogoUpdated", handleLogoUpdate);
       clearTimeout(timer);
     };
   }, []);
@@ -79,19 +88,10 @@ export function InstallPWA() {
   return (
     <>
       <div className="fixed bottom-4 left-4 right-4 sm:left-4 sm:right-auto sm:max-w-md md:bottom-6 md:left-6 md:max-w-[420px] z-50 flex items-center gap-3 sm:gap-4 p-3 sm:p-4 md:p-5 rounded-2xl shadow-xl border bg-white dark:bg-zinc-900 dark:border-zinc-800 animate-in slide-in-from-bottom-4">
-        <div
-          className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 shrink-0 transition-colors duration-500"
-          style={{
-            backgroundColor: logoColor,
-            WebkitMaskImage: `url(/logo-app.png)`,
-            maskImage: `url(/logo-app.png)`,
-            WebkitMaskSize: 'contain',
-            maskSize: 'contain',
-            WebkitMaskRepeat: 'no-repeat',
-            maskRepeat: 'no-repeat',
-            WebkitMaskPosition: 'center',
-            maskPosition: 'center',
-          }}
+        <img
+          src={logoSrc}
+          alt="App Logo"
+          className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 shrink-0 object-contain rounded-lg"
           title="Gestão Igreja"
         />
         <div className="flex-1 min-w-0">
