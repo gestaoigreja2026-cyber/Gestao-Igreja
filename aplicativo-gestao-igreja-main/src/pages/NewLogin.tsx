@@ -12,6 +12,7 @@ import { authService } from '@/services/auth.service';
 import { UNRESTRICTED_EMAILS } from '@/lib/constants';
 import { testSupabaseConnection } from '@/lib/supabaseClient';
 import { z } from 'zod';
+import { useTenant } from '@/hooks/useTenant';
 import {
     Dialog,
     DialogContent,
@@ -41,6 +42,8 @@ interface FormData {
 
 export default function NewLogin() {
     useDocumentTitle('Login');
+
+    const { tenant } = useTenant();
 
     // Força o tema oceano nas páginas públicas
     useEffect(() => {
@@ -204,6 +207,12 @@ export default function NewLogin() {
                                 <div className="flex justify-center mb-3 overflow-visible" style={{ transform: 'scale(1.4)', transformOrigin: 'center' }}>
                                     <Logo size="sm" showText={false} />
                                 </div>
+                                {tenant?.name && (
+                                    <div className="mt-5 space-y-0.5">
+                                        <p className="text-sm font-bold text-foreground tracking-wide">{tenant.name}</p>
+                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Sistema de Gestão</p>
+                                    </div>
+                                )}
                             </div>
 
                             <form onSubmit={handleWelcomeSubmit} className="space-y-4">

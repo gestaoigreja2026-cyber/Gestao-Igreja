@@ -1,100 +1,151 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
+import { createElement } from 'react';
 import { churchesService, Church } from '@/services/churches.service';
 
 const MAIN_DOMAIN = 'church-gest-oficial.com.br';
 
+// ─── Global singleton (para Logo.tsx e InstallPWA antes do React montar) ────
 export let globalChurchLogo: string | null = null;
+export let globalChurchName: string | null = null;
+export let globalChurchThemeColor: string | null = null;
 
-export function useTenant() {
-  const [tenant, setTenant] = useState<Church | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isMainDomain, setIsMainDomain] = useState(false);
-  const [subdomain, setSubdomain] = useState<string | null>(null);
+// ─── Context ─────────────────────────────────────────────────────────────────
+interface TenantContextValue {
+  tenant: Church | null;
+  loading: boolean;
+  isMainDomain: boolean;
+  subdomain: string | null;
+}
+
+const TenantContext = createContext<TenantContextValue>({
+  tenant: null,
+  loading: true,
+  isMainDomain: false,
+  subdomain: null,
+});
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+function extractSlug(): string | null {
+  const host = window.location.hostname;
+
+  // Parâmetro de URL para testes locais: ?slug=ibma ou ?church=ibma
+  const urlParams = new URLSearchParams(window.location.search);
+  const slugParam = urlParams.get('slug') || urlParams.get('church');
+  if (slugParam) return slugParam;
+
+  // localhost / 127.0.0.1 sem subdomínio → domínio principal
+  const isLocal = host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.');
+  if (isLocal) return null;
+
+  // Domínio principal
+  if (host === MAIN_DOMAIN || host === `www.${MAIN_DOMAIN}`) return null;
+
+  // Subdomínio do domínio principal: batista.church-gest-oficial.com.br
+  if (host.endsWith(MAIN_DOMAIN)) {
+    const slug = host.replace(`.${MAIN_DOMAIN}`, '').split('.').pop() || '';
+    return slug && slug !== 'www' ? slug : null;
+  }
+
+  // Domínio customizado: o primeiro segmento pode ser www → ignorar
+  const first = host.split('.')[0];
+  return first && first !== 'www' ? first : null;
+}
+
+function applyBranding(church: Church) {
+  // Título da aba
+  if (church.name) {
+    document.title = church.name;
+    globalChurchName = church.name;
+  }
+
+  if (church.logo_url) {
+    globalChurchLogo = church.logo_url;
+
+    // Favicon
+    const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+    if (favicon) favicon.href = church.logo_url;
+
+    // Apple touch icon
+    const apple = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
+    if (apple) apple.href = church.logo_url;
+
+    // Imagens de logo já renderizadas
+    document.querySelectorAll<HTMLImageElement>('img.church-logo, img[src*="logo-app"]').forEach((img) => {
+      img.src = church.logo_url!;
+    });
+
+    // Evento para Logo.tsx e InstallPWA.tsx (componentes React já montados)
+    window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
+  }
+
+  // theme-color meta tag (cor primária da igreja)
+  const themeColor = church.theme_color || '#2563eb';
+  globalChurchThemeColor = themeColor;
+  const themeMeta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+  if (themeMeta) themeMeta.content = themeColor;
+
+  // Dispara evento geral de branding atualizado
+  window.dispatchEvent(new CustomEvent('churchBrandingUpdated', {
+    detail: { name: church.name, logo: church.logo_url, themeColor },
+  }));
+}
+
+// ─── Provider ─────────────────────────────────────────────────────────────────
+let _providerInitialized = false;
+let _cachedTenant: Church | null = null;
+let _cachedSlug: string | null = null;
+let _cachedIsMain = false;
+let _pendingCallbacks: Array<(v: TenantContextValue) => void> = [];
+let _resolved = false;
+
+async function resolveTenant(): Promise<TenantContextValue> {
+  if (_resolved) {
+    return { tenant: _cachedTenant, loading: false, isMainDomain: _cachedIsMain, subdomain: _cachedSlug };
+  }
+
+  const slug = extractSlug();
+  _cachedSlug = slug;
+
+  if (!slug) {
+    _cachedIsMain = true;
+    _resolved = true;
+    return { tenant: null, loading: false, isMainDomain: true, subdomain: null };
+  }
+
+  try {
+    const church = await churchesService.getBySlug(slug);
+    if (church) {
+      _cachedTenant = church;
+      applyBranding(church);
+    } else {
+      _cachedIsMain = true;
+    }
+  } catch (err) {
+    console.error('[useTenant] Erro ao buscar tenant:', err);
+    _cachedIsMain = true;
+  }
+
+  _resolved = true;
+  return { tenant: _cachedTenant, loading: false, isMainDomain: _cachedIsMain, subdomain: slug };
+}
+
+export function TenantProvider({ children }: { children: ReactNode }) {
+  const [value, setValue] = useState<TenantContextValue>({
+    tenant: _cachedTenant,
+    loading: !_resolved,
+    isMainDomain: _cachedIsMain,
+    subdomain: _cachedSlug,
+  });
 
   useEffect(() => {
-    async function detectTenant() {
-      try {
-        const host = window.location.hostname;
-        
-        // 0. Suporte a ?slug= para testes locais (ex: http://localhost:5173/?slug=ibma)
-        const urlParams = new URLSearchParams(window.location.search);
-        const slugParam = urlParams.get('slug') || urlParams.get('church');
-        if (slugParam) {
-          setSubdomain(slugParam);
-          const church = await churchesService.getBySlug(slugParam);
-          if (church) {
-            setTenant(church);
-            if (church.name) document.title = church.name;
-            if (church.logo_url) {
-              globalChurchLogo = church.logo_url;
-              const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
-              if (favicon) favicon.href = church.logo_url;
-              // Atualiza todas as logos na página
-              document.querySelectorAll('img.church-logo, img[src*="logo-app"]').forEach((img) => {
-                (img as HTMLImageElement).src = church.logo_url!;
-              });
-              // Dispara evento para o componente Logo.tsx (para atualizações em tempo real)
-              window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
-            }
-          }
-          setLoading(false);
-          return;
-        }
-
-        // 1. Identificar se é o domínio principal ou localhost
-        const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
-        const isMain = host === MAIN_DOMAIN || host === `www.${MAIN_DOMAIN}`;
-        
-        if (isMain || (isLocal && !host.includes('.'))) {
-          setIsMainDomain(true);
-          setLoading(false);
-          return;
-        }
-
-        // 2. Extrair subdomínio (slug)
-        let slug = '';
-        if (host.endsWith(MAIN_DOMAIN)) {
-          slug = host.replace(MAIN_DOMAIN, '').replace(/\.$/, '').split('.').pop() || '';
-        } else {
-          // Fallback para domínios customizados ou outros casos (ex: igreja.com.br)
-          slug = host.split('.')[0];
-        }
-
-        if (!slug || slug === 'www') {
-          setIsMainDomain(true);
-          setLoading(false);
-          return;
-        }
-
-        setSubdomain(slug);
-
-        // 3. Buscar igreja no Supabase
-        const church = await churchesService.getBySlug(slug);
-        if (church) {
-          setTenant(church);
-          
-          // Opcional: Atualizar o título da página e favicon se a igreja existir
-          if (church.name) document.title = church.name;
-          if (church.logo_url) {
-            globalChurchLogo = church.logo_url;
-            const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
-            if (favicon) favicon.href = church.logo_url;
-            window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
-          }
-        } else {
-          // Se o subdomínio não existe no banco, tratamos como domínio principal ou erro
-          setIsMainDomain(true);
-        }
-      } catch (error) {
-        console.error('Erro ao detectar tenant:', error);
-        setIsMainDomain(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    detectTenant();
+    if (_resolved) return; // já resolvido por outra instância
+    resolveTenant().then(setValue);
   }, []);
 
-  return { tenant, loading, isMainDomain, subdomain };
+  return createElement(TenantContext.Provider, { value }, children);
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+export function useTenant() {
+  return useContext(TenantContext);
 }

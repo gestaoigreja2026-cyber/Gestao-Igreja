@@ -236,7 +236,12 @@ export default function SuperAdmin() {
         try {
             setSubmitting(true);
             if (editingChurch) {
-                await churchesService.update(editingChurch.id, formData);
+                // Atualizar: enviar apenas name e slug (sem adminEmail)
+                const updateData = {
+                    name: formData.name,
+                    slug: formData.slug,
+                };
+                await churchesService.update(editingChurch.id, updateData);
                 toast({ title: 'Sucesso', description: 'Igreja atualizada com sucesso.' });
             } else {
                 await churchesService.create(formData);

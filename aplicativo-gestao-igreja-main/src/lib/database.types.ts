@@ -15,6 +15,7 @@ export interface Database {
                     name: string
                     slug: string
                     logo_url: string | null
+                    theme_color?: string | null
                     president_name?: string | null
                     address?: string | null
                     phone?: string | null
@@ -39,6 +40,7 @@ export interface Database {
                     name: string
                     slug: string
                     logo_url?: string | null
+                    theme_color?: string | null
                     president_name?: string | null
                     address?: string | null
                     phone?: string | null
@@ -63,6 +65,7 @@ export interface Database {
                     name?: string
                     slug?: string
                     logo_url?: string | null
+                    theme_color?: string | null
                     president_name?: string | null
                     address?: string | null
                     phone?: string | null

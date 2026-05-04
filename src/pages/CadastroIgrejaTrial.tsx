@@ -1,10 +1,11 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Church, User, Image } from 'lucide-react';
+import { Gift, Church, User, Image, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabaseClient';
@@ -32,6 +33,7 @@ export default function CadastroIgrejaTrial() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [form, setForm] = useState<TrialChurchFormData>(initialForm);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -65,6 +67,10 @@ export default function CadastroIgrejaTrial() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      toast({ title: 'Atenção', description: 'Você precisa aceitar os termos para continuar.', variant: 'destructive' });
+      return;
+    }
     if (!form.name.trim()) {
       toast({ title: 'Preencha o nome da igreja', variant: 'destructive' });
       return;
@@ -262,6 +268,73 @@ export default function CadastroIgrejaTrial() {
                     {uploadingLogo ? 'Enviando...' : 'Selecionar imagem'}
                   </Button>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-6 border-primary/30 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <AlertCircle className="h-5 w-5 text-primary" />
+                Termos da Assinatura
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-white rounded-lg p-4 space-y-3 text-sm border border-border">
+                <div className="flex gap-3">
+                  <Check className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-foreground">Teste Grátis: 7 dias</p>
+                    <p className="text-muted-foreground">Acesso completo ao sistema sem custo.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2 border-t">
+                  <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-foreground">Após 7 dias: R$ 75,00 por 3 meses</p>
+                    <p className="text-muted-foreground">Assinatura automática iniciada após período de teste.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2 border-t">
+                  <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-foreground">Após 3 meses: R$ 150,00</p>
+                    <p className="text-muted-foreground">Valor integral da assinatura.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2 border-t">
+                  <AlertCircle className="h-4 w-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-foreground">Falta de Pagamento</p>
+                    <p className="text-muted-foreground">O serviço será pausado. Sem multa ou penalidades.</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-2 border-t">
+                  <Check className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-foreground">Cancelamento Sem Multa</p>
+                    <p className="text-muted-foreground">Pode ser encerrado a qualquer momento, sem taxas adicionais.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-background rounded-lg border border-primary/20">
+                <Checkbox
+                  id="terms"
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                  className="mt-1"
+                />
+                <Label
+                  htmlFor="terms"
+                  className="text-sm leading-relaxed cursor-pointer flex-1 font-normal"
+                >
+                  Li e aceito os termos da assinatura. Entendo que após 7 dias será cobrado R$ 75,00 pelos próximos 3 meses, seguido de R$ 150,00 por período adicional. Sei que posso cancelar a qualquer momento sem multa.
+                </Label>
               </div>
             </CardContent>
           </Card>

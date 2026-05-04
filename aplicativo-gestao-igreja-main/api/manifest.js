@@ -2,61 +2,94 @@ export default async function handler(req, res) {
   try {
     const host = req.headers.host || "";
     const mainDomain = "church-gest-oficial.com.br";
-    
-    // Extrair subdomínio (ex: batista.church-gest-oficial.com.br -> batista)
+
+    // Extrair subdomínio (ex: batista.church-gest-oficial.com.br → batista)
     let subdomain = "";
     if (host.includes(mainDomain)) {
-      subdomain = host.replace(mainDomain, "").replace(/\.$/, "").replace(/^\./, "").split(".")[0];
+      subdomain = host
+        .replace(mainDomain, "")
+        .replace(/\.$/, "")
+        .replace(/^\./, "")
+        .split(".")[0];
     } else {
       // Fallback para localhost ou outros domínios
       subdomain = host.split(".")[0];
     }
 
-    // 🔎 buscar igreja no Supabase
-    // Usando a tabela 'churches' e o campo 'slug' conforme o schema do projeto
-    const response = await fetch(
-      `${process.env.VITE_SUPABASE_URL}/rest/v1/churches?slug=eq.${subdomain}`,
-      {
-        headers: {
-          apikey: process.env.VITE_SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${process.env.VITE_SUPABASE_ANON_KEY}`
+    // Ignora domínio principal e www
+    const isMain = !subdomain || subdomain === "www" || subdomain === mainDomain.split(".")[0];
+
+    let nome = "Gestão Igreja";
+    let logo = "/logo-app.png";
+    let themeColor = "#2563eb";
+    let shortName = "Igreja";
+
+    if (!isMain) {
+      // Buscar igreja no Supabase
+      const supabaseUrl = process.env.VITE_SUPABASE_URL;
+      const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+      if (supabaseUrl && supabaseKey) {
+        const response = await fetch(
+          `${supabaseUrl}/rest/v1/churches?slug=eq.${encodeURIComponent(subdomain)}&select=name,logo_url,theme_color`,
+          {
+            headers: {
+              apikey: supabaseKey,
+              Authorization: `Bearer ${supabaseKey}`,
+            },
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          const igreja = data?.[0];
+
+          if (igreja) {
+            if (igreja.name) {
+              nome = igreja.name;
+              // Short name: primeiras 2 palavras (máx 12 chars)
+              shortName = nome.split(" ").slice(0, 2).join(" ").substring(0, 12);
+            }
+            if (igreja.logo_url) logo = igreja.logo_url;
+            if (igreja.theme_color) themeColor = igreja.theme_color;
+          }
         }
       }
-    );
+    }
 
-    const data = await response.json();
-    const igreja = data?.[0];
+    // Cache-busting para evitar o navegador servir manifest desatualizado
+    const v = Date.now();
+    const logoWithV = logo.startsWith("http")
+      ? `${logo}${logo.includes("?") ? "&" : "?"}v=${v}`
+      : `${logo}?v=${v}`;
 
-    // 🛑 fallback (importante)
-    const nome = igreja?.name || "Gestão Igreja";
-    const logo = igreja?.logo_url || "/logo-app.png";
-    const cor = "#2563eb"; // Cor padrão do app
-
-    // 🔥 evitar cache (CRÍTICO)
-    res.setHeader("Cache-Control", "no-store");
+    // ⚠️ CRÍTICO: sem cache
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.setHeader("Content-Type", "application/json");
 
     return res.status(200).json({
       name: nome,
-      short_name: nome,
+      short_name: shortName,
       description: "Sistema de Gestão Eclesiástica Premium",
       start_url: "/",
       display: "standalone",
       background_color: "#ffffff",
-      theme_color: cor,
+      theme_color: themeColor,
       icons: [
         {
-          src: `${logo}?v=${Date.now()}`,
+          src: logoWithV,
           sizes: "192x192",
-          type: "image/png"
+          type: logo.endsWith(".svg") ? "image/svg+xml" : "image/png",
+          purpose: "any maskable",
         },
         {
-          src: `${logo}?v=${Date.now()}`,
+          src: logoWithV,
           sizes: "512x512",
-          type: "image/png"
-        }
-      ]
+          type: logo.endsWith(".svg") ? "image/svg+xml" : "image/png",
+          purpose: "any maskable",
+        },
+      ],
     });
-
   } catch (error) {
     console.error("Erro no manifest:", error);
 
@@ -64,7 +97,12 @@ export default async function handler(req, res) {
       name: "Gestão Igreja",
       short_name: "Igreja",
       start_url: "/",
-      display: "standalone"
+      display: "standalone",
+      theme_color: "#2563eb",
+      icons: [
+        { src: "/logo-192.png", sizes: "192x192", type: "image/png" },
+        { src: "/logo-512.png", sizes: "512x512", type: "image/png" },
+      ],
     });
   }
 }

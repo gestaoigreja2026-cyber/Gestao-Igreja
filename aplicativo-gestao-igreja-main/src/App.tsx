@@ -152,7 +152,7 @@ function RoleProtectedRoute({ children, roles }: { children: React.ReactNode; ro
   );
 }
 
-import { useTenant } from "@/hooks/useTenant";
+import { useTenant, TenantProvider } from "@/hooks/useTenant";
 
 function AppRoutes() {
   const { isAuthenticated, user, authLoading } = useAuth();
@@ -233,17 +233,19 @@ function App() {
     >
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <ThemeProvider>
-            <TooltipProvider>
-              <AuthProvider>
-                <ChatProvider>
-                  <Toaster />
-                  <Sonner />
-                  <AppRoutes />
-                </ChatProvider>
-              </AuthProvider>
-            </TooltipProvider>
-          </ThemeProvider>
+          <TenantProvider>
+            <ThemeProvider>
+              <TooltipProvider>
+                <AuthProvider>
+                  <ChatProvider>
+                    <Toaster />
+                    <Sonner />
+                    <AppRoutes />
+                  </ChatProvider>
+                </AuthProvider>
+              </TooltipProvider>
+            </ThemeProvider>
+          </TenantProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </div>
