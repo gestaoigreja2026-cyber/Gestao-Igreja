@@ -805,6 +805,7 @@ export default function SuperAdmin() {
                                                 )}
                                                 <p className="text-xs text-muted-foreground truncate">{formData.logo_url}</p>
                                                 <p className="text-[10px] text-primary mt-1 group-hover:underline">Clique para trocar a imagem</p>
+                                                <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: Quadrado (ex: 512x512) • Fundo transparente</p>
                                             </div>
                                         </div>
                                     ) : (
@@ -821,6 +822,7 @@ export default function SuperAdmin() {
                                                     {uploadingLogo ? 'Enviando...' : 'Clique para enviar a logo'}
                                                 </p>
                                                 <p className="text-[10px] text-muted-foreground mt-0.5">PNG, JPG, WEBP ou SVG</p>
+                                                <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: Quadrado (ex: 512x512) • Fundo transparente</p>
                                             </div>
                                         </div>
                                     )}
