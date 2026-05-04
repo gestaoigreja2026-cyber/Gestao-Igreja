@@ -201,7 +201,7 @@ export default function NewLogin() {
                     <Card className="shadow-2xl border-primary/10 overflow-hidden">
                         <CardContent className="p-4 sm:p-6">
                             <div className="text-center mb-5">
-                                <div className="flex justify-center mb-3 overflow-visible" style={{ transform: 'scale(1.1)', transformOrigin: 'center' }}>
+                                <div className="flex justify-center mb-3 overflow-visible" style={{ transform: 'scale(1.4)', transformOrigin: 'center' }}>
                                     <Logo size="sm" showText={false} />
                                 </div>
                             </div>

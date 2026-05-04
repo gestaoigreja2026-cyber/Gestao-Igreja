@@ -14,6 +14,28 @@ export function useTenant() {
       try {
         const host = window.location.hostname;
         
+        // 0. Suporte a ?slug= para testes locais (ex: http://localhost:5173/?slug=ibma)
+        const urlParams = new URLSearchParams(window.location.search);
+        const slugParam = urlParams.get('slug') || urlParams.get('church');
+        if (slugParam) {
+          setSubdomain(slugParam);
+          const church = await churchesService.getBySlug(slugParam);
+          if (church) {
+            setTenant(church);
+            if (church.name) document.title = church.name;
+            if (church.logo_url) {
+              const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+              if (favicon) favicon.href = church.logo_url;
+              // Atualiza todas as logos na página
+              document.querySelectorAll('img.church-logo, img[src*="logo-app"]').forEach((img) => {
+                (img as HTMLImageElement).src = church.logo_url!;
+              });
+            }
+          }
+          setLoading(false);
+          return;
+        }
+
         // 1. Identificar se é o domínio principal ou localhost
         const isLocal = host.includes('localhost') || host.includes('127.0.0.1');
         const isMain = host === MAIN_DOMAIN || host === `www.${MAIN_DOMAIN}`;

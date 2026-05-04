@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
     Building2,
     Users,
@@ -21,6 +21,9 @@ import {
     XCircle,
     History,
     Copy,
+    Upload,
+    ImageIcon,
+    CheckCircle2,
 } from 'lucide-react';
 import {
     Card,
@@ -89,8 +92,11 @@ export default function SuperAdmin() {
     const [activeTab, setActiveTab] = useState<TabValue>('gestao');
     const { toast } = useToast();
 
-    const [formData, setFormData] = useState({ name: '', slug: '', adminEmail: '' });
+    const [formData, setFormData] = useState({ name: '', slug: '', adminEmail: '', logo_url: '' });
     const [submitting, setSubmitting] = useState(false);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [uploadSuccess, setUploadSuccess] = useState(false);
+    const logoFileInputRef = useRef<HTMLInputElement>(null);
     const [actionChurchId, setActionChurchId] = useState<string | null>(null);
     const [excludeConfirm, setExcludeConfirm] = useState<{ churchId: string; name: string } | null>(null);
     const [removeChurchConfirm, setRemoveChurchConfirm] = useState<{ id: string; name: string } | null>(null);
@@ -207,12 +213,46 @@ export default function SuperAdmin() {
     const handleOpenDialog = (church?: Church) => {
         if (church) {
             setEditingChurch(church);
-            setFormData({ name: church.name, slug: church.slug, adminEmail: '' });
+            setFormData({ name: church.name, slug: church.slug, adminEmail: '', logo_url: (church as any).logo_url || '' });
         } else {
             setEditingChurch(null);
-            setFormData({ name: '', slug: '', adminEmail: '' });
+            setFormData({ name: '', slug: '', adminEmail: '', logo_url: '' });
         }
+        setUploadSuccess(false);
         setIsDialogOpen(true);
+    };
+
+    const handleLogoUpload = async (file: File) => {
+        if (!file) return;
+        setUploadingLogo(true);
+        setUploadSuccess(false);
+        try {
+            // Garante que o bucket 'logos' existe (ignora erro se já existir)
+            await supabase.storage.createBucket('logos', { public: true }).catch(() => {});
+
+            const ext = file.name.split('.').pop();
+            const slug = formData.slug || `church-${Date.now()}`;
+            const fileName = `${slug}-${Date.now()}.${ext}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('logos')
+                .upload(fileName, file, { upsert: true, contentType: file.type });
+
+            if (uploadError) throw uploadError;
+
+            const { data: urlData } = supabase.storage.from('logos').getPublicUrl(fileName);
+            const publicUrl = urlData?.publicUrl;
+
+            if (!publicUrl) throw new Error('Não foi possível obter a URL pública da imagem.');
+
+            setFormData(prev => ({ ...prev, logo_url: publicUrl }));
+            setUploadSuccess(true);
+            toast({ title: 'Logo enviada!', description: 'A imagem foi salva e a URL foi preenchida automaticamente.' });
+        } catch (e: any) {
+            toast({ title: 'Erro no upload', description: e?.message || 'Não foi possível enviar a logo.', variant: 'destructive' });
+        } finally {
+            setUploadingLogo(false);
+        }
     };
 
     const handleRemoveChurch = async () => {
@@ -236,7 +276,9 @@ export default function SuperAdmin() {
         try {
             setSubmitting(true);
             if (editingChurch) {
-                await churchesService.update(editingChurch.id, formData);
+                const updatePayload: any = { name: formData.name, slug: formData.slug };
+                if (formData.logo_url !== undefined) updatePayload.logo_url = formData.logo_url || null;
+                await churchesService.update(editingChurch.id, updatePayload);
                 toast({ title: 'Sucesso', description: 'Igreja atualizada com sucesso.' });
             } else {
                 await churchesService.create(formData);
@@ -726,6 +768,81 @@ export default function SuperAdmin() {
                                 <Input required placeholder="Ex: igreja-central" value={formData.slug}
                                     onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} />
                                 <p className="text-[10px] text-muted-foreground">Identificador único. Não pode repetir.</p>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Logo da Igreja</label>
+
+                                {/* Área de upload */}
+                                <div
+                                    className="relative border-2 border-dashed border-primary/20 rounded-xl p-4 flex flex-col items-center gap-3 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer group"
+                                    onClick={() => !uploadingLogo && logoFileInputRef.current?.click()}
+                                >
+                                    <input
+                                        ref={logoFileInputRef}
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleLogoUpload(file);
+                                        }}
+                                    />
+
+                                    {formData.logo_url ? (
+                                        <div className="flex items-center gap-4 w-full">
+                                            <img
+                                                src={formData.logo_url}
+                                                alt="Logo da igreja"
+                                                className="h-16 w-16 object-contain rounded-lg bg-white border shadow-sm"
+                                                onError={(e) => { (e.target as HTMLImageElement).src = '/logo-app.png'; }}
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                {uploadSuccess && (
+                                                    <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-medium mb-1">
+                                                        <CheckCircle2 className="h-3.5 w-3.5" />
+                                                        Logo enviada com sucesso!
+                                                    </div>
+                                                )}
+                                                <p className="text-xs text-muted-foreground truncate">{formData.logo_url}</p>
+                                                <p className="text-[10px] text-primary mt-1 group-hover:underline">Clique para trocar a imagem</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-2 py-2">
+                                            {uploadingLogo ? (
+                                                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                                            ) : (
+                                                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                                    <ImageIcon className="h-6 w-6 text-primary" />
+                                                </div>
+                                            )}
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium text-foreground">
+                                                    {uploadingLogo ? 'Enviando...' : 'Clique para enviar a logo'}
+                                                </p>
+                                                <p className="text-[10px] text-muted-foreground mt-0.5">PNG, JPG, WEBP ou SVG</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {uploadingLogo && (
+                                        <div className="absolute inset-0 rounded-xl bg-background/60 flex items-center justify-center">
+                                            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Campo URL manual como fallback */}
+                                <details className="mt-1">
+                                    <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-primary transition-colors">Ou cole uma URL manualmente</summary>
+                                    <Input
+                                        type="url"
+                                        placeholder="https://... (URL pública da imagem)"
+                                        value={formData.logo_url}
+                                        onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
+                                        className="mt-2"
+                                    />
+                                </details>
                             </div>
                             {!editingChurch && (
                                 <div className="space-y-2">

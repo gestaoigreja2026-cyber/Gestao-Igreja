@@ -27,6 +27,50 @@
   }
 }
 
+/* ═══════════════════════════════════════════════
+   ✨ CUSTOM SCROLLBAR SYSTEM (Premium Design)
+   ═══════════════════════════════════════════════ */
+
+/* Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+/* Dark Mode support for Scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+
 /*
   🎨 Sistema de Temas Premium - Gestão Igreja
   5 Temas com Dark Mode automático
