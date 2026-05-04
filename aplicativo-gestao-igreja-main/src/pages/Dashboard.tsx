@@ -63,11 +63,11 @@ const quickActionsList: QuickActionDef[] = [
   { icon: DollarSign, label: 'Caixa Diário', href: '/caixa-diario', roles: ['pastor', 'tesoureiro', 'superadmin'], color: '#10B981' },
   { icon: Calendar, label: 'Eventos', href: '/eventos', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#7C3AED' },
   { icon: HandHeart, label: 'Solicitações de Oração', href: '/solicitacoes-oracao', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#059669' },
-  { icon: CreditCard, label: 'Contas e PIX Igreja', href: '/pix-donacoes', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#84CC16' },
+  { icon: CreditCard, label: 'Contas e PIX Igreja', href: '/pix-donacoes', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#84CC16' },
   { icon: Landmark, label: 'Página Institucional', href: '/institucional', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#475569' },
   { icon: UserRound, label: 'Pastores', href: '/pastores', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#0EA5E9' },
   { icon: Shield, label: 'Privacidade e LGPD', href: '/privacidade', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#DC2626' },
-  { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'superadmin', 'diretor_patrimonio'], color: '#B45309' },
+  { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'secretario', 'superadmin', 'diretor_patrimonio', 'tesoureiro'], color: '#B45309' },
   { icon: HelpCircle, label: 'Como Acessar', href: '/como-acessar', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#64748B' },
 ];
 
