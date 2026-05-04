@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { globalChurchLogo } from './../hooks/useTenant';
 
 const LOGO_SRC = '/logo-app.png';
 
@@ -19,7 +20,7 @@ const sizeStyles: Record<string, { width: string; height: string }> = {
 
 export function Logo({ size = 'md', showText = true }: LogoProps) {
   // Estado para armazenar a logo dinâmica
-  const [logoSrc, setLogoSrc] = useState(LOGO_SRC);
+  const [logoSrc, setLogoSrc] = useState(globalChurchLogo || LOGO_SRC);
 
   useEffect(() => {
     const handleLogoUpdate = (e: any) => {

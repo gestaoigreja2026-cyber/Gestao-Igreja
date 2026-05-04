@@ -3,6 +3,8 @@ import { churchesService, Church } from '@/services/churches.service';
 
 const MAIN_DOMAIN = 'church-gest-oficial.com.br';
 
+export let globalChurchLogo: string | null = null;
+
 export function useTenant() {
   const [tenant, setTenant] = useState<Church | null>(null);
   const [loading, setLoading] = useState(true);
@@ -24,13 +26,14 @@ export function useTenant() {
             setTenant(church);
             if (church.name) document.title = church.name;
             if (church.logo_url) {
+              globalChurchLogo = church.logo_url;
               const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
               if (favicon) favicon.href = church.logo_url;
               // Atualiza todas as logos na página
               document.querySelectorAll('img.church-logo, img[src*="logo-app"]').forEach((img) => {
                 (img as HTMLImageElement).src = church.logo_url!;
               });
-              // Dispara evento para o componente Logo.tsx
+              // Dispara evento para o componente Logo.tsx (para atualizações em tempo real)
               window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
             }
           }
@@ -73,6 +76,7 @@ export function useTenant() {
           // Opcional: Atualizar o título da página e favicon se a igreja existir
           if (church.name) document.title = church.name;
           if (church.logo_url) {
+            globalChurchLogo = church.logo_url;
             const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
             if (favicon) favicon.href = church.logo_url;
             window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
