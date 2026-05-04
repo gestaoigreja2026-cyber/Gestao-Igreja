@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabaseClient';
@@ -32,6 +33,7 @@ export default function CadastroIgrejaTrial() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [form, setForm] = useState<TrialChurchFormData>(initialForm);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -65,6 +67,10 @@ export default function CadastroIgrejaTrial() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      toast({ title: 'Atenção', description: 'Você precisa aceitar os termos para continuar.', variant: 'destructive' });
+      return;
+    }
     if (!form.name.trim()) {
       toast({ title: 'Preencha o nome da igreja', variant: 'destructive' });
       return;
@@ -262,6 +268,25 @@ export default function CadastroIgrejaTrial() {
                     {uploadingLogo ? 'Enviando...' : 'Selecionar imagem'}
                   </Button>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="mt-6 border-primary/20 bg-primary/5">
+            <CardContent className="pt-6 flex items-start gap-3">
+              <Checkbox 
+                id="terms" 
+                checked={termsAccepted} 
+                onCheckedChange={(c) => setTermsAccepted(c === true)} 
+                className="mt-1 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+              />
+              <div className="space-y-1.5">
+                <Label htmlFor="terms" className="text-sm font-semibold leading-none cursor-pointer">
+                  Li e concordo com os termos do serviço
+                </Label>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  7 dias para teste. Após os 7 dias começa a cobrança. Na falta de pagamento o serviço é pausado. O cancelamento do serviço não gera multa e pode ser encerrado a qualquer momento.
+                </p>
               </div>
             </CardContent>
           </Card>
