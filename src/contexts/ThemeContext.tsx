@@ -31,33 +31,16 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
     const [themeId, setThemeId] = useState<string>(() => {
-        try {
-            if (typeof window === 'undefined') return 'oceano-profundo';
-            return localStorage.getItem('church_theme') || 'oceano-profundo';
-        } catch (e) {
-            // Falha ao acessar localStorage (ex: modo privado), usar padrão
-            return 'oceano-profundo';
-        }
+        if (typeof window === 'undefined') return 'oceano-profundo';
+        return localStorage.getItem('church_theme') || 'oceano-profundo';
     });
 
     const currentTheme = themes.find(t => t.id === themeId) || themes[0];
 
     useEffect(() => {
-        try {
-            if (typeof document !== 'undefined') {
-                document.documentElement.setAttribute('data-theme', themeId);
-                document.body.setAttribute('data-theme', themeId);
-            }
-            try {
-                localStorage.setItem('church_theme', themeId);
-            } catch (e) {
-                // ignore localStorage set errors
-            }
-        } catch (e) {
-            // Garantir que erros aqui não quebrem a renderização
-            // (por exemplo, em ambientes restritos)
-            // console.warn('ThemeProvider effect error', e);
-        }
+        document.documentElement.setAttribute('data-theme', themeId);
+        document.body.setAttribute('data-theme', themeId);
+        localStorage.setItem('church_theme', themeId);
     }, [themeId]);
 
     const setTheme = (id: string) => {

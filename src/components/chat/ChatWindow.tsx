@@ -63,8 +63,8 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
   return (
     <div className={`flex flex-col h-full ${isDarkMode ? 'bg-gray-900' : 'bg-[#efeae2]'}`}>
       {/* Header */}
-      <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#f0f2f5] border-b'} px-4 py-2.5 flex items-center justify-between shadow-sm z-10`}>
-        <div className="flex items-center gap-3">
+      <div className={`${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-[#f0f2f5] border-b'} px-3 md:px-4 py-2 flex items-center justify-between shadow-sm z-10`}>
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <button 
             onClick={onBack}
             className="md:hidden p-2 -ml-2 rounded-full hover:bg-black/5 transition-colors"
@@ -78,11 +78,11 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
           </Avatar>
           
           <div 
-            className="flex flex-col cursor-pointer"
+            className="flex flex-col cursor-pointer min-w-0"
             onClick={() => setShowContactInfo(true)}
           >
-            <span className={`font-semibold text-[16px] leading-tight ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{chatName}</span>
-            <span className={`text-[13px] leading-tight mt-0.5 hover:underline ${isDarkMode ? 'text-gray-400 decoration-gray-500' : 'text-gray-500 decoration-gray-400'}`}>Clique para ver os dados do contato</span>
+            <span className={`font-semibold text-[16px] leading-tight truncate ${isDarkMode ? 'text-gray-100' : 'text-gray-900'}`}>{chatName}</span>
+            <span className={`text-[13px] leading-tight mt-0.5 hover:underline truncate ${isDarkMode ? 'text-gray-400 decoration-gray-500' : 'text-gray-500 decoration-gray-400'}`}>Clique para ver os dados do contato</span>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
               setCallType('video');
               setShowVideoCall(true);
             }} 
-            className="p-2 rounded-full text-gray-500 hover:bg-black/5 transition-colors hidden sm:block"
+            className="p-2 rounded-full text-gray-500 hover:bg-black/5 transition-colors"
           >
             <Video className="w-5 h-5" />
           </button>
@@ -107,7 +107,7 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
               setCallType('audio');
               setShowVideoCall(true);
             }} 
-            className="p-2 rounded-full text-gray-500 hover:bg-black/5 transition-colors hidden sm:block"
+            className="p-2 rounded-full text-gray-500 hover:bg-black/5 transition-colors"
           >
             <Phone className="w-5 h-5" />
           </button>

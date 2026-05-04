@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
+import { globalChurchLogo } from "@/hooks/useTenant";
+import { useTenant } from "@/hooks/useTenant";
 import {
   Dialog,
   DialogContent,
@@ -15,18 +17,26 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
-const isIOS = typeof navigator !== "undefined" && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+const isIOS =
+  typeof navigator !== "undefined" && /iPhone|iPad|iPod/i.test(navigator.userAgent);
 const isStandalone = () =>
   typeof window !== "undefined" &&
-  (window.matchMedia("(display-mode: standalone)").matches || (window.navigator as any)?.standalone);
+  (window.matchMedia("(display-mode: standalone)").matches ||
+    (window.navigator as any)?.standalone);
 
 export function InstallPWA() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
-  const { currentTheme } = useTheme();
+  const [logoSrc, setLogoSrc] = useState(globalChurchLogo || "/logo-app.png");
 
-  const logoColor = currentTheme?.primaryHex || "#3B82F6";
+  const { currentTheme } = useTheme();
+  const { tenant } = useTenant();
+
+  // Nome e logo dinâmicos via tenant context
+  const churchName = tenant?.name || "Gestão Igreja";
+  const churchLogo = tenant?.logo_url || logoSrc;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -34,7 +44,8 @@ export function InstallPWA() {
     if (isStandalone()) return;
 
     // 1. Verifica se o evento já foi capturado globalmente antes do React montar
-    const globalPrompt = (window as any).deferredPrompt as BeforeInstallPromptEvent | undefined;
+    const globalPrompt = (window as any)
+      .deferredPrompt as BeforeInstallPromptEvent | undefined;
     if (globalPrompt) {
       setDeferredPrompt(globalPrompt);
     }
@@ -45,21 +56,28 @@ export function InstallPWA() {
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       (window as any).deferredPrompt = e; // sincroniza globalmente
     };
-
     window.addEventListener("beforeinstallprompt", handler);
 
     // 3. Sempre mostra o banner após 1.5s (independente do evento nativo)
     const timer = setTimeout(() => setShowBanner(true), 1500);
 
+    // 4. Escutar atualizações dinâmicas da logo (ex: index.html inline script)
+    const handleLogoUpdate = (e: Event) => {
+      setLogoSrc((e as CustomEvent).detail || "/logo-app.png");
+    };
+    window.addEventListener("churchLogoUpdated", handleLogoUpdate);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("churchLogoUpdated", handleLogoUpdate);
       clearTimeout(timer);
     };
   }, []);
 
   const handleInstall = async () => {
-    // Tenta o deferredPrompt do state, ou do global como último recurso
-    const prompt = deferredPrompt || ((window as any).deferredPrompt as BeforeInstallPromptEvent | undefined);
+    const prompt =
+      deferredPrompt ||
+      ((window as any).deferredPrompt as BeforeInstallPromptEvent | undefined);
     if (prompt) {
       await prompt.prompt();
       const { outcome } = await prompt.userChoice;
@@ -79,33 +97,35 @@ export function InstallPWA() {
   return (
     <>
       <div className="fixed bottom-4 left-4 right-4 sm:left-4 sm:right-auto sm:max-w-md md:bottom-6 md:left-6 md:max-w-[420px] z-50 flex items-center gap-3 sm:gap-4 p-3 sm:p-4 md:p-5 rounded-2xl shadow-xl border bg-white dark:bg-zinc-900 dark:border-zinc-800 animate-in slide-in-from-bottom-4">
-        <div
-          className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 shrink-0 transition-colors duration-500"
-          style={{
-            backgroundColor: logoColor,
-            WebkitMaskImage: `url(/logo-app.png)`,
-            maskImage: `url(/logo-app.png)`,
-            WebkitMaskSize: 'contain',
-            maskSize: 'contain',
-            WebkitMaskRepeat: 'no-repeat',
-            maskRepeat: 'no-repeat',
-            WebkitMaskPosition: 'center',
-            maskPosition: 'center',
-          }}
-          title="Gestão Igreja"
+        <img
+          src={churchLogo}
+          alt={`Logo ${churchName}`}
+          className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 shrink-0 object-contain rounded-lg"
+          onError={(e) => { (e.target as HTMLImageElement).src = "/logo-app.png"; }}
         />
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-black dark:text-white text-sm sm:text-base md:text-lg">Instalar App</p>
+          <p className="font-semibold text-black dark:text-white text-sm sm:text-base md:text-lg leading-tight">
+            Instalar {churchName}
+          </p>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            Use Gestão Igreja como app no celular, tablet ou PC
+            Use como app no celular, tablet ou PC
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
-          <Button size="sm" onClick={handleInstall} className="gap-2 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4">
+          <Button
+            size="sm"
+            onClick={handleInstall}
+            className="gap-2 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
+          >
             <Download className="h-4 w-4" />
             Instalar
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0" onClick={handleDismiss}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0"
+            onClick={handleDismiss}
+          >
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -114,7 +134,7 @@ export function InstallPWA() {
       <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Instalar App</DialogTitle>
+            <DialogTitle>Instalar {churchName}</DialogTitle>
             <DialogDescription asChild>
               <div className="space-y-3 pt-2">
                 {isIOS ? (

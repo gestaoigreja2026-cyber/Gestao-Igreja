@@ -1,4 +1,0 @@
-Coloque aqui a imagem da arte do certificado de batismo com o nome:
-  certificado-batismo-arte.png
-
-Assim o "Modelo 3 (Arte)" na Secretaria funcionará com a arte como fundo.

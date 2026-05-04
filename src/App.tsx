@@ -152,11 +152,16 @@ function RoleProtectedRoute({ children, roles }: { children: React.ReactNode; ro
   );
 }
 
+import { useTenant, TenantProvider } from "@/hooks/useTenant";
+
 function AppRoutes() {
   const { isAuthenticated, user, authLoading } = useAuth();
+  const { loading: tenantLoading, isMainDomain } = useTenant();
   const postLoginPath = getPostLoginPath(user);
 
-  if (authLoading && (window.location.pathname === '/' || window.location.pathname === '/login')) {
+  const isGlobalLoading = authLoading || tenantLoading;
+
+  if (isGlobalLoading && (window.location.pathname === '/' || window.location.pathname === '/login')) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -168,7 +173,18 @@ function AppRoutes() {
     <>
       <InstallPWA />
       <Routes>
-        <Route path="/" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <Landing />} />
+        <Route 
+          path="/" 
+          element={
+            isAuthenticated ? (
+              <Navigate to={postLoginPath} replace />
+            ) : isMainDomain ? (
+              <Landing />
+            ) : (
+              <NewLogin />
+            )
+          } 
+        />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/hotmart-success" element={<HotmartSuccess />} />
         <Route path="/cadastro-igreja-trial" element={<CadastroIgrejaTrial />} />
@@ -217,17 +233,19 @@ function App() {
     >
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <ThemeProvider>
-            <TooltipProvider>
-              <AuthProvider>
-                <ChatProvider>
-                  <Toaster />
-                  <Sonner />
-                  <AppRoutes />
-                </ChatProvider>
-              </AuthProvider>
-            </TooltipProvider>
-          </ThemeProvider>
+          <TenantProvider>
+            <ThemeProvider>
+              <TooltipProvider>
+                <AuthProvider>
+                  <ChatProvider>
+                    <Toaster />
+                    <Sonner />
+                    <AppRoutes />
+                  </ChatProvider>
+                </AuthProvider>
+              </TooltipProvider>
+            </ThemeProvider>
+          </TenantProvider>
         </BrowserRouter>
       </QueryClientProvider>
     </div>

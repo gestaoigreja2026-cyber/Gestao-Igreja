@@ -1,10 +1,10 @@
-# Netlify – deploy do app (Vite SPA)
-# Não altera a Vercel; você pode usar os dois.
+# Netlify – deploy do app (Vite SPA) com Netlify Functions
 
 [build]
   base = "."
   command = "npm run build"
   publish = "dist"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20"
@@ -12,12 +12,14 @@
   NPM_FLAGS = "--legacy-peer-deps"
   NPM_USE_NPM_CI = "false"
 
-# SPA: todas as rotas caem no index.html
+# ── Manifest PWA dinâmico (multi-tenant) ────────────────────────────────────
+# /api/manifest → Netlify Function manifest.js
 [[redirects]]
-  from = "/"
-  to = "/index.html"
+  from = "/api/manifest"
+  to = "/.netlify/functions/manifest"
   status = 200
 
+# ── SPA: todas as outras rotas caem no index.html ───────────────────────────
 [[redirects]]
   from = "/*"
   to = "/index.html"

@@ -34,6 +34,20 @@ export const churchesService = {
     },
 
     /**
+     * Obtém detalhes de uma igreja pelo slug (usado para Multi-tenant via URL)
+     */
+    async getBySlug(slug: string) {
+        const { data, error } = await supabase
+            .from('churches')
+            .select('*')
+            .eq('slug', slug)
+            .maybeSingle();
+
+        if (error) throw error;
+        return data;
+    },
+
+    /**
      * Cria um novo tenant (Igreja) com um admin inicial opcional
      */
     /**

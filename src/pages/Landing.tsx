@@ -110,9 +110,9 @@ export default function Landing() {
   const [showInstallHelp, setShowInstallHelp] = useState(false);
 
   const handleInstallClick = async () => {
-    if (canInstall) {
-      await install();
-    } else {
+    // Tenta usar o prompt capturado (seja via hook ou global)
+    const success = await install();
+    if (!success) {
       setShowInstallHelp(true);
     }
   };
