@@ -49,25 +49,26 @@ interface QuickActionDef {
   label: string;
   href: string;
   roles: UserRole[];
+  color: string;
 }
 
 const quickActionsList: QuickActionDef[] = [
-  { icon: Users, label: 'Ministérios', href: '/ministerios', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'] },
-  { icon: MapPin, label: 'Células', href: '/celulas', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'] },
-  { icon: FileText, label: 'Secretaria', href: '/secretaria', roles: ['pastor', 'secretario', 'superadmin'] },
-  { icon: BarChart3, label: 'Relatórios', href: '/relatorios', roles: ['admin', 'pastor', 'secretario', 'lider_ministerio', 'superadmin'] },
-  { icon: Upload, label: 'Uploads e Atas', href: '/uploads', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-  { icon: GraduationCap, label: 'Escolas', href: '/escolas', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-  { icon: HeartHandshake, label: 'Discipulado', href: '/discipulado', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'] },
-  { icon: DollarSign, label: 'Caixa Diário', href: '/caixa-diario', roles: ['pastor', 'tesoureiro', 'superadmin'] },
-  { icon: Calendar, label: 'Eventos', href: '/eventos', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-  { icon: HandHeart, label: 'Solicitações de Oração', href: '/solicitacoes-oracao', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-  { icon: CreditCard, label: 'Contas e PIX Igreja', href: '/pix-donacoes', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-  { icon: Landmark, label: 'Página Institucional', href: '/institucional', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-  { icon: UserRound, label: 'Pastores', href: '/pastores', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-  { icon: Shield, label: 'Privacidade e LGPD', href: '/privacidade', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-  { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'superadmin', 'diretor_patrimonio'] },
-  { icon: HelpCircle, label: 'Como Acessar', href: '/como-acessar', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'] },
+  { icon: Users, label: 'Ministérios', href: '/ministerios', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#8B5CF6' },
+  { icon: MapPin, label: 'Células', href: '/celulas', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#F43F5E' },
+  { icon: FileText, label: 'Secretaria', href: '/secretaria', roles: ['pastor', 'secretario', 'superadmin'], color: '#2563EB' },
+  { icon: BarChart3, label: 'Relatórios', href: '/relatorios', roles: ['admin', 'pastor', 'secretario', 'lider_ministerio', 'superadmin'], color: '#D97706' },
+  { icon: Upload, label: 'Uploads e Atas', href: '/uploads', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#0891B2' },
+  { icon: GraduationCap, label: 'Escolas', href: '/escolas', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#F97316' },
+  { icon: HeartHandshake, label: 'Discipulado', href: '/discipulado', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#EC4899' },
+  { icon: DollarSign, label: 'Caixa Diário', href: '/caixa-diario', roles: ['pastor', 'tesoureiro', 'superadmin'], color: '#10B981' },
+  { icon: Calendar, label: 'Eventos', href: '/eventos', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#7C3AED' },
+  { icon: HandHeart, label: 'Solicitações de Oração', href: '/solicitacoes-oracao', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#059669' },
+  { icon: CreditCard, label: 'Contas e PIX Igreja', href: '/pix-donacoes', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#84CC16' },
+  { icon: Landmark, label: 'Página Institucional', href: '/institucional', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#475569' },
+  { icon: UserRound, label: 'Pastores', href: '/pastores', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#0EA5E9' },
+  { icon: Shield, label: 'Privacidade e LGPD', href: '/privacidade', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#DC2626' },
+  { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'superadmin', 'diretor_patrimonio'], color: '#B45309' },
+  { icon: HelpCircle, label: 'Como Acessar', href: '/como-acessar', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#64748B' },
 ];
 
 export default function Dashboard() {
@@ -173,7 +174,13 @@ export default function Dashboard() {
           <CardContent className="px-4 py-6 pb-8 sm:px-6">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
               {visibleActions.map((action) => (
-                <QuickAction key={action.href} icon={action.icon} label={action.label} href={action.href} />
+                <QuickAction 
+                  key={action.href} 
+                  icon={action.icon} 
+                  label={action.label} 
+                  href={action.href} 
+                  color={action.color}
+                />
               ))}
             </div>
           </CardContent>
@@ -192,7 +199,7 @@ export default function Dashboard() {
   );
 }
 
-function QuickAction({ icon: Icon, label, href }: { icon?: ElementType | null; label: string; href: string }) {
+function QuickAction({ icon: Icon, label, href, color }: { icon?: ElementType | null; label: string; href: string; color: string }) {
   const navigate = useNavigate();
 
   const handleClick = (e: React.MouseEvent) => {
@@ -203,15 +210,32 @@ function QuickAction({ icon: Icon, label, href }: { icon?: ElementType | null; l
   return (
     <button
       onClick={handleClick}
-      className="flex flex-col items-center gap-4 p-8 sm:p-6 rounded-2xl bg-white dark:bg-card hover:bg-primary/5 border-2 border-primary/10 hover:border-primary/40 transition-all duration-300 hover:scale-105 hover:shadow-xl group shadow-md cursor-pointer"
+      className="flex flex-col items-center gap-4 p-8 sm:p-6 rounded-2xl bg-white dark:bg-card hover:bg-muted/50 border-2 border-primary/5 hover:border-primary/20 transition-all duration-300 hover:scale-105 hover:shadow-xl group shadow-md cursor-pointer relative overflow-hidden"
     >
+      {/* Background Glow Effect on Hover */}
+      <div 
+        className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] transition-opacity duration-300 pointer-events-none"
+        style={{ backgroundColor: color }}
+      />
+
       {Icon && (
-        <div className="p-4 rounded-xl bg-primary group-hover:scale-110 transition-transform shadow-lg shadow-primary/20">
-          <Icon className="h-8 w-8 sm:h-6 sm:w-6 text-primary-foreground" />
+        <div 
+          className="p-4 rounded-xl transition-all duration-500 shadow-lg group-hover:scale-110 group-hover:rotate-3"
+          style={{ 
+            backgroundColor: color,
+            boxShadow: `0 8px 16px -4px ${color}40`
+          }}
+        >
+          <Icon className="h-8 w-8 sm:h-6 sm:w-6 text-white" />
         </div>
       )}
-      <span className="text-base sm:text-sm font-black text-center text-foreground group-hover:text-primary transition-colors">
-        {label}
+      <span 
+        className="text-base sm:text-sm font-black text-center text-foreground transition-colors duration-300"
+        style={{ color: 'inherit' }}
+      >
+        <span className="group-hover:opacity-80" style={{ color: color }}>
+          {label}
+        </span>
       </span>
     </button>
   );

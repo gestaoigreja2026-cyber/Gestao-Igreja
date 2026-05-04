@@ -194,313 +194,67 @@ export default function NewLogin() {
     };
 
     return (
-        <div
-            className="min-h-screen flex items-center justify-center relative px-4 py-4 sm:py-6"
-            style={{ minHeight: '100vh', backgroundColor: 'hsl(var(--background))' }}
-        >
-            <div className="w-full max-w-[352px] relative z-10 my-auto">
+        <div className="min-h-screen flex items-center justify-center relative px-4 bg-gradient-to-br from-primary/5 via-background to-primary/10">
+            <div className="w-full max-w-[320px] relative z-10">
                 {/* TELA 1: BOAS-VINDAS */}
                 {step === 1 && (
-                    <Card className="shadow-2xl border-primary/10 overflow-hidden">
-                        <CardContent className="p-4 sm:p-6">
-                            <div className="text-center mb-5">
-                                <div className="flex justify-center mb-3 overflow-visible" style={{ transform: 'scale(1.4)', transformOrigin: 'center' }}>
-                                    <Logo size="sm" showText={false} />
+                    <Card className="shadow-sm">
+                        <CardContent className="p-4">
+                            <div className="text-center mb-4">
+                                <div className="flex justify-center mb-3">
+                                    <Logo size="md" showText={false} />
                                 </div>
-                                {tenant?.name && (
-                                    <div className="mt-5 space-y-0.5">
-                                        <p className="text-sm font-bold text-foreground tracking-wide">{tenant.name}</p>
-                                        <p className="text-[10px] text-muted-foreground uppercase tracking-widest">Sistema de Gestão</p>
-                                    </div>
+                                {tenant?.name ? (
+                                    <h1 className="text-xl font-bold">
+                                        <span className="text-slate-900">{tenant.name}</span>
+                                    </h1>
+                                ) : (
+                                    <h1 className="text-xl font-bold">
+                                        <span className="text-slate-900">Gestão</span>{' '}
+                                        <span className="text-primary">Igreja</span>
+                                    </h1>
                                 )}
+                                <h2 className="text-base font-semibold mt-3">Acessar sistema</h2>
+                                <p className="text-xs text-muted-foreground">Entre com seus dados para continuar</p>
                             </div>
 
-                            <form onSubmit={handleWelcomeSubmit} className="space-y-4">
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-foreground/70 uppercase tracking-widest">
-                                        Nome Completo
-                                    </label>
+                            <form onSubmit={handleWelcomeSubmit} className="space-y-3">
+                                <div className="space-y-2">
                                     <Input
                                         type="text"
-                                        placeholder="Digite seu nome"
+                                        placeholder="Seu Nome"
                                         value={formData.fullName}
                                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                        className="h-11 bg-muted/30 border-primary/10 focus:border-primary/50"
+                                        className="h-10"
                                         required
                                     />
                                 </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold text-foreground/70 uppercase tracking-widest">
-                                        E-mail
-                                    </label>
+                                <div className="space-y-2">
                                     <Input
                                         type="email"
-                                        placeholder="seu@email.com"
+                                        placeholder="E-mail"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="h-11 bg-muted/30 border-primary/10 focus:border-primary/50"
+                                        className="h-10"
                                         required
                                     />
                                 </div>
 
                                 {error && (
-                                    error.toLowerCase().includes('confirmação') || error.toLowerCase().includes('email não confirmado') ? (
-                                        <div className="rounded-xl border-2 border-amber-500/50 bg-amber-50 dark:bg-amber-950/30 p-5 shadow-lg shadow-amber-500/10">
-                                            <div className="flex gap-4">
-                                                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                                                    <Mail className="h-6 w-6 text-amber-600 dark:text-amber-500" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-bold text-amber-800 dark:text-amber-200 text-base mb-1">Confirme seu e-mail</h3>
-                                                    <p className="text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
-                                                        Enviamos um link de confirmação para <strong>{formData.email}</strong>. Abra seu e-mail e clique no link para ativar sua conta.
-                                                    </p>
-                                                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                                                        Não recebeu? Verifique a pasta de spam.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <p className="text-sm text-destructive text-center font-medium bg-destructive/10 py-2 rounded-md border border-destructive/20">
-                                            {error}
-                                        </p>
-                                    )
+                                    <div className="text-xs text-destructive text-center">
+                                        {error}
+                                    </div>
                                 )}
 
-                                <Button type="submit" className="w-full h-10 text-xs font-bold" size="lg">
-                                    Continuar
-                                    <ArrowRight className="ml-2 h-4 w-4" />
+                                <Button type="submit" className="w-full h-10" size="sm">
+                                    Próximo
                                 </Button>
-                                <button
-                                    type="button"
-                                    onClick={() => { setForgotEmail(formData.email); setForgotOpen(true); }}
-                                    className="text-sm text-muted-foreground hover:text-primary transition-colors w-full"
-                                >
-                                    Esqueci minha senha
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleConnectionTest}
-                                    disabled={connectionTestLoading}
-                                    className="text-xs text-muted-foreground/70 hover:text-primary transition-colors w-full"
-                                >
-                                    {connectionTestLoading ? 'Testando…' : 'Problemas de conexão? Verificar'}
-                                </button>
-                            </form>
-                        </CardContent>
-                    </Card>
-                )}
-
-                <Dialog open={connectionTestOpen} onOpenChange={setConnectionTestOpen}>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Diagnóstico de conexão</DialogTitle>
-                            <DialogDescription>
-                                Resultado do teste de conexão com o Supabase.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-3 text-sm">
-                            {connectionTestLoading ? (
-                                <p className="text-muted-foreground">Testando…</p>
-                            ) : connectionTestResult ? (
-                                <>
-                                    <p>
-                                        <span className="font-medium">URL configurada:</span>{' '}
-                                        {connectionTestResult.urlConfigured ? 'Sim' : 'Não'}
-                                    </p>
-                                    <p>
-                                        <span className="font-medium">Chave configurada:</span>{' '}
-                                        {connectionTestResult.keyConfigured ? 'Sim' : 'Não'}
-                                    </p>
-                                    <p>
-                                        <span className="font-medium">Conexão:</span>{' '}
-                                        {connectionTestResult.ok ? (
-                                            <span className="text-green-600 font-medium">OK</span>
-                                        ) : (
-                                            <span className="text-destructive font-medium">{connectionTestResult.error || 'Falhou'}</span>
-                                        )}
-                                    </p>
-                                    {!connectionTestResult.ok && (
-                                        <p className="text-xs text-muted-foreground mt-2">
-                                            Se &quot;Failed to fetch&quot;: projeto Supabase pausado, URL/chave errada, ou falta adicionar sua URL em Supabase → Auth → URL Configuration.
-                                        </p>
-                                    )}
-                                </>
-                            ) : null}
-                        </div>
-                    </DialogContent>
-                </Dialog>
-
-                <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <DialogTitle>Redefinir senha</DialogTitle>
-                            <DialogDescription>
-                                Digite o e-mail da sua conta. Enviaremos um link para você criar uma nova senha.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={handleForgotSubmit} className="space-y-4">
-                            <Input
-                                type="email"
-                                placeholder="seu@email.com"
-                                value={forgotEmail}
-                                onChange={(e) => setForgotEmail(e.target.value)}
-                                required
-                            />
-                            <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setForgotOpen(false)}>
-                                    Cancelar
-                                </Button>
-                                <Button type="submit" disabled={forgotLoading}>
-                                    {forgotLoading ? 'Enviando...' : 'Enviar link'}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </DialogContent>
-                </Dialog>
-
-                {/* TELA 2: LOGIN/CADASTRO */}
-                {step === 2 && (
-                    <Card className="shadow-2xl border-primary/10 overflow-hidden">
-                        <CardContent className="p-4 sm:p-6">
-                            <div className="text-center mb-5">
-                                <h2 className="text-lg font-black text-foreground mb-1">Acesso Seguro</h2>
-                                <p className="text-[11px] text-muted-foreground">Escolha seu perfil e digite seu PIN</p>
-                            </div>
-
-                            <form onSubmit={handleFinalSubmit} className="space-y-6">
-                                {/* PIN Container */}
-                                <div className="space-y-4">
-                                    <label className="text-xs font-bold text-foreground/70 text-center block uppercase tracking-widest">
-                                        Sua Senha PIN (6 dígitos)
-                                    </label>
-                                    <div className="flex justify-between gap-1.5 max-w-[240px] mx-auto">
-                                        {formData.pin.map((digit, i) => (
-                                            <input
-                                                key={i}
-                                                ref={(el) => (pinRefs.current[i] = el)}
-                                                type="password"
-                                                maxLength={1}
-                                                value={digit}
-                                                onChange={(e) => handlePinChange(i, e.target.value)}
-                                                onKeyDown={(e) => handleKeyDown(i, e)}
-                                                className="w-8 h-10 text-center text-lg font-bold bg-muted/40 border-2 border-primary/10 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Seleção de Perfil */}
-                                <div className="space-y-4">
-                                    <label className="text-xs font-bold text-foreground/70 block uppercase tracking-widest mb-3">
-                                        Selecione seu Perfil
-                                    </label>
-                                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                        <RoleCard
-                                            icon={<Shield className="h-5 w-5" />}
-                                            label="Pastor"
-                                            active={formData.role === 'admin'}
-                                            onClick={() => setFormData({ ...formData, role: 'admin' })}
-                                        />
-                                        <RoleCard
-                                            icon={<User className="h-5 w-5" />}
-                                            label="Secretário"
-                                            active={formData.role === 'secretario'}
-                                            onClick={() => setFormData({ ...formData, role: 'secretario' })}
-                                        />
-                                        <RoleCard
-                                            icon={<Briefcase className="h-5 w-5" />}
-                                            label="Tesoureiro"
-                                            active={formData.role === 'tesoureiro'}
-                                            onClick={() => setFormData({ ...formData, role: 'tesoureiro' })}
-                                        />
-                                        <RoleCard
-                                            icon={<MapPin className="h-5 w-5" />}
-                                            label="Líder Célula"
-                                            active={formData.role === 'lider_celula'}
-                                            onClick={() => setFormData({ ...formData, role: 'lider_celula' })}
-                                        />
-                                        <RoleCard
-                                            icon={<Church className="h-5 w-5" />}
-                                            label="Líder Minis."
-                                            active={formData.role === 'lider_ministerio'}
-                                            onClick={() => setFormData({ ...formData, role: 'lider_ministerio' })}
-                                        />
-                                        <RoleCard
-                                            icon={<Users className="h-5 w-5" />}
-                                            label="Membro"
-                                            active={formData.role === 'membro'}
-                                            onClick={() => setFormData({ ...formData, role: 'membro' })}
-                                        />
-                                        <RoleCard
-                                            icon={<Archive className="h-5 w-5" />}
-                                            label="Patrimônio"
-                                            active={formData.role === 'diretor_patrimonio'}
-                                            onClick={() => setFormData({ ...formData, role: 'diretor_patrimonio' })}
-                                        />
-                                        <RoleCard
-                                            icon={<Shield className="h-5 w-5" />}
-                                            label="SuperAdmin"
-                                            active={formData.role === 'superadmin'}
-                                            onClick={() => setFormData({ ...formData, role: 'superadmin' })}
-                                        />
-                                        <RoleCard
-                                            icon={<User className="h-5 w-5" />}
-                                            label="Congregado"
-                                            active={formData.role === 'congregado'}
-                                            onClick={() => setFormData({ ...formData, role: 'congregado' })}
-                                        />
-                                    </div>
-                                </div>
-
-                                {error && (
-                                    error.toLowerCase().includes('confirmação') || error.toLowerCase().includes('email não confirmado') ? (
-                                        <div className="rounded-xl border-2 border-amber-500/50 bg-amber-50 dark:bg-amber-950/30 p-5 shadow-lg shadow-amber-500/10">
-                                            <div className="flex gap-4">
-                                                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                                                    <Mail className="h-6 w-6 text-amber-600 dark:text-amber-500" />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h3 className="font-bold text-amber-800 dark:text-amber-200 text-base mb-1">
-                                                        Confirme seu e-mail
-                                                    </h3>
-                                                    <p className="text-sm text-amber-700 dark:text-amber-300 leading-relaxed">
-                                                        Enviamos um link de confirmação para <strong>{formData.email}</strong>. Abra seu e-mail e clique no link para ativar sua conta.
-                                                    </p>
-                                                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-2">
-                                                        Não recebeu? Verifique a pasta de spam ou solicite um novo link em &quot;Esqueci minha senha&quot;.
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <p className="text-sm text-destructive text-center font-medium bg-destructive/10 py-2 rounded-md border border-destructive/20">
-                                            {error}
-                                        </p>
-                                    )
-                                )}
-
-                                <div className="flex flex-col gap-4">
-                                    <Button
-                                        type="submit"
-                                        className="w-full h-11 text-sm font-bold shadow-lg shadow-primary/20"
-                                        size="lg"
-                                        disabled={formData.pin.some(digit => !digit)}
-                                    >
-                                        Entrar no Sistema
-                                    </Button>
-                                    <button
-                                        type="button"
-                                        onClick={() => setStep(1)}
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors font-semibold"
-                                    >
-                                        Voltar
-                                    </button>
+                                
+                                <div className="flex flex-col gap-1 pt-1">
                                     <button
                                         type="button"
                                         onClick={() => { setForgotEmail(formData.email); setForgotOpen(true); }}
-                                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                                        className="text-[11px] text-muted-foreground hover:text-primary transition-colors"
                                     >
                                         Esqueci minha senha
                                     </button>
@@ -508,9 +262,116 @@ export default function NewLogin() {
                                         type="button"
                                         onClick={handleConnectionTest}
                                         disabled={connectionTestLoading}
-                                        className="text-xs text-muted-foreground/70 hover:text-primary transition-colors"
+                                        className="text-[9px] text-muted-foreground/50 hover:text-primary transition-colors uppercase"
                                     >
-                                        {connectionTestLoading ? 'Testando…' : 'Problemas de conexão? Verificar'}
+                                        {connectionTestLoading ? 'Verificando...' : 'Status da Conexão'}
+                                    </button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
+                )}
+
+                {/* TELA 2: PIN E PERFIL */}
+                {step === 2 && (
+                    <Card className="shadow-sm w-full max-w-sm mx-auto">
+                        <CardContent className="p-6">
+                            <div className="text-center mb-6">
+                                <h2 className="text-lg font-semibold">Verificação</h2>
+                                <p className="text-sm text-muted-foreground">Informe seu PIN e selecione sua função</p>
+                            </div>
+
+                            <form onSubmit={handleFinalSubmit} className="space-y-6">
+                                {/* PIN Container */}
+                                <div className="flex justify-between gap-2 max-w-[240px] mx-auto">
+                                    {formData.pin.map((digit, i) => (
+                                        <input
+                                            key={i}
+                                            ref={(el) => (pinRefs.current[i] = el)}
+                                            type="password"
+                                            maxLength={1}
+                                            inputMode="numeric"
+                                            value={digit}
+                                            onChange={(e) => handlePinChange(i, e.target.value)}
+                                            onKeyDown={(e) => handleKeyDown(i, e)}
+                                            className="w-10 h-12 text-center text-lg font-bold border rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                        />
+                                    ))}
+                                </div>
+
+                                {/* Seleção de Perfil */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <RoleButton
+                                        icon={<Shield size={16} />}
+                                        label="Pastor"
+                                        active={formData.role === 'admin'}
+                                        onClick={() => setFormData({ ...formData, role: 'admin' })}
+                                    />
+                                    <RoleButton
+                                        icon={<User size={16} />}
+                                        label="Secretário"
+                                        active={formData.role === 'secretario'}
+                                        onClick={() => setFormData({ ...formData, role: 'secretario' })}
+                                    />
+                                    <RoleButton
+                                        icon={<Briefcase size={16} />}
+                                        label="Tesoureiro"
+                                        active={formData.role === 'tesoureiro'}
+                                        onClick={() => setFormData({ ...formData, role: 'tesoureiro' })}
+                                    />
+                                    <RoleButton
+                                        icon={<Users size={16} />}
+                                        label="Membro"
+                                        active={formData.role === 'membro'}
+                                        onClick={() => setFormData({ ...formData, role: 'membro' })}
+                                    />
+                                    <RoleButton
+                                        icon={<MapPin size={16} />}
+                                        label="Célula"
+                                        active={formData.role === 'lider_celula'}
+                                        onClick={() => setFormData({ ...formData, role: 'lider_celula' })}
+                                    />
+                                    <RoleButton
+                                        icon={<Church size={16} />}
+                                        label="Ministério"
+                                        active={formData.role === 'lider_ministerio'}
+                                        onClick={() => setFormData({ ...formData, role: 'lider_ministerio' })}
+                                    />
+                                    <RoleButton
+                                        icon={<Archive size={16} />}
+                                        label="Patrimônio"
+                                        active={formData.role === 'diretor_patrimonio'}
+                                        onClick={() => setFormData({ ...formData, role: 'diretor_patrimonio' })}
+                                    />
+                                    <RoleButton
+                                        icon={<Shield size={16} />}
+                                        label="Admin"
+                                        active={formData.role === 'superadmin'}
+                                        onClick={() => setFormData({ ...formData, role: 'superadmin' })}
+                                    />
+                                </div>
+
+                                {error && (
+                                    <div className="text-sm text-destructive text-center">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <div className="flex flex-col gap-3">
+                                    <Button
+                                        type="submit"
+                                        className="w-full"
+                                        size="lg"
+                                        disabled={formData.pin.some(digit => !digit)}
+                                    >
+                                        Entrar
+                                    </Button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setStep(1)}
+                                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                                    >
+                                        Voltar
                                     </button>
                                 </div>
                             </form>
@@ -518,11 +379,75 @@ export default function NewLogin() {
                     </Card>
                 )}
             </div>
+
+            {/* Diálogos */}
+            <Dialog open={connectionTestOpen} onOpenChange={setConnectionTestOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Diagnóstico</DialogTitle>
+                        <DialogDescription>
+                            Verificação de conexão com o servidor.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-2 py-4">
+                        {connectionTestLoading ? (
+                            <p className="text-sm text-muted-foreground animate-pulse">Testando...</p>
+                        ) : connectionTestResult ? (
+                            <div className="space-y-2">
+                                <StatusItem label="URL do Banco" ok={connectionTestResult.urlConfigured} />
+                                <StatusItem label="Chave de API" ok={connectionTestResult.keyConfigured} />
+                                <StatusItem label="Status Final" ok={connectionTestResult.ok} error={connectionTestResult.error} />
+                            </div>
+                        ) : null}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Recuperar Senha</DialogTitle>
+                        <DialogDescription>
+                            Enviaremos um link para o seu e-mail.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={handleForgotSubmit} className="space-y-4 pt-2">
+                        <Input
+                            type="email"
+                            placeholder="seu@email.com"
+                            value={forgotEmail}
+                            onChange={(e) => setForgotEmail(e.target.value)}
+                            required
+                        />
+                        <DialogFooter className="flex-col sm:flex-row gap-2">
+                            <Button type="button" variant="ghost" onClick={() => setForgotOpen(false)}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit" disabled={forgotLoading}>
+                                {forgotLoading ? 'Enviando...' : 'Enviar Link'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
 
-function RoleCard({
+function StatusItem({ label, ok, error }: { label: string; ok: boolean; error?: string }) {
+    return (
+        <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border">
+            <span className="text-xs font-medium">{label}</span>
+            {ok ? (
+                <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-200">OK</span>
+            ) : (
+                <span className="text-[10px] font-bold text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-200">{error || 'ERRO'}</span>
+            )}
+        </div>
+    );
+}
+
+function RoleButton({
     icon,
     label,
     active,
@@ -537,17 +462,22 @@ function RoleCard({
         <button
             type="button"
             onClick={onClick}
-            className={`flex flex-col items-center justify-center p-3 gap-1.5 rounded-xl border-2 transition-all duration-300
-                ${active
-                    ? 'border-primary bg-primary/10 text-primary shadow-md scale-105'
-                    : 'border-muted/50 hover:border-primary/30 hover:bg-primary/5 text-muted-foreground font-medium'
+            className={`flex items-center justify-start gap-3 rounded-md border px-4 py-2.5 text-sm transition w-full
+        ${active
+                    ? 'border-primary bg-primary/10 text-primary font-bold shadow-sm'
+                    : 'border-muted hover:bg-muted text-muted-foreground'
                 }`}
         >
-            <div className={`p-1.5 rounded-lg transition-colors ${active ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+            <span className={active ? 'text-primary' : 'text-muted-foreground opacity-70'}>
                 {icon}
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-wider">{label}</span>
+            </span>
+            <span>{label}</span>
         </button>
     );
 }
+
+
+
+
+
 
