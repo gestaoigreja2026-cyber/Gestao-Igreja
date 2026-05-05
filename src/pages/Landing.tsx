@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users, Church, FileText, DollarSign, Check, ArrowRight, Download, LogIn, LayoutDashboard, Fingerprint, Video, UserPlus, Gift, Send, Phone, Mail,
-  MessageSquare, TrendingUp, Shield, Smartphone
+  MessageSquare, TrendingUp, Shield, Smartphone, X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/contexts/AuthContext';
 import { useInstallPWA } from '@/hooks/useInstallPWA';
 import { APP_NAME } from '@/lib/constants';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AIAssistant } from '@/components/AIAssistant';
 
 const formatTime = (time: number) => {
@@ -79,12 +79,21 @@ const PurchaseCard = ({ timeLeft }: { timeLeft: number }) => (
     </div>
   </div>
 );
-
 export default function Landing() {
   useDocumentTitle(APP_NAME);
   const { isAuthenticated } = useAuth();
   const { isInstalled, install } = useInstallPWA();
   const [timeLeft, setTimeLeft] = useState(300);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
+
+  const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  const handleInstallClick = async () => {
+    const success = await install();
+    if (!success && isIOS) {
+      setShowInstallHelp(true);
+    }
+  };
 
   useEffect(() => {
     const timer = setInterval(() => setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0)), 1000);
@@ -95,6 +104,46 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
+      {/* iOS Install Help Dialog */}
+      <AnimatePresence>
+        {showInstallHelp && (
+          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setShowInstallHelp(false)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 100, y: 100 }}
+              className="relative bg-white dark:bg-zinc-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-zinc-200 dark:border-zinc-800"
+            >
+              <button 
+                onClick={() => setShowInstallHelp(false)}
+                className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="flex flex-col items-center text-center gap-4">
+                <div className="p-4 bg-primary/10 text-primary rounded-2xl">
+                  <Smartphone className="w-8 h-8" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-xl font-black">Instalar no iPhone</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Para instalar, toque no botão <b>Compartilhar</b> (ícone abaixo) e selecione <b>"Adicionar à Tela de Início"</b>.
+                  </p>
+                </div>
+                <Button onClick={() => setShowInstallHelp(false)} className="w-full rounded-xl font-bold">Entendido</Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Header Premium */}
       <header className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-md border-primary/10">
         <div className="container max-w-6xl mx-auto h-24 flex items-center justify-between px-6">
@@ -102,7 +151,7 @@ export default function Landing() {
           
           <div className="flex items-center gap-3">
             {!isInstalled && (
-              <Button variant="ghost" size="sm" className="hidden md:flex gap-2 font-bold text-primary" onClick={() => install()}>
+              <Button variant="ghost" size="sm" className="flex gap-2 font-bold text-primary" onClick={handleInstallClick}>
                 <Download className="h-4 w-4" />
                 Instalar
               </Button>
