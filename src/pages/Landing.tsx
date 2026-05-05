@@ -84,15 +84,23 @@ export default function Landing() {
   const { isAuthenticated } = useAuth();
   const { isInstalled, install } = useInstallPWA();
   const [timeLeft, setTimeLeft] = useState(300);
+  const [isInstalling, setIsInstalling] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
 
   const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const handleInstallClick = async () => {
+    setIsInstalling(true);
     const success = await install();
-    if (!success && isIOS) {
-      setShowInstallHelp(true);
+    
+    if (!success) {
+      if (isIOS) {
+        setShowInstallHelp(true);
+      } else {
+        alert("O seu navegador ainda está preparando o instalador. Por favor, aguarde 5 segundos e tente novamente.");
+      }
     }
+    setIsInstalling(false);
   };
 
   useEffect(() => {
@@ -151,9 +159,11 @@ export default function Landing() {
           
           <div className="flex items-center gap-1.5 sm:gap-3">
             {!isInstalled && (
-              <Button variant="ghost" size="sm" className="flex gap-1.5 font-bold text-primary px-2 sm:px-4" onClick={handleInstallClick}>
+              <Button variant="ghost" size="sm" className="flex gap-1.5 font-bold text-primary px-2 sm:px-4" onClick={handleInstallClick} disabled={isInstalling}>
                 <Download className="h-4 w-4 shrink-0" />
-                <span className="hidden min-[480px]:inline">Instalar</span>
+                <span className="hidden min-[480px]:inline">
+                  {isInstalling ? 'Preparando...' : 'Instalar'}
+                </span>
               </Button>
             )}
             <Link to="/login">
