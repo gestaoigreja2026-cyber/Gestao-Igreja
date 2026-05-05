@@ -149,18 +149,21 @@ export default function Landing() {
         <div className="container max-w-6xl mx-auto h-24 flex items-center justify-between px-6">
           <Logo size="sm" showText={false} />
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             {!isInstalled && (
-              <Button variant="ghost" size="sm" className="flex gap-2 font-bold text-primary" onClick={handleInstallClick}>
-                <Download className="h-4 w-4" />
-                Instalar
+              <Button variant="ghost" size="sm" className="flex gap-1.5 font-bold text-primary px-2 sm:px-4" onClick={handleInstallClick}>
+                <Download className="h-4 w-4 shrink-0" />
+                <span className="hidden min-[480px]:inline">Instalar</span>
               </Button>
             )}
             <Link to="/login">
-              <Button variant="outline" className="rounded-full px-6 font-bold">Entrar</Button>
+              <Button variant="outline" size="sm" className="rounded-full px-3 sm:px-6 font-bold text-xs sm:text-sm">Entrar</Button>
             </Link>
             <Link to="/cadastro-igreja-trial">
-              <Button className="rounded-full px-6 font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20">TESTAR GRÁTIS</Button>
+              <Button size="sm" className="rounded-full px-3 sm:px-6 font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 text-xs sm:text-sm">
+                <span className="hidden min-[480px]:inline">TESTAR GRÁTIS</span>
+                <span className="min-[480px]:hidden">TESTAR</span>
+              </Button>
             </Link>
           </div>
         </div>
@@ -177,7 +180,7 @@ export default function Landing() {
             <Badge variant="outline" className="mb-6 px-4 py-1.5 border-primary/30 text-primary bg-primary/5 rounded-full font-bold tracking-widest text-[10px] uppercase">
               O Futuro da sua Igreja começou
             </Badge>
-            <h1 className="text-5xl md:text-7xl font-black mb-8 leading-[1.05] tracking-tight text-foreground">
+            <h1 className="text-3xl md:text-5xl font-black mb-8 leading-[1.05] tracking-tight text-foreground">
               Sua Igreja em um <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-cyan-400 to-blue-600">
                 Novo Nível de Excelência.
