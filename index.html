@@ -76,7 +76,7 @@
 
       const isMainDomain = !subdomain || subdomain === 'www' || subdomain === 'church-gest-oficial';
       
-      if (host === 'localhost' || host === '127.0.0.1') {
+      if (host === 'localhost' || host === '127.0.0.1' || !host.includes('church-gest-oficial')) {
         link.setAttribute("href", "/manifest.json");
       } else {
         link.setAttribute("href", `/api/manifest?v=${version}`);

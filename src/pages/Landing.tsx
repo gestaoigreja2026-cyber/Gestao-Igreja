@@ -97,7 +97,10 @@ export default function Landing() {
       if (isIOS) {
         setShowInstallHelp(true);
       } else {
-        alert("O seu navegador ainda está preparando o instalador. Por favor, aguarde 5 segundos e tente novamente.");
+        const retry = confirm("O instalador ainda está sendo preparado pelo seu navegador. Isso é normal no primeiro acesso.\n\nDeseja recarregar a página para tentar ativar agora?");
+        if (retry) {
+          window.location.reload();
+        }
       }
     }
     setIsInstalling(false);
