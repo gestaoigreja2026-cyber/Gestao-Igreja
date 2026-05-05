@@ -55,11 +55,15 @@ export function InstallPWA() {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       (window as any).deferredPrompt = e; // sincroniza globalmente
+      if (!isIOS) setShowBanner(true); // Só mostra o banner quando estiver pronto no Android/Chrome
     };
     window.addEventListener("beforeinstallprompt", handler);
 
-    // 3. Sempre mostra o banner após 1.5s (independente do evento nativo)
-    const timer = setTimeout(() => setShowBanner(true), 1500);
+    // 3. Para iOS, mostra o banner após um curto delay (já que não há evento)
+    let timer: any;
+    if (isIOS) {
+      timer = setTimeout(() => setShowBanner(true), 1500);
+    }
 
     // 4. Escutar atualizações dinâmicas da logo (ex: index.html inline script)
     const handleLogoUpdate = (e: Event) => {
@@ -70,7 +74,7 @@ export function InstallPWA() {
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("churchLogoUpdated", handleLogoUpdate);
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
     };
   }, []);
 
@@ -78,10 +82,21 @@ export function InstallPWA() {
     const prompt =
       deferredPrompt ||
       ((window as any).deferredPrompt as BeforeInstallPromptEvent | undefined);
+    
     if (prompt) {
-      await prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      if (outcome === "accepted") setShowBanner(false);
+      // Oculta o banner imediatamente para não ficar atrás do prompt do navegador
+      setShowBanner(false);
+      
+      try {
+        await prompt.prompt();
+        const { outcome } = await prompt.userChoice;
+        console.log('User choice:', outcome);
+        // Se recusar, podemos opcionalmente re-exibir no futuro, mas aqui limpamos
+        setDeferredPrompt(null);
+        (window as any).deferredPrompt = null;
+      } catch (err) {
+        console.error('Erro ao chamar prompt de instalação:', err);
+      }
     } else {
       setShowHelpDialog(true);
     }

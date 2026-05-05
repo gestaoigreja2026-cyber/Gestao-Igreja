@@ -94,15 +94,31 @@ exports.handler = async (event) => {
             src: logoWithV,
             sizes: '192x192',
             type: logo.endsWith('.svg') ? 'image/svg+xml' : 'image/png',
-            purpose: 'any maskable',
+            purpose: 'any'
           },
           {
             src: logoWithV,
             sizes: '512x512',
             type: logo.endsWith('.svg') ? 'image/svg+xml' : 'image/png',
-            purpose: 'any maskable',
-          },
+            purpose: 'maskable'
+          }
         ],
+        screenshots: [
+          {
+            src: logoWithV,
+            sizes: '512x512',
+            type: logo.endsWith('.svg') ? 'image/svg+xml' : 'image/png',
+            form_factor: 'wide',
+            label: 'Gestão da Igreja'
+          },
+          {
+            src: logoWithV,
+            sizes: '512x512',
+            type: logo.endsWith('.svg') ? 'image/svg+xml' : 'image/png',
+            form_factor: 'narrow',
+            label: 'Gestão da Igreja'
+          }
+        ]
       }),
     };
   } catch (error) {
