@@ -15,8 +15,8 @@ interface LogoProps {
 // Tamanhos da logo (+30% em relação ao original)
 const sizeStyles: Record<string, { width: string; height: string }> = {
   xs: { width: '2.4rem',  height: '2.4rem' },
-  sm: { width: '8rem',    height: '8rem' },
-  md: { width: '14rem',   height: '14rem' },
+  sm: { width: '5.5rem',  height: '5.5rem' },
+  md: { width: '12rem',   height: '12rem' },
   lg: { width: '24rem',   height: '24rem' },
   xl: { width: '38rem',   height: '38rem' },
 };

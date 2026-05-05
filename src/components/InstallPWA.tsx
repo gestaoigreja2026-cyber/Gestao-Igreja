@@ -95,8 +95,6 @@ export function InstallPWA() {
       } catch (err) {
         console.error('Erro ao instalar PWA:', err);
       }
-    } else if (isIOS) {
-      setShowHelpDialog(true);
     }
   };
 
@@ -143,26 +141,6 @@ export function InstallPWA() {
           </Button>
         </div>
       </div>
-
-      {isIOS && (
-        <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Instalar no iPhone/iPad</DialogTitle>
-              <DialogDescription asChild>
-                <div className="space-y-3 pt-2">
-                  <p><strong>Siga estes passos no Safari:</strong></p>
-                  <ol className="list-decimal list-inside space-y-1 text-sm">
-                    <li>Toque no ícone <strong>Compartilhar</strong> (seta para cima) na barra inferior</li>
-                    <li>Role e toque em <strong>Adicionar à Tela de Início</strong></li>
-                    <li>Toque em <strong>Adicionar</strong> no topo direito</li>
-                  </ol>
-                </div>
-              </DialogDescription>
-            </DialogHeader>
-          </DialogContent>
-        </Dialog>
-      )}
     </>
   );
 }

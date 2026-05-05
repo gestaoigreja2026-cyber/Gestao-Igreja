@@ -76,7 +76,11 @@
 
       const isMainDomain = !subdomain || subdomain === 'www' || subdomain === 'church-gest-oficial';
       
-      link.setAttribute("href", `/api/manifest?v=${version}`);
+      if (host === 'localhost' || host === '127.0.0.1') {
+        link.setAttribute("href", "/manifest.json");
+      } else {
+        link.setAttribute("href", `/api/manifest?v=${version}`);
+      }
 
       // Função para aplicar o branding na página
       const applyBranding = (name, logo) => {
