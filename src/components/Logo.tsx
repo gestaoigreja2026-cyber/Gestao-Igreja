@@ -14,11 +14,11 @@ interface LogoProps {
 
 // Tamanhos da logo (+30% em relação ao original)
 const sizeStyles: Record<string, { width: string; height: string }> = {
-  xs: { width: '2.6rem',  height: '2.6rem' },
-  sm: { width: '9.11rem', height: '9.11rem' },
-  md: { width: '15.95rem', height: '15.95rem' },
-  lg: { width: '27.33rem', height: '27.33rem' },
-  xl: { width: '43.28rem', height: '43.28rem' },
+  xs: { width: '2rem',    height: '2rem' },
+  sm: { width: '6.5rem',  height: '6.5rem' },
+  md: { width: '11rem',   height: '11rem' },
+  lg: { width: '19rem',   height: '19rem' },
+  xl: { width: '30rem',   height: '30rem' },
 };
 
 export function Logo({ size = 'md', showText = true, overrideSrc }: LogoProps) {
@@ -59,13 +59,13 @@ export function Logo({ size = 'md', showText = true, overrideSrc }: LogoProps) {
       size === 'lg' ? 'flex-col text-center gap-4' : 'flex-row gap-3',
     )}>
       <div
-        className="flex items-center justify-center rounded-xl transition-all duration-500 z-10 overflow-hidden"
+        className="flex items-center justify-center rounded-xl transition-all duration-500 z-10 overflow-hidden p-1"
         style={{ ...sizeStyles[size] }}
       >
         <img
           src={logoSrc}
           alt={tenant?.name || 'Gestão Igreja'}
-          className="church-logo w-full h-full object-contain"
+          className="church-logo w-full h-full object-contain object-center"
           style={{ maxWidth: '100%', maxHeight: '100%' }}
           onError={() => setLogoSrc(DEFAULT_LOGO)}
         />

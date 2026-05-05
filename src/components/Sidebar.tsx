@@ -162,7 +162,7 @@ export function Sidebar() {
         <div className="flex items-start justify-between gap-2">
           {/* Logo */}
           <div className={cn('flex flex-col items-center gap-0 min-w-0 flex-1', collapsed && 'flex-none')}>
-            <div className={cn('origin-center', collapsed ? 'scale-[1.05]' : 'scale-[1.05]')}>
+            <div className="flex justify-center w-full">
               <Logo size="sm" showText={false} />
             </div>
           </div>
