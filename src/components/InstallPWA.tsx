@@ -84,20 +84,18 @@ export function InstallPWA() {
       ((window as any).deferredPrompt as BeforeInstallPromptEvent | undefined);
     
     if (prompt) {
-      // Oculta o banner imediatamente para não ficar atrás do prompt do navegador
       setShowBanner(false);
-      
       try {
         await prompt.prompt();
         const { outcome } = await prompt.userChoice;
-        console.log('User choice:', outcome);
-        // Se recusar, podemos opcionalmente re-exibir no futuro, mas aqui limpamos
-        setDeferredPrompt(null);
-        (window as any).deferredPrompt = null;
+        if (outcome === 'accepted') {
+          setDeferredPrompt(null);
+          (window as any).deferredPrompt = null;
+        }
       } catch (err) {
-        console.error('Erro ao chamar prompt de instalação:', err);
+        console.error('Erro ao instalar PWA:', err);
       }
-    } else {
+    } else if (isIOS) {
       setShowHelpDialog(true);
     }
   };
@@ -115,7 +113,7 @@ export function InstallPWA() {
         <img
           src={churchLogo}
           alt={`Logo ${churchName}`}
-          className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 shrink-0 object-contain rounded-lg"
+          className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 shrink-0 object-contain rounded-lg p-1"
           onError={(e) => { (e.target as HTMLImageElement).src = "/logo-app.png"; }}
         />
         <div className="flex-1 min-w-0">
@@ -123,7 +121,7 @@ export function InstallPWA() {
             Instalar {churchName}
           </p>
           <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            Use como app no celular, tablet ou PC
+            Use como app no celular ou PC
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
@@ -146,35 +144,25 @@ export function InstallPWA() {
         </div>
       </div>
 
-      <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Instalar {churchName}</DialogTitle>
-            <DialogDescription asChild>
-              <div className="space-y-3 pt-2">
-                {isIOS ? (
-                  <>
-                    <p><strong>No Safari (iPhone/iPad):</strong></p>
-                    <ol className="list-decimal list-inside space-y-1 text-sm">
-                      <li>Toque no ícone <strong>Compartilhar</strong> (seta para cima) na barra inferior</li>
-                      <li>Role e toque em <strong>Adicionar à Tela de Início</strong></li>
-                      <li>Toque em <strong>Adicionar</strong></li>
-                    </ol>
-                  </>
-                ) : (
-                  <>
-                    <p><strong>No Chrome ou Edge (PC, tablet, Android):</strong></p>
-                    <ol className="list-decimal list-inside space-y-1 text-sm">
-                      <li>Toque no menu <strong>⋮</strong> (três pontos) no canto superior direito</li>
-                      <li>Selecione <strong>Instalar app</strong> ou <strong>Adicionar à tela inicial</strong></li>
-                    </ol>
-                  </>
-                )}
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+      {isIOS && (
+        <Dialog open={showHelpDialog} onOpenChange={setShowHelpDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Instalar no iPhone/iPad</DialogTitle>
+              <DialogDescription asChild>
+                <div className="space-y-3 pt-2">
+                  <p><strong>Siga estes passos no Safari:</strong></p>
+                  <ol className="list-decimal list-inside space-y-1 text-sm">
+                    <li>Toque no ícone <strong>Compartilhar</strong> (seta para cima) na barra inferior</li>
+                    <li>Role e toque em <strong>Adicionar à Tela de Início</strong></li>
+                    <li>Toque em <strong>Adicionar</strong> no topo direito</li>
+                  </ol>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }
