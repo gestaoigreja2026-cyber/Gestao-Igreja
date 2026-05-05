@@ -14,11 +14,11 @@ interface LogoProps {
 
 // Tamanhos da logo (+30% em relação ao original)
 const sizeStyles: Record<string, { width: string; height: string }> = {
-  xs: { width: '2rem',    height: '2rem' },
-  sm: { width: '6.5rem',  height: '6.5rem' },
-  md: { width: '11rem',   height: '11rem' },
-  lg: { width: '19rem',   height: '19rem' },
-  xl: { width: '30rem',   height: '30rem' },
+  xs: { width: '2.4rem',  height: '2.4rem' },
+  sm: { width: '8rem',    height: '8rem' },
+  md: { width: '14rem',   height: '14rem' },
+  lg: { width: '24rem',   height: '24rem' },
+  xl: { width: '38rem',   height: '38rem' },
 };
 
 export function Logo({ size = 'md', showText = true, overrideSrc }: LogoProps) {
@@ -59,7 +59,7 @@ export function Logo({ size = 'md', showText = true, overrideSrc }: LogoProps) {
       size === 'lg' ? 'flex-col text-center gap-4' : 'flex-row gap-3',
     )}>
       <div
-        className="flex items-center justify-center rounded-xl transition-all duration-500 z-10 overflow-hidden p-1"
+        className="flex items-center justify-center rounded-xl transition-all duration-500 z-10 p-1"
         style={{ ...sizeStyles[size] }}
       >
         <img
