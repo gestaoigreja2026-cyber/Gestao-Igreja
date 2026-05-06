@@ -2,7 +2,7 @@ import { useState, useRef, useMemo, useEffect } from 'react';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { ChatConversation, useChat } from '@/hooks/useChat';
-import { ArrowLeft, MoreVertical, Phone, Video, Pin, X, Search } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Pin, X, Search } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -20,10 +20,10 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
   const { data: messages, isLoading } = useMessages(conversation.id);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showContactInfo, setShowContactInfo] = useState(false);
-  const [showVideoCall, setShowVideoCall] = useState(false);
-  const [callType, setCallType] = useState<'video' | 'audio'>('video');
   const [isSearching, setIsSearching] = useState(false);
   const [messageSearchTerm, setMessageSearchTerm] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const filteredMessages = useMemo(() => {
     if (!messages) return [];
@@ -93,24 +93,6 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
           >
             <Search className="w-5 h-5" />
           </button>
-          <button 
-            onClick={() => {
-              setCallType('video');
-              setShowVideoCall(true);
-            }} 
-            className="p-2 rounded-full text-gray-500 hover:bg-black/5 transition-colors"
-          >
-            <Video className="w-5 h-5" />
-          </button>
-          <button 
-            onClick={() => {
-              setCallType('audio');
-              setShowVideoCall(true);
-            }} 
-            className="p-2 rounded-full text-gray-500 hover:bg-black/5 transition-colors"
-          >
-            <Phone className="w-5 h-5" />
-          </button>
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -119,22 +101,22 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem className="cursor-pointer" onClick={() => setShowContactInfo(true)}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => setShowContactInfo(true)}
+              >
                 Dados do contato
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer" onClick={async () => {
-                if (confirm('Deseja limpar todas as mensagens desta conversa?')) {
-                  await clearMessages(conversation.id);
-                }
-              }}>
+              <DropdownMenuItem
+                className="cursor-pointer"
+                onSelect={() => setShowClearConfirm(true)}
+              >
                 Limpar conversa
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600" onClick={async () => {
-                if (confirm('Deseja APAGAR esta conversa inteira?')) {
-                  await deleteConversation(conversation.id);
-                  onBack();
-                }
-              }}>
+              <DropdownMenuItem
+                className="cursor-pointer text-red-600 focus:text-red-600"
+                onSelect={() => setShowDeleteConfirm(true)}
+              >
                 Apagar conversa
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -247,29 +229,50 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
         </DialogContent>
       </Dialog>
 
-      {/* Video Call Modal */}
-      <Dialog open={showVideoCall} onOpenChange={setShowVideoCall}>
-        <DialogContent className="sm:max-w-[90vw] sm:max-h-[90vh] p-0 overflow-hidden bg-black border-none">
-          <DialogHeader className="p-4 bg-gray-900 text-white flex-row items-center justify-between space-y-0">
-            <DialogTitle className="flex items-center gap-2">
-              {callType === 'video' ? <Video className="w-5 h-5" /> : <Phone className="w-5 h-5" />}
-              {callType === 'video' ? 'Chamada de Vídeo' : 'Chamada de Voz'} - {chatName}
-            </DialogTitle>
+      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Limpar Conversa</DialogTitle>
           </DialogHeader>
-          <div className="w-full aspect-video md:aspect-[16/9] bg-gray-800">
-            <iframe
-              src={`https://meet.jit.si/${conversation.id.replace(/-/g, '')}#userInfo.displayName="${chatName}"&config.startWithAudioMuted=false&config.startWithVideoMuted=${callType === 'audio'}`}
-              allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write; autoplay"
-              className="w-full h-full border-none"
-            />
+          <div className="py-4 text-center">
+            <p className="text-gray-600">Deseja limpar todas as mensagens desta conversa?</p>
+            <p className="text-sm text-gray-500 mt-2">Esta ação não pode ser desfeita.</p>
           </div>
-          <div className="p-4 bg-gray-900 flex justify-center">
-            <Button variant="destructive" className="rounded-full px-8" onClick={() => setShowVideoCall(false)}>
-              Encerrar Chamada
-            </Button>
-          </div>
+          <DialogFooter className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowClearConfirm(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => {
+              clearMessages(conversation.id)
+                .then(() => setShowClearConfirm(false))
+                .catch(err => alert('Erro ao limpar conversa: ' + (err?.message || 'Tente novamente.')));
+            }}>Limpar Mensagens</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Apagar Conversa</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-center">
+            <p className="text-gray-600">Deseja APAGAR esta conversa inteira?</p>
+            <p className="text-sm text-red-500 mt-2 font-medium">Atenção: Você perderá acesso a todo o histórico de mensagens.</p>
+          </div>
+          <DialogFooter className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={() => {
+              deleteConversation(conversation.id).then(() => {
+                setShowDeleteConfirm(false);
+                onBack();
+              }).catch(err => {
+                setShowDeleteConfirm(false);
+                alert('Erro ao apagar conversa: ' + (err?.message || 'Tente novamente.'));
+              });
+            }}>Sim, Apagar Tudo</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

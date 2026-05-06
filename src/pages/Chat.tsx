@@ -95,9 +95,9 @@ export default function Chat() {
               <div className="w-32 h-32 mx-auto bg-primary/10 rounded-full flex items-center justify-center mb-6">
                 <svg viewBox="0 0 24 24" width="64" height="64" stroke="currentColor" strokeWidth="1" fill="none" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
               </div>
-              <h2 className="text-3xl font-light text-gray-700 mb-4">Gestão Igreja Chat</h2>
+              <h2 className="text-3xl font-light text-gray-700 mb-4">Chat</h2>
               <p className="text-gray-500 mb-8 leading-relaxed">
-                Envie e receba mensagens sem precisar manter seu celular conectado. Use o Gestão Igreja em até 4 dispositivos simultaneamente.
+                Envie e receba mensagens sem precisar manter seu celular conectado. Use o Chat em até 4 dispositivos simultaneamente.
               </p>
               <div className="flex flex-col items-center justify-center gap-4 text-sm text-gray-400">
                 <div className="flex items-center gap-2">

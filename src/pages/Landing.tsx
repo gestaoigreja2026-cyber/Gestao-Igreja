@@ -157,7 +157,7 @@ export default function Landing() {
 
       {/* Header Premium */}
       <header className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-md border-primary/10">
-        <div className="container max-w-6xl mx-auto h-24 flex items-center justify-between px-6">
+        <div className="container max-w-6xl mx-auto h-24 flex items-center justify-center gap-8 px-6">
           <Logo size="sm" showText={false} />
           
           <div className="flex items-center gap-1.5 sm:gap-3">
@@ -341,7 +341,7 @@ export default function Landing() {
           </div>
           
           <div className="pt-8 border-t flex flex-col md:flex-row justify-between items-center gap-6 text-sm text-muted-foreground font-bold">
-            <p>© {new Date().getFullYear()} GESTÃO IGREJA. Todos os direitos reservados.</p>
+            <p>© {new Date().getFullYear()} — Todos os direitos reservados.</p>
             <p>CNPJ: 65.589.068/0001-01</p>
           </div>
         </div>

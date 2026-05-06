@@ -54,6 +54,7 @@ interface ChatContextType {
   clearMessages: (conversationId: string) => Promise<string>;
   deleteConversation: (conversationId: string) => Promise<string>;
   requestNotificationPermission: () => Promise<boolean>;
+  createStandardRooms: () => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -226,9 +227,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const createGroupMutation = useMutation({
     mutationFn: async ({ name, userIds }: { name: string, userIds: string[] }) => {
-      const { data: conv } = await supabase.from('chat_conversations').insert({ name, type: 'group' }).select().single();
-      const participants = [...new Set([currentUser!.id, ...userIds])].map(id => ({ conversation_id: conv.id, profile_id: id, role: id === currentUser!.id ? 'admin' : 'member' }));
-      await supabase.from('chat_participants').insert(participants);
+      const { data: conv, error } = await supabase.from('chat_conversations').insert({ name, type: 'group' }).select().single();
+      if (error) throw error;
+      if (!conv) throw new Error('Não foi possível criar o grupo.');
+
+      const participants = [...new Set([currentUser!.id, ...userIds])].map(id => ({ 
+        conversation_id: conv.id, 
+        profile_id: id, 
+        role: id === currentUser!.id ? 'admin' : 'member' 
+      }));
+      
+      const { error: partError } = await supabase.from('chat_participants').insert(participants);
+      if (partError) throw partError;
+      
       return conv.id;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations'] })
@@ -236,7 +247,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const clearMessagesMutation = useMutation({
     mutationFn: async (conversationId: string) => {
-      await supabase.from('chat_messages').delete().eq('conversation_id', conversationId);
+      const { data, error } = await supabase.from('chat_messages').delete().eq('conversation_id', conversationId).select();
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        // Pode ser que não houvesse mensagens, o que não é um erro fatal, mas logamos
+        console.log('Nenhuma mensagem apagada (talvez vazio ou sem permissão)');
+      }
       return conversationId;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-messages'] })
@@ -244,8 +260,63 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const deleteConversationMutation = useMutation({
     mutationFn: async (conversationId: string) => {
-      await supabase.from('chat_conversations').delete().eq('id', conversationId);
+      // 1. Delete all messages first
+      const { error: msgError } = await supabase.from('chat_messages').delete().eq('conversation_id', conversationId);
+      if (msgError) console.error("Erro ao apagar mensagens:", msgError);
+
+      // 2. Tentar apagar a conversa ANTES dos participantes (para não perder o RLS de admin)
+      const { data: convData, error: convError } = await supabase
+        .from('chat_conversations')
+        .delete()
+        .eq('id', conversationId)
+        .select();
+        
+      if (convError) throw convError;
+      
+      // Se convData for vazio, o RLS bloqueou silenciosamente (não tem permissão global)
+      if (!convData || convData.length === 0) {
+        // Fallback: Apenas sai da conversa apagando a própria participação
+        const { error: leaveError } = await supabase
+          .from('chat_participants')
+          .delete()
+          .eq('conversation_id', conversationId)
+          .eq('profile_id', (await supabase.auth.getUser()).data.user?.id);
+          
+        if (leaveError) throw leaveError;
+        return conversationId; // Conclui com sucesso (vai sumir da lista)
+      }
+
+      // 3. Se apagou a conversa com sucesso, apaga os participantes restantes
+      await supabase.from('chat_participants').delete().eq('conversation_id', conversationId);
+
       return conversationId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+    }
+  });
+
+  const createStandardRoomsMutation = useMutation({
+    mutationFn: async () => {
+      if (!currentUser) return;
+      const rooms = [
+        { name: 'Pastores', type: 'leaders' },
+        { name: 'Células', type: 'cell' },
+        { name: 'Ministérios', type: 'ministry' },
+        { name: 'Membros', type: 'group' }
+      ];
+
+      for (const room of rooms) {
+        const { data: conv, error } = await supabase.from('chat_conversations').insert(room).select().single();
+        if (error || !conv) continue;
+        
+        await supabase.from('chat_participants').insert({
+          conversation_id: conv.id,
+          profile_id: currentUser.id,
+          role: 'admin'
+        });
+      }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations'] })
   });
@@ -293,7 +364,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       starredMessages: starredMessagesQuery.data || [],
       clearMessages: clearMessagesMutation.mutateAsync,
       deleteConversation: deleteConversationMutation.mutateAsync,
-      requestNotificationPermission
+      requestNotificationPermission,
+      createStandardRooms: createStandardRoomsMutation.mutateAsync
     }}>
       {children}
     </ChatContext.Provider>

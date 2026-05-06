@@ -7,6 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+
 interface ChatSidebarProps {
   conversations: ChatConversation[];
   isLoading: boolean;
@@ -19,8 +22,9 @@ interface ChatSidebarProps {
 }
 
 export function ChatSidebar({ conversations, activeConversationId, onSelectConversation, isLoading, isSearchingNew, setIsSearchingNew, onNewGroup, onStarredMessages, onSettings, isDarkMode }: ChatSidebarProps) {
-  const { searchUsers, startChat, isStartingChat } = useChat();
+  const { searchUsers, startChat, isStartingChat, createStandardRooms } = useChat();
   const [searchTerm, setSearchTerm] = useState('');
+  const [showCreateRoomsConfirm, setShowCreateRoomsConfirm] = useState(false);
 
   // Filter conversations based on search term
   const filteredConversations = conversations.filter(conv => {
@@ -104,6 +108,12 @@ export function ChatSidebar({ conversations, activeConversationId, onSelectConve
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem className="cursor-pointer" onClick={onNewGroup}>
                 Novo grupo
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="cursor-pointer text-primary font-medium" 
+                onSelect={() => setShowCreateRoomsConfirm(true)}
+              >
+                Criar Salas Padrão
               </DropdownMenuItem>
               <DropdownMenuItem className="cursor-pointer" onClick={onStarredMessages}>
                 Mensagens favoritas
@@ -229,6 +239,27 @@ export function ChatSidebar({ conversations, activeConversationId, onSelectConve
           </div>
         )}
       </div>
+
+      <Dialog open={showCreateRoomsConfirm} onOpenChange={setShowCreateRoomsConfirm}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Criar Salas Padrão</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 text-center">
+            <p className="text-gray-600">Deseja criar as 4 salas padrão do sistema?</p>
+            <p className="text-sm text-gray-500 mt-2">(Pastores, Células, Ministérios, Membros)</p>
+          </div>
+          <DialogFooter className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowCreateRoomsConfirm(false)}>Cancelar</Button>
+            <Button onClick={() => {
+              createStandardRooms()
+                .then(() => setShowCreateRoomsConfirm(false))
+                .catch(() => alert('Erro ao criar salas padrão.'));
+            }}>Sim, Criar Salas</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

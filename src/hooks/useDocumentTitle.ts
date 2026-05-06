@@ -4,7 +4,11 @@ const BASE_TITLE = 'Gestão Igreja';
 
 export function useDocumentTitle(title: string) {
   useEffect(() => {
-    document.title = title ? `${title} | ${BASE_TITLE}` : BASE_TITLE;
+    if (title === BASE_TITLE) {
+      document.title = BASE_TITLE;
+    } else {
+      document.title = title ? `${title} | ${BASE_TITLE}` : BASE_TITLE;
+    }
     return () => {
       document.title = BASE_TITLE;
     };

@@ -201,20 +201,16 @@ export default function NewLogin() {
                     <Card className="shadow-sm">
                         <CardContent className="p-4">
                             <div className="text-center mb-4">
-                                <div className="flex justify-center mb-3">
+                                <div className="flex justify-center mb-4">
                                     <Logo size="md" showText={false} />
                                 </div>
-                                {tenant?.name ? (
+                                {tenant?.name && (
                                     <h1 className="text-xl font-bold">
                                         <span className="text-slate-900">{tenant.name}</span>
                                     </h1>
-                                ) : (
-                                    <h1 className="text-xl font-bold">
-                                        <span className="text-slate-900">Gestão</span>{' '}
-                                        <span className="text-primary">Igreja</span>
-                                    </h1>
                                 )}
-                                <h2 className="text-base font-semibold mt-3">Acessar sistema</h2>
+                                <p className="text-xl font-bold text-primary mt-3">Seja bem Vindo</p>
+                                <h2 className="text-base font-semibold">Acessar sistema</h2>
                                 <p className="text-xs text-muted-foreground">Entre com seus dados para continuar</p>
                             </div>
 
