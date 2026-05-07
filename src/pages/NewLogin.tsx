@@ -195,7 +195,7 @@ export default function NewLogin() {
 
     return (
         <div className="min-h-screen flex items-center justify-center relative px-4 bg-gradient-to-br from-primary/5 via-background to-primary/10">
-            <div className="w-full max-w-[320px] relative z-10">
+            <div className="w-full max-w-[400px] relative z-10">
                 {/* TELA 1: BOAS-VINDAS */}
                 {step === 1 && (
                     <Card className="shadow-sm">
@@ -279,7 +279,7 @@ export default function NewLogin() {
 
                             <form onSubmit={handleFinalSubmit} className="space-y-6">
                                 {/* PIN Container */}
-                                <div className="flex justify-between gap-2 max-w-[240px] mx-auto">
+                                <div className="flex justify-center gap-2 w-full">
                                     {formData.pin.map((digit, i) => (
                                         <input
                                             key={i}
