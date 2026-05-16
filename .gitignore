@@ -35,3 +35,8 @@ netlify-env-import.txt
 .env*.local
 release
 vite.config.ts.timestamp-*.mjs
+
+# Temporary and Scratch files
+scratch/
+supabase/.temp/
+supabase/.env

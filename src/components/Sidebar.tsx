@@ -64,7 +64,7 @@ const navGroups: NavGroup[] = [
       { icon: BookOpen, label: 'Planos de Leitura', href: '/planos-leitura', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
       { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'superadmin', 'diretor_patrimonio'] },
       { icon: Share2, label: 'Redes Sociais', href: '/redes-sociais', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-      { icon: Gift, label: 'Cadastrar Igreja - Teste 7 dias', href: '/cadastro-igreja-trial', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], openInNewTab: true },
+      { icon: Gift, label: 'Cadastrar Igreja', href: '/cadastro-igreja-trial', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], openInNewTab: true },
     ],
   },
 ];
@@ -108,8 +108,8 @@ export function Sidebar() {
   const filteredOther = otherItems.filter(canSee);
   const showDashboard = canSee(dashboardItem);
 
-  // Garantir que superadmin sempre veja o Painel Root
-  const isSuperAdmin = user?.role === 'superadmin';
+  // Garantir que superadmin sempre veja o Painel Root (apenas para o e-mail master)
+  const isSuperAdmin = user?.role === 'superadmin' && user?.email === 'edukadoshmda@gmail.com';
 
   const handleAvatarClick = () => {
     avatarInputRef.current?.click();

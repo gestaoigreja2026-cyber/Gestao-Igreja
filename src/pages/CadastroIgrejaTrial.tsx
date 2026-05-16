@@ -29,7 +29,7 @@ const initialForm: TrialChurchFormData = {
 };
 
 export default function CadastroIgrejaTrial() {
-  useDocumentTitle('Cadastrar Igreja - Teste 7 dias');
+  useDocumentTitle('Cadastrar Igreja');
   const navigate = useNavigate();
   const { toast } = useToast();
   const [form, setForm] = useState<TrialChurchFormData>(initialForm);
@@ -79,8 +79,8 @@ export default function CadastroIgrejaTrial() {
     try {
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(form));
       sessionStorage.setItem('trial_signup', '1');
-      toast({ title: 'Dados salvos!', description: 'Agora faça login ou cadastre-se para completar.' });
-      navigate('/login?trial=1');
+      toast({ title: 'Dados salvos!', description: 'Redirecionando para a página de pagamento para ativar sua conta.' });
+      navigate('/checkout');
     } catch (err: any) {
       toast({ title: 'Erro', description: err?.message, variant: 'destructive' });
     } finally {
@@ -91,16 +91,7 @@ export default function CadastroIgrejaTrial() {
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-        <div className="flex flex-col items-center gap-4 mb-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
-              <Gift className="h-7 w-7 text-primary" />
-              Cadastrar Igreja - Teste 7 dias
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Preencha os dados da sua igreja e comece o período de teste gratuito.
-            </p>
-          </div>
+        <div className="flex flex-col items-center gap-4 mb-4">
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -124,12 +115,12 @@ export default function CadastroIgrejaTrial() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="cnpj">CNPJ</Label>
+                <Label htmlFor="cnpj">CPF ou CNPJ</Label>
                 <Input
                   id="cnpj"
                   value={form.cnpj}
                   onChange={(e) => handleChange('cnpj', e.target.value)}
-                  placeholder="00.000.000/0001-00"
+                  placeholder="000.000.000-00 ou 00.000.000/0001-00"
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const ASAAS_API_KEY = Deno.env.get('ASAAS_API_KEY')
 const ASAAS_WEBHOOK_TOKEN = Deno.env.get('ASAAS_WEBHOOK_TOKEN') // Token de segurança do Webhook
+const ASAAS_BASE_URL = ASAAS_API_KEY?.includes('hmlg') ? 'https://sandbox.asaas.com/api/v3' : 'https://www.asaas.com/api/v3'
 
 serve(async (req) => {
   const { method } = req
@@ -31,7 +32,7 @@ serve(async (req) => {
       const { action, churchId } = body
       
       if (action === 'init_checkout') {
-        const { churchName, churchSlug, adminEmail, adminName, cpfCnpj } = body
+        const { churchName, churchSlug, adminEmail, adminName, cpfCnpj, mobilePhone } = body
 
         // 1. Cria a igreja no banco (status inadimplente até pagar)
         const { data: newChurch, error: churchError } = await supabaseClient
@@ -43,25 +44,26 @@ serve(async (req) => {
         if (churchError) throw churchError
 
         // 2. Cria o Cliente no Asaas
-        const customerResponse = await fetch('https://www.asaas.com/api/v3/customers', {
+        const customerResponse = await fetch(`${ASAAS_BASE_URL}/customers`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'access_token': ASAAS_API_KEY || '' },
           body: JSON.stringify({
             name: adminName,
             email: adminEmail,
-            cpfCnpj: cpfCnpj
+            cpfCnpj: cpfCnpj,
+            mobilePhone: mobilePhone
           })
         })
         const customer = await customerResponse.json()
         if (customer.errors) throw new Error(customer.errors[0].description)
 
         // 3. Cria a Assinatura no Asaas (R$ 75,00 promocional)
-        const subResponse = await fetch('https://www.asaas.com/api/v3/subscriptions', {
+        const subResponse = await fetch(`${ASAAS_BASE_URL}/subscriptions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'access_token': ASAAS_API_KEY || '' },
           body: JSON.stringify({
             customer: customer.id,
-            billingType: 'UNDEFINED', // Permite que o cliente escolha no checkout
+            billingType: 'UNDEFINED', // Permite que o cliente escolha PIX ou Cartão no checkout
             value: 75.0,
             nextDueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0], // Amanhã
             cycle: 'MONTHLY',
@@ -83,14 +85,26 @@ serve(async (req) => {
           })
           .eq('church_id', newChurch.id)
 
-        // 5. Busca a primeira cobrança pendente para pegar a URL de pagamento
-        const paymentsResponse = await fetch(`https://www.asaas.com/api/v3/payments?subscription=${subscription.id}`, {
+        // 5. Busca a primeira cobrança pendente para pegar a URL de pagamento e o ID
+        const paymentsResponse = await fetch(`${ASAAS_BASE_URL}/payments?subscription=${subscription.id}`, {
           headers: { 'access_token': ASAAS_API_KEY || '' }
         })
         const payments = await paymentsResponse.json()
+        const paymentId = payments.data?.[0]?.id
         const invoiceUrl = payments.data?.[0]?.invoiceUrl || customer.invoiceUrl
 
-        return new Response(JSON.stringify({ url: invoiceUrl }), { 
+        let pixData = null;
+        if (paymentId) {
+          // 6. Busca o QR Code do PIX para exibir na tela
+          const pixResponse = await fetch(`${ASAAS_BASE_URL}/payments/${paymentId}/pixQrCode`, {
+            headers: { 'access_token': ASAAS_API_KEY || '' }
+          })
+          if (pixResponse.ok) {
+            pixData = await pixResponse.json()
+          }
+        }
+
+        return new Response(JSON.stringify({ url: invoiceUrl, pix: pixData }), { 
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } 
         })
       }
@@ -108,7 +122,7 @@ serve(async (req) => {
         }
 
         // Busca a última cobrança pendente no Asaas
-        const asaasResponse = await fetch(`https://www.asaas.com/api/v3/payments?customer=${sub.asaas_customer_id}&status=PENDING`, {
+        const asaasResponse = await fetch(`${ASAAS_BASE_URL}/payments?customer=${sub.asaas_customer_id}&status=PENDING`, {
           headers: { 'access_token': ASAAS_API_KEY || '' }
         })
         const payments = await asaasResponse.json()
@@ -133,7 +147,7 @@ serve(async (req) => {
           return new Response(JSON.stringify({ error: 'Assinatura não encontrada' }), { status: 404 })
         }
 
-        const asaasResponse = await fetch(`https://www.asaas.com/api/v3/subscriptions/${sub.asaas_subscription_id}`, {
+        const asaasResponse = await fetch(`${ASAAS_BASE_URL}/subscriptions/${sub.asaas_subscription_id}`, {
           headers: { 'access_token': ASAAS_API_KEY || '' }
         })
         const subscription = await asaasResponse.json()

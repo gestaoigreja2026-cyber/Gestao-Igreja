@@ -172,10 +172,10 @@ export default function Landing() {
             <Link to="/login">
               <Button variant="outline" size="sm" className="rounded-full px-3 sm:px-6 font-bold text-xs sm:text-sm">Entrar</Button>
             </Link>
-            <Link to="/cadastro-igreja-trial">
+            <Link to="/checkout">
               <Button size="sm" className="rounded-full px-3 sm:px-6 font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 text-xs sm:text-sm">
-                <span className="hidden min-[480px]:inline">TESTAR GRÁTIS</span>
-                <span className="min-[480px]:hidden">TESTAR</span>
+                <span className="hidden min-[480px]:inline">ASSINE AGORA</span>
+                <span className="min-[480px]:hidden">ASSINAR</span>
               </Button>
             </Link>
           </div>
@@ -205,9 +205,9 @@ export default function Landing() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Link to="/cadastro-igreja-trial">
+              <Link to="/checkout">
                 <Button size="lg" className="h-16 px-10 rounded-2xl font-black text-xl bg-primary shadow-2xl shadow-primary/30 hover:scale-105 transition-transform">
-                  COMEÇAR AGORA
+                  ASSINE AGORA
                 </Button>
               </Link>
               <div className="flex -space-x-3">
@@ -291,13 +291,12 @@ export default function Landing() {
             Pronto para transformar a <br /> sua gestão hoje?
           </h2>
           <div className="flex flex-col md:flex-row justify-center items-center gap-6">
-             <Link to="/cadastro-igreja-trial">
+             <Link to="/checkout">
                 <Button size="lg" className="h-20 px-12 rounded-2xl font-black text-2xl bg-white text-primary hover:bg-slate-50 shadow-2xl hover:scale-105 transition-transform">
-                  INICIAR TESTE GRÁTIS
+                  ASSINE AGORA
                 </Button>
               </Link>
           </div>
-          <p className="mt-8 text-primary-foreground font-bold opacity-80">Experimente todos os recursos por 7 dias sem compromisso.</p>
         </div>
         
         {/* Decorative Blurs */}

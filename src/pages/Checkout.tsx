@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Church, User, Mail, CreditCard, ArrowRight, Loader2, CheckCircle2, ShieldCheck, Globe, AlertCircle } from 'lucide-react';
 import { 
@@ -26,8 +26,29 @@ export default function Checkout() {
         churchSlug: '',
         adminName: '',
         adminEmail: '',
-        cpfCnpj: ''
+        cpfCnpj: '',
+        mobilePhone: ''
     });
+    
+    useEffect(() => {
+        const stored = sessionStorage.getItem('trial_church_form_data');
+        if (stored) {
+            try {
+                const data = JSON.parse(stored);
+                setFormData(prev => ({
+                    ...prev,
+                    churchName: data.name || prev.churchName,
+                    churchSlug: data.slug || prev.churchSlug,
+                    adminEmail: data.email || prev.adminEmail,
+                    adminName: data.pastorName || prev.adminName,
+                    cpfCnpj: data.cnpj || prev.cpfCnpj,
+                    mobilePhone: data.whatsapp || data.phone || prev.mobilePhone
+                }));
+            } catch (e) {
+                console.error('Erro ao carregar dados do trial:', e);
+            }
+        }
+    }, []);
 
     const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
@@ -55,9 +76,8 @@ export default function Checkout() {
             if (data?.url) {
                 toast({
                     title: 'Iniciando pagamento',
-                    description: 'Você será redirecionado para o ambiente seguro do Asaas.',
+                    description: 'Você será redirecionado para o ambiente de pagamento.',
                 });
-                // Aguarda um momento para o usuário ler o toast e redireciona
                 setTimeout(() => {
                     window.location.href = data.url;
                 }, 1500);
@@ -66,14 +86,28 @@ export default function Checkout() {
             }
         } catch (error: any) {
             console.error('Erro no checkout:', error);
-            const isEdgeError = error.message?.includes('Edge Function') || error.message?.includes('failed to fetch') || error.message?.includes('invoke');
             
-            if (isEdgeError) {
+            // Tenta extrair a mensagem de erro real vinda da Edge Function
+            let errorMessage = error.message || 'Ocorreu um erro ao processar sua solicitação.';
+            
+            // O Supabase retorna "Edge Function returned a non-2xx status code" quando a função falha propositalmente (ex: CPF inválido)
+            if (error.message?.includes('non-2xx')) {
+                toast({
+                    title: 'Verifique os dados',
+                    description: 'Houve um erro na validação dos dados (Ex: CPF inválido ou nome de igreja já existente).',
+                    variant: 'destructive'
+                });
+                return;
+            }
+
+            const isNetworkError = error.message?.includes('failed to fetch');
+            
+            if (isNetworkError) {
                 setShowFallback(true);
             } else {
                 toast({
                     title: 'Erro no cadastro',
-                    description: error.message || 'Ocorreu um erro ao processar sua solicitação.',
+                    description: errorMessage,
                     variant: 'destructive'
                 });
             }
@@ -229,6 +263,17 @@ export default function Checkout() {
                                         required 
                                         value={formData.cpfCnpj}
                                         onChange={(e) => setFormData({ ...formData, cpfCnpj: e.target.value.replace(/\D/g, '') })}
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium flex items-center gap-2">
+                                        <CreditCard className="h-4 w-4 text-muted-foreground" /> Celular (WhatsApp)
+                                    </label>
+                                    <Input 
+                                        placeholder="(DDD) 99999-9999" 
+                                        required 
+                                        value={formData.mobilePhone}
+                                        onChange={(e) => setFormData({ ...formData, mobilePhone: e.target.value })}
                                     />
                                 </div>
                                 <div className="sm:col-span-2 space-y-2">

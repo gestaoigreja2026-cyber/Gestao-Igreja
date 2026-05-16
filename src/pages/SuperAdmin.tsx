@@ -78,7 +78,7 @@ type TabValue = 'gestao' | 'relatorios' | 'mensalidades' | 'logs_asaas';
 export default function SuperAdmin() {
     useDocumentTitle('Painel Root - 100 Igrejas');
     const navigate = useNavigate();
-    const { switchChurch } = useAuth();
+    const { user, switchChurch } = useAuth();
     const [loading, setLoading] = useState(true);
     const [loadingReports, setLoadingReports] = useState(false);
     const [loadingSubs, setLoadingSubs] = useState(false);
@@ -107,9 +107,20 @@ export default function SuperAdmin() {
     const [selectedLog, setSelectedLog] = useState<any | null>(null);
 
     useEffect(() => {
+        // Segurança: Bloqueia acesso se não for o e-mail master
+        if (user && user.email !== 'edukadoshmda@gmail.com') {
+            toast({
+                title: 'Acesso Negado',
+                description: 'Você não tem permissão para acessar o Painel Root.',
+                variant: 'destructive'
+            });
+            navigate('/dashboard');
+            return;
+        }
+
         loadData();
         loadSubscriptions(); // Carrega assinaturas para ter dados na aba Gestão também
-    }, []);
+    }, [user, navigate]);
 
     useEffect(() => {
         if (activeTab === 'relatorios') loadReports();
