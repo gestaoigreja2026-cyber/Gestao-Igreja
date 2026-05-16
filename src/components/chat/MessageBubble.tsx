@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChatMessage, useChat } from '@/hooks/useChat';
-import { Pin, MoreHorizontal, Star, FileText, Download, Play, Music, Check, CheckCheck } from 'lucide-react';
+import { Pin, MoreHorizontal, Star, FileText, Download, Play, Music, Check, CheckCheck, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface MessageBubbleProps {
@@ -11,7 +11,7 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message, isMine, isDarkMode }: MessageBubbleProps) {
-  const { pinMessage, starMessage } = useChat();
+  const { pinMessage, starMessage, deleteMessage } = useChat();
 
   return (
     <div className={`flex w-full mb-1 ${isMine ? 'justify-end' : 'justify-start'}`}>
@@ -107,6 +107,17 @@ export function MessageBubble({ message, isMine, isDarkMode }: MessageBubbleProp
               >
                 <Star className={`w-3.5 h-3.5 ${message.is_starred ? 'fill-amber-500 text-amber-500' : ''}`} />
                 {message.is_starred ? 'Desfavoritar' : 'Favoritar'}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="cursor-pointer flex items-center gap-2 text-red-600 focus:text-red-600"
+                onClick={() => {
+                  if (confirm('Deseja realmente apagar esta mensagem?')) {
+                    deleteMessage(message.id);
+                  }
+                }}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Apagar
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -53,6 +53,7 @@ interface ChatContextType {
   starredMessages: ChatMessage[];
   clearMessages: (conversationId: string) => Promise<string>;
   deleteConversation: (conversationId: string) => Promise<string>;
+  deleteMessage: (messageId: string) => Promise<void>;
   requestNotificationPermission: () => Promise<boolean>;
   createStandardRooms: () => Promise<void>;
 }
@@ -297,6 +298,17 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   });
 
+  const deleteMessageMutation = useMutation({
+    mutationFn: async (messageId: string) => {
+      const { error } = await supabase.from('chat_messages').delete().eq('id', messageId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+    }
+  });
+
   const createStandardRoomsMutation = useMutation({
     mutationFn: async () => {
       if (!currentUser) return;
@@ -364,6 +376,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       starredMessages: starredMessagesQuery.data || [],
       clearMessages: clearMessagesMutation.mutateAsync,
       deleteConversation: deleteConversationMutation.mutateAsync,
+      deleteMessage: deleteMessageMutation.mutateAsync,
       requestNotificationPermission,
       createStandardRooms: createStandardRoomsMutation.mutateAsync
     }}>
