@@ -195,10 +195,10 @@ export default function NewLogin() {
 
     return (
         <div className="min-h-screen flex items-center justify-center relative px-4 bg-gradient-to-br from-primary/5 via-background to-primary/10">
-            <div className="w-full max-w-[400px] relative z-10">
+            <div className="w-full max-w-[360px] relative z-10">
                 {/* TELA 1: BOAS-VINDAS */}
                 {step === 1 && (
-                    <Card className="shadow-sm">
+                    <Card className="shadow-sm rounded-[2rem] overflow-hidden">
                         <CardContent className="p-4">
                             <div className="text-center mb-4">
                                 <div className="flex justify-center mb-4">
@@ -221,7 +221,7 @@ export default function NewLogin() {
                                         placeholder="Seu Nome"
                                         value={formData.fullName}
                                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                        className="h-10"
+                                        className="h-10 rounded-full"
                                         required
                                     />
                                 </div>
@@ -231,7 +231,7 @@ export default function NewLogin() {
                                         placeholder="E-mail"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="h-10"
+                                        className="h-10 rounded-full"
                                         required
                                     />
                                 </div>
@@ -242,7 +242,7 @@ export default function NewLogin() {
                                     </div>
                                 )}
 
-                                <Button type="submit" className="w-full h-10" size="sm">
+                                <Button type="submit" className="w-full h-10 rounded-full" size="sm">
                                     Próximo
                                 </Button>
                                 
@@ -270,7 +270,7 @@ export default function NewLogin() {
 
                 {/* TELA 2: PIN E PERFIL */}
                 {step === 2 && (
-                    <Card className="shadow-sm w-full max-w-sm mx-auto">
+                    <Card className="shadow-sm w-full max-w-sm mx-auto rounded-[2rem] overflow-hidden">
                         <CardContent className="p-6">
                             <div className="text-center mb-6">
                                 <h2 className="text-lg font-semibold">Verificação</h2>

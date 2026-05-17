@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const ASAAS_API_KEY = Deno.env.get('ASAAS_API_KEY')
 const ASAAS_WEBHOOK_TOKEN = Deno.env.get('ASAAS_WEBHOOK_TOKEN') // Token de segurança do Webhook
-const ASAAS_BASE_URL = ASAAS_API_KEY?.includes('hmlg') ? 'https://sandbox.asaas.com/api/v3' : 'https://www.asaas.com/api/v3'
+const ASAAS_BASE_URL = ASAAS_API_KEY?.includes('hmlg') ? 'https://api-sandbox.asaas.com/v3' : 'https://api.asaas.com/v3'
 
 serve(async (req) => {
   const { method } = req

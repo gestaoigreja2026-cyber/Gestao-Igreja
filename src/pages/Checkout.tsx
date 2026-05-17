@@ -90,16 +90,29 @@ export default function Checkout() {
             // Tenta extrair a mensagem de erro real vinda da Edge Function
             let errorMessage = error.message || 'Ocorreu um erro ao processar sua solicitação.';
             
-            // O Supabase retorna "Edge Function returned a non-2xx status code" quando a função falha propositalmente (ex: CPF inválido)
-            if (error.message?.includes('non-2xx')) {
+            if (error.context) {
+                try {
+                    // Clone para poder ler se necessário mais de uma vez ou evitar travamentos
+                    const contextClone = error.context.clone ? error.context.clone() : error.context;
+                    const body = await contextClone.json();
+                    if (body?.error) {
+                        errorMessage = body.error;
+                    }
+                } catch (e) {
+                    console.error('Erro ao ler JSON de erro do context:', e);
+                }
+            }
+
+            // O Supabase retorna "Edge Function returned a non-2xx status code" quando a função falha propositalmente
+            if (error.message?.includes('non-2xx') || error.name === 'FunctionsHttpError') {
                 toast({
-                    title: 'Verifique os dados',
-                    description: 'Houve um erro na validação dos dados (Ex: CPF inválido ou nome de igreja já existente).',
+                    title: 'Falha na validação',
+                    description: errorMessage || 'Houve um erro na validação dos dados (Ex: CPF inválido ou nome de igreja já existente).',
                     variant: 'destructive'
                 });
                 return;
             }
-
+ 
             const isNetworkError = error.message?.includes('failed to fetch');
             
             if (isNetworkError) {
