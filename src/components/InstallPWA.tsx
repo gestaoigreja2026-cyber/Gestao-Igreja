@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { X, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -25,6 +26,7 @@ const isStandalone = () =>
     (window.navigator as any)?.standalone);
 
 export function InstallPWA() {
+  const location = useLocation();
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
@@ -103,41 +105,45 @@ export function InstallPWA() {
     setShowBanner(false);
   };
 
+  const hiddenPaths = ['/', '/login', '/checkout', '/cadastro-igreja-trial'];
+  if (hiddenPaths.includes(location.pathname)) return null;
+
   if (!showBanner) return null;
 
   return (
     <>
-      <div className="fixed bottom-4 left-4 right-4 sm:left-4 sm:right-auto sm:max-w-md md:bottom-6 md:left-6 md:max-w-[420px] z-50 flex items-center gap-3 sm:gap-4 p-3 sm:p-4 md:p-5 rounded-2xl shadow-xl border bg-white dark:bg-zinc-900 dark:border-zinc-800 animate-in slide-in-from-bottom-4">
-        <img
-          src={churchLogo}
-          alt={`Logo ${churchName}`}
-          className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 shrink-0 object-contain rounded-lg p-1"
-          onError={(e) => { (e.target as HTMLImageElement).src = "/logo-app.png"; }}
-        />
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-black dark:text-white text-sm sm:text-base md:text-lg leading-tight">
-            Instalar {churchName}
-          </p>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-            Use como app no celular ou PC
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
-          <Button
-            size="sm"
-            onClick={handleInstall}
-            className="gap-2 text-xs sm:text-sm h-9 sm:h-10 px-3 sm:px-4"
-          >
-            <Download className="h-4 w-4" />
-            Instalar
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 shrink-0"
+      <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:w-[380px] md:bottom-6 z-50 rounded-2xl shadow-2xl border border-gray-200 bg-white dark:bg-zinc-900 dark:border-zinc-800 animate-in slide-in-from-bottom-4 overflow-hidden">
+        {/* Header com logo e fechar */}
+        <div className="flex items-center gap-3 p-4 pb-3">
+          <img
+            src={churchLogo}
+            alt={`Logo ${churchName}`}
+            className="h-14 w-14 shrink-0 object-contain rounded-xl border border-gray-100 dark:border-zinc-700 bg-white p-1"
+            onError={(e) => { (e.target as HTMLImageElement).src = "/logo-app.png"; }}
+          />
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-black dark:text-white text-base leading-tight truncate">
+              Instalar {churchName}
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              Use como app no celular ou PC
+            </p>
+          </div>
+          <button
             onClick={handleDismiss}
+            className="shrink-0 p-1.5 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <X className="h-4 w-4" />
+          </button>
+        </div>
+        {/* Botão de instalar */}
+        <div className="px-4 pb-4">
+          <Button
+            onClick={handleInstall}
+            className="w-full gap-2 h-10 font-semibold rounded-xl"
+          >
+            <Download className="h-4 w-4" />
+            Instalar aplicativo
           </Button>
         </div>
       </div>

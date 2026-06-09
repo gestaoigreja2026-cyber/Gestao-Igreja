@@ -10,6 +10,19 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import App from "./App";
 import { registerSW } from 'virtual:pwa-register';
 
+// ── Limpa service workers de outros apps / portas antigas ────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const reg of registrations) {
+      const swUrl = reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL || '';
+      // Mantém apenas SWs que pertencem a este mesmo origin (localhost:5173)
+      if (swUrl && !swUrl.startsWith(window.location.origin)) {
+        reg.unregister().then(() => console.log('[PWA] SW de outro origin removido:', swUrl));
+      }
+    }
+  });
+}
+
 // Registro automático do PWA
 const updateSW = registerSW({
   immediate: true,

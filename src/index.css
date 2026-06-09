@@ -82,7 +82,6 @@
   /* ═══════════════════════════════════════════════
      ☀️ TEMA 1: FÉ RADIANTE (Default) - Laranja
      ═══════════════════════════════════════════════ */
-  :root,
   [data-theme="fe-radiante"] {
     --background: 0 0% 100%;
     --foreground: 20 20% 12%;
@@ -134,7 +133,6 @@
     --spacing: 0.25rem;
   }
 
-  .dark,
   .dark[data-theme="fe-radiante"] {
     --background: 20 10% 12%;
     --foreground: 30 40% 98%;
@@ -256,6 +254,7 @@
   /* ═══════════════════════════════════════════════
      🌊 TEMA 3: OCEANO PROFUNDO - Azul Real
      ═══════════════════════════════════════════════ */
+  :root,
   [data-theme="oceano-profundo"] {
     --background: 0 0% 100%;
     --foreground: 220 20% 12%;
@@ -291,6 +290,7 @@
     --shadow-hsl: 217 91% 60%;
   }
 
+  .dark,
   .dark[data-theme="oceano-profundo"] {
     --background: 222 35% 10%;
     --foreground: 210 40% 98%;

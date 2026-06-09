@@ -195,7 +195,7 @@ export default function Landing() {
             </Badge>
             <h1 className="text-3xl md:text-5xl font-black mb-8 leading-[1.05] tracking-tight text-foreground">
               Sua Igreja em um <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-cyan-400 to-blue-600">
+              <span className="text-primary">
                 Novo Nível de Excelência.
               </span>
             </h1>

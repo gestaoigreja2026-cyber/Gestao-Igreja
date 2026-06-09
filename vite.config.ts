@@ -22,6 +22,10 @@ function envCheck(mode: string) {
 }
 
 export default defineConfig(({ mode }) => ({
+  server: {
+    port: 3000,
+    strictPort: true,
+  },
   base: '/',
   plugins: [
     envCheck(mode),
@@ -45,11 +49,13 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': path.resolve(__dirname, 'src'),
       buffer: 'buffer',
+      stream: 'stream-browserify',
     },
     // Evita "Cannot read properties of null (reading 'useState')" com react-leaflet
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
     include: ['buffer'],
+    exclude: ['xlsx-js-style'],
   },
 }));

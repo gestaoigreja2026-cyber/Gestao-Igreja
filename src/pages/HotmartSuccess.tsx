@@ -26,14 +26,9 @@ export default function HotmartSuccess() {
     
     // Cleanup: restaura o tema do usuário apenas se estiver navegando para área autenticada
     return () => {
-      // Só restaura se não estiver indo para outra página pública
-      const path = window.location.pathname;
-      const publicPages = ['/', '/login', '/checkout', '/hotmart-success'];
-      if (!publicPages.includes(path)) {
-        const savedTheme = localStorage.getItem('church_theme') || 'fe-radiante';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        document.body.setAttribute('data-theme', savedTheme);
-      }
+      const savedTheme = localStorage.getItem('church_theme_v2') || 'oceano-profundo';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.body.setAttribute('data-theme', savedTheme);
     };
   }, []);
 

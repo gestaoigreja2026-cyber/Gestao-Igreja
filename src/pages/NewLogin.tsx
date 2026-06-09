@@ -63,7 +63,7 @@ export default function NewLogin() {
             const path = window.location.pathname;
             const publicPages = ['/', '/login', '/checkout', '/hotmart-success'];
             if (!publicPages.includes(path)) {
-                const savedTheme = localStorage.getItem('church_theme') || 'fe-radiante';
+                const savedTheme = localStorage.getItem('church_theme_v2') || 'oceano-profundo';
                 document.documentElement.setAttribute('data-theme', savedTheme);
                 document.body.setAttribute('data-theme', savedTheme);
             }
@@ -290,7 +290,7 @@ export default function NewLogin() {
                                             value={digit}
                                             onChange={(e) => handlePinChange(i, e.target.value)}
                                             onKeyDown={(e) => handleKeyDown(i, e)}
-                                            className="w-10 h-12 text-center text-lg font-bold border rounded-md focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                                            className="w-10 h-12 text-center text-lg font-bold border rounded-2xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                         />
                                     ))}
                                 </div>
@@ -356,7 +356,7 @@ export default function NewLogin() {
                                 <div className="flex flex-col gap-3">
                                     <Button
                                         type="submit"
-                                        className="w-full"
+                                        className="w-full rounded-full"
                                         size="lg"
                                         disabled={formData.pin.some(digit => !digit)}
                                     >
@@ -458,7 +458,7 @@ function RoleButton({
         <button
             type="button"
             onClick={onClick}
-            className={`flex items-center justify-start gap-3 rounded-md border px-4 py-2.5 text-sm transition w-full
+            className={`flex items-center justify-start gap-3 rounded-2xl border px-4 py-2.5 text-sm transition w-full
         ${active
                     ? 'border-primary bg-primary/10 text-primary font-bold shadow-sm'
                     : 'border-muted hover:bg-muted text-muted-foreground'

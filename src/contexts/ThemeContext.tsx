@@ -32,7 +32,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: ReactNode }) {
     const [themeId, setThemeId] = useState<string>(() => {
         if (typeof window === 'undefined') return 'oceano-profundo';
-        return localStorage.getItem('church_theme') || 'oceano-profundo';
+        return localStorage.getItem('church_theme_v2') || 'oceano-profundo';
     });
 
     const currentTheme = themes.find(t => t.id === themeId) || themes[0];
@@ -40,7 +40,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', themeId);
         document.body.setAttribute('data-theme', themeId);
-        localStorage.setItem('church_theme', themeId);
+        localStorage.setItem('church_theme_v2', themeId);
     }, [themeId]);
 
     const setTheme = (id: string) => {

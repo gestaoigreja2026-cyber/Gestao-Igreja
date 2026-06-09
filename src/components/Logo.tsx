@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { globalChurchLogo } from '@/hooks/useTenant';
 import { useTenant } from '@/hooks/useTenant';
 
-const DEFAULT_LOGO = '/logo-app.png';
+const DEFAULT_LOGO = '/logo-app.png?v=211';
 
 interface LogoProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
@@ -24,30 +24,19 @@ const sizeStyles: Record<string, { width: string; height: string }> = {
 export function Logo({ size = 'md', showText = true, overrideSrc }: LogoProps) {
   const { tenant } = useTenant();
 
-  const resolvedSrc =
-    overrideSrc ||
-    tenant?.logo_url ||
-    globalChurchLogo ||
-    DEFAULT_LOGO;
+  const resolvedSrc = DEFAULT_LOGO;
 
   const [logoSrc, setLogoSrc] = useState(resolvedSrc);
 
   // Sincroniza se o tenant mudar depois do render inicial
   useEffect(() => {
-    const next =
-      overrideSrc ||
-      tenant?.logo_url ||
-      globalChurchLogo ||
-      DEFAULT_LOGO;
-    setLogoSrc(next);
+    setLogoSrc(DEFAULT_LOGO);
   }, [tenant?.logo_url, overrideSrc]);
 
   // Escuta eventos externos (ex: script inline do index.html terminar)
   useEffect(() => {
     const handler = (e: Event) => {
-      if (!overrideSrc && !tenant?.logo_url) {
-        setLogoSrc((e as CustomEvent).detail || DEFAULT_LOGO);
-      }
+      setLogoSrc(DEFAULT_LOGO);
     };
     window.addEventListener('churchLogoUpdated', handler);
     return () => window.removeEventListener('churchLogoUpdated', handler);
