@@ -30,9 +30,9 @@ exports.handler = async (event) => {
 
     // ─── Valores padrão ──────────────────────────────────────────────────────
     let nome = 'Gestão Igreja';
-    let logo = '/novo-icone-app.png';
     let themeColor = '#2563eb';
     let shortName = 'Igreja';
+    const installerIcon = '/novo-icone-app.png';
 
     // ─── Buscar tenant no Supabase ───────────────────────────────────────────
     if (!isMain) {
@@ -41,7 +41,7 @@ exports.handler = async (event) => {
 
       if (supabaseUrl && supabaseKey) {
         const response = await fetch(
-          `${supabaseUrl}/rest/v1/churches?slug=eq.${encodeURIComponent(subdomain)}&select=name,logo_url,theme_color`,
+          `${supabaseUrl}/rest/v1/churches?slug=eq.${encodeURIComponent(subdomain)}&select=name,theme_color`,
           {
             headers: {
               apikey: supabaseKey,
@@ -60,7 +60,6 @@ exports.handler = async (event) => {
               // Short name: primeiras 2 palavras, máx 12 chars
               shortName = nome.split(' ').slice(0, 2).join(' ').substring(0, 12);
             }
-            if (igreja.logo_url) logo = igreja.logo_url;
             if (igreja.theme_color) themeColor = igreja.theme_color;
           }
         }
@@ -69,9 +68,7 @@ exports.handler = async (event) => {
 
     // ─── Cache-busting ───────────────────────────────────────────────────────
     const v = Date.now();
-    const logoWithV = logo.startsWith('http')
-      ? `${logo}${logo.includes('?') ? '&' : '?'}v=${v}`
-      : `${logo}?v=${v}`;
+    const iconWithV = `${installerIcon}?v=${v}`;
 
     // ─── Retorna manifest ─────────────────────────────────────────────────────
     return {
@@ -91,15 +88,15 @@ exports.handler = async (event) => {
         theme_color: themeColor,
         icons: [
           {
-            src: logoWithV,
+            src: iconWithV,
             sizes: '192x192',
-            type: logo.endsWith('.svg') ? 'image/svg+xml' : 'image/png',
+            type: 'image/png',
             purpose: 'any'
           },
           {
-            src: logoWithV,
+            src: iconWithV,
             sizes: '512x512',
-            type: logo.endsWith('.svg') ? 'image/svg+xml' : 'image/png',
+            type: 'image/png',
             purpose: 'maskable'
           }
         ]

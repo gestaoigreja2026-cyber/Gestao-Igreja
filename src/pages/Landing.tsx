@@ -82,26 +82,30 @@ const PurchaseCard = ({ timeLeft }: { timeLeft: number }) => (
 export default function Landing() {
   useDocumentTitle(APP_NAME);
   const { isAuthenticated } = useAuth();
-  const { isInstalled, install } = useInstallPWA();
+  const { isInstalled, canInstall, install } = useInstallPWA();
   const [timeLeft, setTimeLeft] = useState(300);
   const [isInstalling, setIsInstalling] = useState(false);
   const [showInstallHelp, setShowInstallHelp] = useState(false);
 
   const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const showInstallButton = !isInstalled && (isIOS || canInstall);
 
   const handleInstallClick = async () => {
+    if (isIOS) {
+      setShowInstallHelp(true);
+      return;
+    }
+
+    if (!canInstall) {
+      return;
+    }
+
     setIsInstalling(true);
     const success = await install();
-    
     if (!success) {
-      if (isIOS) {
-        setShowInstallHelp(true);
-      } else {
-        const retry = confirm("O instalador ainda está sendo preparado pelo seu navegador. Isso é normal no primeiro acesso.\n\nDeseja recarregar a página para tentar ativar agora?");
-        if (retry) {
-          window.location.reload();
-        }
-      }
+      window.alert(
+        'A instalação não foi concluída. Verifique se o app está ativo no navegador e tente novamente.'
+      );
     }
     setIsInstalling(false);
   };
@@ -161,7 +165,7 @@ export default function Landing() {
           <Logo size="sm" showText={false} />
           
           <div className="flex items-center gap-1.5 sm:gap-3">
-            {!isInstalled && (
+            {!isInstalled && showInstallButton && (
               <Button variant="ghost" size="sm" className="flex gap-1.5 font-bold text-primary px-2 sm:px-4" onClick={handleInstallClick} disabled={isInstalling}>
                 <Download className="h-4 w-4 shrink-0" />
                 <span className="hidden min-[480px]:inline">
