@@ -106,7 +106,7 @@ export function InstallPWA() {
     setShowBanner(false);
   };
 
-  const hiddenPaths = ['/', '/login', '/checkout', '/cadastro-igreja-trial'];
+  const hiddenPaths = ['/login', '/checkout', '/cadastro-igreja-trial'];
   if (hiddenPaths.includes(location.pathname)) return null;
 
   if (!showBanner) return null;
