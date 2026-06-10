@@ -31,7 +31,7 @@ export function InstallPWA() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
   const [showHelpDialog, setShowHelpDialog] = useState(false);
-  const [logoSrc, setLogoSrc] = useState(globalChurchLogo || "/logo-app.png");
+  const [logoSrc, setLogoSrc] = useState(globalChurchLogo || "/novo-icone-app.png");
 
   const { currentTheme } = useTheme();
   const { tenant } = useTenant();
@@ -120,7 +120,7 @@ export function InstallPWA() {
             src={churchLogo}
             alt={`Logo ${churchName}`}
             className="h-14 w-14 shrink-0 object-contain rounded-xl border border-gray-100 dark:border-zinc-700 bg-white p-1"
-            onError={(e) => { (e.target as HTMLImageElement).src = "/logo-app.png"; }}
+            onError={(e) => { (e.target as HTMLImageElement).src = "/novo-icone-app.png"; }}
           />
           <div className="flex-1 min-w-0">
             <p className="font-bold text-black dark:text-white text-base leading-tight truncate">

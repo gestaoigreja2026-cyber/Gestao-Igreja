@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       manifest: false,
-      includeAssets: ['logo-app.png', 'logo-app-v2.png', 'logo-app-v3.png', 'favicon.ico', 'robots.txt'],
+      includeAssets: ['novo-icone-app.png', 'logo-app.png', 'logo-app-v2.png', 'logo-app-v3.png', 'favicon.ico', 'robots.txt'],
       workbox: {
         clientsClaim: true,
         skipWaiting: true,

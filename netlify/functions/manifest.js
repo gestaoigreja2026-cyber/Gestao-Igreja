@@ -30,7 +30,7 @@ exports.handler = async (event) => {
 
     // ─── Valores padrão ──────────────────────────────────────────────────────
     let nome = 'Gestão Igreja';
-    let logo = '/logo-app.png';
+    let logo = '/novo-icone-app.png';
     let themeColor = '#2563eb';
     let shortName = 'Igreja';
 
@@ -118,8 +118,8 @@ exports.handler = async (event) => {
         display: 'standalone',
         theme_color: '#2563eb',
         icons: [
-          { src: '/logo-192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/logo-512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/novo-icone-app.png', sizes: '192x192', type: 'image/png' },
+          { src: '/novo-icone-app.png', sizes: '512x512', type: 'image/png' },
         ],
       }),
     };
