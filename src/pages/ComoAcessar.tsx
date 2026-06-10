@@ -143,11 +143,10 @@ const tips = [
   { icon: Palette, text: 'Use o seletor de temas para escolher cores da interface.' },
   { icon: ChevronLeft, text: 'Clique na seta para recolher ou expandir o menu lateral.' },
   { icon: KeyRound, text: 'Na tela de login, use "Esqueci minha senha".' },
-  { icon: Smartphone, text: 'No celular, adicione o app à tela inicial para usar como aplicativo (PWA).' },
 ];
 
 const steps = [
-  'Acesse o endereço do app no navegador ou instale como PWA no celular.',
+  'Acesse o endereço do app no navegador.',
   'Na tela inicial, clique em **Entrar** e faça login com e-mail e senha.',
   'Sem conta? Peça ao administrador da igreja para cadastrar você.',
   'Use o **Dashboard** para ver versículo, aniversariantes e ações rápidas.',
@@ -195,7 +194,7 @@ export default function ComoAcessar() {
         </CardHeader>
         <CardContent className="space-y-3">
           <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-            <li>Acesse o endereço do app no navegador (ou instale como PWA no celular).</li>
+            <li>Acesse o endereço do app no navegador.</li>
             <li>Na tela inicial, clique em <strong className="text-foreground">Entrar</strong>.</li>
             <li>Faça login com seu <strong className="text-foreground">e-mail</strong> e <strong className="text-foreground">senha</strong>.</li>
             <li>Se ainda não tem conta, peça ao administrador da igreja para cadastrar você.</li>

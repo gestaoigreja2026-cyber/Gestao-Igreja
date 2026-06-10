@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Logo } from '@/components/Logo';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
 import { useAuth } from '@/contexts/AuthContext';
-import { useInstallPWA } from '@/hooks/useInstallPWA';
+
 import { APP_NAME } from '@/lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AIAssistant } from '@/components/AIAssistant';

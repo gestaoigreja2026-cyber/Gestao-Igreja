@@ -413,12 +413,7 @@ Precisa de ajuda?
 **Requisitos:**
 • Navegador: Chrome, Firefox, Safari ou Edge
 • Internet estável
-• Disponível em: computador, tablet e celular
-
-**Instalar o App (PWA):**
-• Clique em **"Instalar App"** no navegador
-• Ou use o menu do Chrome → "Instalar aplicativo"
-• Funciona offline e tem notificações push`
+• Disponível em: computador, tablet e celular`
   },
   geral: {
     keywords: ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e aí', 'hey', 'hi', 'hello'],

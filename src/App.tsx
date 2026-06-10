@@ -17,7 +17,6 @@ import ConfirmScale from "./pages/ConfirmScale";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Assets from "./pages/Assets";
-import { InstallPWA } from "@/components/InstallPWA";
 import { MainLayout } from "@/components/MainLayout";
 import { SubscriptionBlock } from "@/components/SubscriptionBlock";
 import { TrialGate } from "@/components/TrialGate";
@@ -171,7 +170,6 @@ function AppRoutes() {
 
   return (
     <>
-      <InstallPWA />
       <Routes>
         <Route 
           path="/" 

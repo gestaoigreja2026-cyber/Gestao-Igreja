@@ -4,7 +4,7 @@ import { churchesService, Church } from '@/services/churches.service';
 
 const MAIN_DOMAIN = 'church-gest-oficial.com.br';
 
-// ─── Global singleton (para Logo.tsx e InstallPWA antes do React montar) ────
+// ─── Global singleton (para Logo.tsx antes do React montar) ────
 export let globalChurchLogo: string | null = null;
 export let globalChurchName: string | null = null;
 export let globalChurchThemeColor: string | null = null;
@@ -74,7 +74,7 @@ function applyBranding(church: Church) {
       img.src = church.logo_url!;
     });
 
-    // Evento para Logo.tsx e InstallPWA.tsx (componentes React já montados)
+    // Evento para Logo.tsx (componentes React já montados)
     window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
   }
 

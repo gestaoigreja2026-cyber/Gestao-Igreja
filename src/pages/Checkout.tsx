@@ -181,10 +181,6 @@ export default function Checkout() {
                                 <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                                 <span>Relatórios Financeiros e Atas</span>
                             </div>
-                            <div className="flex items-center gap-2 text-sm">
-                                <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                                <span>App PWA para todos os Membros</span>
-                            </div>
                             <div className="flex items-center gap-2 text-sm font-semibold text-primary">
                                 <ShieldCheck className="h-4 w-4" />
                                 <span>Cancele a qualquer momento</span>
