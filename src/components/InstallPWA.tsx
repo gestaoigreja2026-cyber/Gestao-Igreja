@@ -50,6 +50,7 @@ export function InstallPWA() {
       .deferredPrompt as BeforeInstallPromptEvent | undefined;
     if (globalPrompt) {
       setDeferredPrompt(globalPrompt);
+      if (!isIOS) setShowBanner(true);
     }
 
     // 2. Escuta novos eventos (caso o React já esteja montado quando o evento disparar)

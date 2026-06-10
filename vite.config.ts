@@ -32,7 +32,9 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       manifest: false,
+      includeAssets: ['logo-app.png', 'logo-app-v2.png', 'logo-app-v3.png', 'favicon.ico', 'robots.txt'],
       workbox: {
         clientsClaim: true,
         skipWaiting: true,
