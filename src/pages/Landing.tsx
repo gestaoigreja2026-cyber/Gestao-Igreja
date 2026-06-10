@@ -82,33 +82,7 @@ const PurchaseCard = ({ timeLeft }: { timeLeft: number }) => (
 export default function Landing() {
   useDocumentTitle(APP_NAME);
   const { isAuthenticated } = useAuth();
-  const { isInstalled, canInstall, install } = useInstallPWA();
   const [timeLeft, setTimeLeft] = useState(300);
-  const [isInstalling, setIsInstalling] = useState(false);
-  const [showInstallHelp, setShowInstallHelp] = useState(false);
-
-  const isIOS = typeof navigator !== 'undefined' && /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const showInstallButton = !isInstalled && (isIOS || canInstall);
-
-  const handleInstallClick = async () => {
-    if (isIOS) {
-      setShowInstallHelp(true);
-      return;
-    }
-
-    if (!canInstall) {
-      return;
-    }
-
-    setIsInstalling(true);
-    const success = await install();
-    if (!success) {
-      window.alert(
-        'A instalação não foi concluída. Verifique se o app está ativo no navegador e tente novamente.'
-      );
-    }
-    setIsInstalling(false);
-  };
 
   useEffect(() => {
     const timer = setInterval(() => setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0)), 1000);
@@ -119,60 +93,12 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
-      {/* iOS Install Help Dialog */}
-      <AnimatePresence>
-        {showInstallHelp && (
-          <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-              onClick={() => setShowInstallHelp(false)}
-            />
-            <motion.div 
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 100, y: 100 }}
-              className="relative bg-white dark:bg-zinc-900 rounded-3xl p-8 max-w-sm w-full shadow-2xl border border-zinc-200 dark:border-zinc-800"
-            >
-              <button 
-                onClick={() => setShowInstallHelp(false)}
-                className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <div className="flex flex-col items-center text-center gap-4">
-                <div className="p-4 bg-primary/10 text-primary rounded-2xl">
-                  <Smartphone className="w-8 h-8" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-black">Instalar no iPhone</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Para instalar, toque no botão <b>Compartilhar</b> (ícone abaixo) e selecione <b>"Adicionar à Tela de Início"</b>.
-                  </p>
-                </div>
-                <Button onClick={() => setShowInstallHelp(false)} className="w-full rounded-xl font-bold">Entendido</Button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
       {/* Header Premium */}
       <header className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-md border-primary/10">
         <div className="container max-w-6xl mx-auto h-24 flex items-center justify-center gap-8 px-6">
           <Logo size="sm" showText={false} />
           
           <div className="flex items-center gap-1.5 sm:gap-3">
-            {!isInstalled && showInstallButton && (
-              <Button variant="ghost" size="sm" className="flex gap-1.5 font-bold text-primary px-2 sm:px-4" onClick={handleInstallClick} disabled={isInstalling}>
-                <Download className="h-4 w-4 shrink-0" />
-                <span className="hidden min-[480px]:inline">
-                  {isInstalling ? 'Preparando...' : 'Instalar'}
-                </span>
-              </Button>
-            )}
             <Link to="/login">
               <Button variant="outline" size="sm" className="rounded-full px-3 sm:px-6 font-bold text-xs sm:text-sm">Entrar</Button>
             </Link>
