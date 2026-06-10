@@ -1,6 +1,5 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
 /** Alerta se Supabase não estiver configurado no build. */
@@ -30,22 +29,6 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     envCheck(mode),
     react(),
-    VitePWA({
-      registerType: 'autoUpdate',
-      injectRegister: 'auto',
-      manifest: false,
-      includeAssets: ['novo-icone-app.png', 'logo-app.png', 'logo-app-v2.png', 'logo-app-v3.png', 'favicon.ico', 'robots.txt'],
-      workbox: {
-        clientsClaim: true,
-        skipWaiting: true,
-        runtimeCaching: [
-          {
-            urlPattern: /\/api\/manifest/,
-            handler: 'NetworkOnly'
-          }
-        ]
-      }
-    }),
   ],
   resolve: {
     alias: {
