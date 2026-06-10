@@ -1,30 +1,51 @@
 {
-  "id": "gestao-igreja-v8",
-  "name": "Gestão Igreja",
+  "id": "gestao-igreja-v1",
+  "name": "Gestão Igreja - Gestão de Excelência",
   "short_name": "Gestão Igreja",
-  "description": "Sistema de Gestão Eclesiástica Premium",
+  "description": "Sistema de Gestão Eclesiástica com Células, Membros, Finanças e muito mais",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#ffffff",
-  "theme_color": "#2563eb",
+  "theme_color": "#2d5016",
+  "categories": ["productivity", "business"],
   "icons": [
     {
-      "src": "/novo-icone-app.png",
+      "src": "/pwa-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/novo-icone-app.png",
+      "src": "/pwa-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-icon-256.png",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/novo-icone-app.png",
+      "src": "/pwa-icon-256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/pwa-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

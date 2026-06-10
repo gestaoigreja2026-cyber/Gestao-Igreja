@@ -8,8 +8,20 @@ import { createRoot } from "react-dom/client";
 import { StrictMode } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import App from "./App";
+import { registerSW } from 'virtual:pwa-register';
 
-
+// Registrar Service Worker com atualização automática
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    console.log('Nova versão disponível - recarregando...');
+    updateSW(true);
+    window.location.reload();
+  },
+  onOfflineReady() {
+    console.log('App pronto para funcionar offline!');
+  }
+});
 
 function showErrorPage(message: string) {
   const root = document.getElementById("root");

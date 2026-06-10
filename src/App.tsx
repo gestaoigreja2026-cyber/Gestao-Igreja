@@ -18,6 +18,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Assets from "./pages/Assets";
 import { MainLayout } from "@/components/MainLayout";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { SubscriptionBlock } from "@/components/SubscriptionBlock";
 import { TrialGate } from "@/components/TrialGate";
 import { UserRole } from "@/types";
@@ -170,6 +171,7 @@ function AppRoutes() {
 
   return (
     <>
+      <InstallPrompt />
       <Routes>
         <Route 
           path="/" 
