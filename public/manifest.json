@@ -9,19 +9,19 @@
   "theme_color": "#2563eb",
   "icons": [
     {
-      "src": "/novo-icone-app.png?v=214",
+      "src": "/novo-icone-app.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/novo-icone-app.png?v=214",
+      "src": "/novo-icone-app.png",
       "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/novo-icone-app.png?v=214",
+      "src": "/novo-icone-app.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
