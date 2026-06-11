@@ -229,7 +229,7 @@ export default function Checkout() {
                 <div>
                     <h2 className="text-2xl font-black text-center mb-2">Escolha seu Plano</h2>
                     <p className="text-muted-foreground text-center text-sm mb-6">Selecione conforme o número de membros da sua igreja</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="flex overflow-x-auto gap-3 pb-4 md:grid md:grid-cols-4 snap-x snap-mandatory">
                         {PLANS.map(plan => {
                             const Icon = plan.icon;
                             const isSelected = selectedPlanId === plan.id;
@@ -239,7 +239,7 @@ export default function Checkout() {
                                     type="button"
                                     onClick={() => setSelectedPlanId(plan.id)}
                                     className={cn(
-                                        'relative rounded-2xl border-2 p-4 text-left transition-all hover:shadow-md',
+                                        'relative rounded-2xl border-2 p-4 text-left transition-all hover:shadow-md min-w-[160px] w-[60%] shrink-0 snap-center md:min-w-0 md:w-auto',
                                         isSelected ? `${plan.borderSelected} ${plan.bgSelected}` : `${plan.borderDefault} bg-background hover:border-muted-foreground/30`
                                     )}
                                 >
@@ -247,7 +247,7 @@ export default function Checkout() {
                                         <span className="absolute -top-2.5 left-3 bg-blue-500 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
                                             Popular
                                         </span>
-                                    )}
+                                     )}
                                     <div className={cn('p-2 rounded-lg w-fit mb-2 bg-gradient-to-br text-white', plan.color)}>
                                         <Icon className="h-4 w-4" />
                                     </div>
