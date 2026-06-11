@@ -26,7 +26,7 @@ export default function HotmartSuccess() {
     
     // Cleanup: restaura o tema do usuário apenas se estiver navegando para área autenticada
     return () => {
-      const savedTheme = localStorage.getItem('church_theme_v2') || 'oceano-profundo';
+      const savedTheme = localStorage.getItem('church_theme_v2') || 'ceu-azul';
       document.documentElement.setAttribute('data-theme', savedTheme);
       document.body.setAttribute('data-theme', savedTheme);
     };

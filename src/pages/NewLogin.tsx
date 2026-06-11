@@ -48,8 +48,8 @@ export default function NewLogin() {
     // Força o tema oceano nas páginas públicas
     useEffect(() => {
         // Aplica imediatamente o tema
-        document.documentElement.setAttribute('data-theme', 'oceano-profundo');
-        document.body.setAttribute('data-theme', 'oceano-profundo');
+        document.documentElement.setAttribute('data-theme', 'ceu-azul');
+        document.body.setAttribute('data-theme', 'ceu-azul');
 
         // Se ?trial=1, marcar para signup trial
         const params = new URLSearchParams(window.location.search);
@@ -63,7 +63,7 @@ export default function NewLogin() {
             const path = window.location.pathname;
             const publicPages = ['/', '/login', '/checkout', '/hotmart-success'];
             if (!publicPages.includes(path)) {
-                const savedTheme = localStorage.getItem('church_theme_v2') || 'oceano-profundo';
+                const savedTheme = localStorage.getItem('church_theme_v2') || 'ceu-azul';
                 document.documentElement.setAttribute('data-theme', savedTheme);
                 document.body.setAttribute('data-theme', savedTheme);
             }

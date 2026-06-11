@@ -32,7 +32,9 @@ serve(async (req) => {
       const { action, churchId } = body
       
       if (action === 'init_checkout') {
-        const { churchName, churchSlug, adminEmail, adminName, cpfCnpj, mobilePhone } = body
+        const { churchName, churchSlug, adminEmail, adminName, cpfCnpj, mobilePhone, plan_amount, subscription_plan } = body
+        const amount = plan_amount || 199.0;
+        const planName = subscription_plan ? subscription_plan.toUpperCase() : 'STARTER';
 
         // 1. Cria a igreja no banco (status inadimplente até pagar)
         const { data: newChurch, error: churchError } = await supabaseClient
@@ -57,17 +59,17 @@ serve(async (req) => {
         const customer = await customerResponse.json()
         if (customer.errors) throw new Error(customer.errors[0].description)
 
-        // 3. Cria a Assinatura no Asaas (R$ 75,00 promocional)
+        // 3. Cria a Assinatura no Asaas (com valor dinâmico do plano)
         const subResponse = await fetch(`${ASAAS_BASE_URL}/subscriptions`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'access_token': ASAAS_API_KEY || '' },
           body: JSON.stringify({
             customer: customer.id,
             billingType: 'UNDEFINED', // Permite que o cliente escolha PIX ou Cartão no checkout
-            value: 75.0,
+            value: amount,
             nextDueDate: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString().split('T')[0], // Amanhã
             cycle: 'MONTHLY',
-            description: `Assinatura Plano Excelência (R$ 75/mês nos 3 primeiros meses, depois R$ 150/mês) - ${churchName}`
+            description: `Assinatura Plano ${planName} (R$ ${amount}/mês) - ${churchName}`
           })
         })
         const subscription = await subResponse.json()
@@ -81,7 +83,8 @@ serve(async (req) => {
             asaas_customer_id: customer.id,
             asaas_subscription_id: subscription.id,
             status: 'inadimplente',
-            plan_amount: 75.0
+            plan_amount: amount,
+            subscription_plan: subscription_plan || 'starter'
           })
           .eq('church_id', newChurch.id)
 

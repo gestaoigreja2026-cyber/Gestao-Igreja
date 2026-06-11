@@ -605,31 +605,193 @@
   }
 
   /* ═══════════════════════════════════════════════
-     👑 TEMA 10: CIDADE DE OURO - Dourado Premium
+     👑 TEMA 10: CIDADE DE OURO - Âmbar da Logo
+     Cor exata: #C4852A ≈ HSL 35 70% 47%
      ═══════════════════════════════════════════════ */
   [data-theme="cidade-ouro"] {
     --background: 0 0% 100%;
-    --foreground: 45 60% 10%;
+    --foreground: 35 45% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 45 60% 10%;
-    --primary: 43 89% 38%;
-    --secondary: 35 90% 50%;
-    --accent: 45 40% 90%;
-    --muted: 45 40% 95%;
-    --border: 45 40% 88%;
-    --ring: 43 70% 45%;
-    --sidebar-background: 43 30% 10%;
-    --shadow-hsl: 43 70% 45%;
+    --card-foreground: 35 45% 8%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 35 45% 8%;
+    --primary: 35 70% 47%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 65% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 42 80% 60%;
+    --accent-foreground: 35 45% 8%;
+    --muted: 38 20% 94%;
+    --muted-foreground: 35 15% 45%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 38 30% 88%;
+    --input: 38 30% 88%;
+    --ring: 35 70% 47%;
+    --radius: 1rem;
+    --sidebar-background: 35 40% 10%;
+    --sidebar-foreground: 38 30% 95%;
+    --sidebar-primary: 35 70% 47%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 35 35% 18%;
+    --sidebar-accent-foreground: 42 80% 70%;
+    --sidebar-border: 35 30% 18%;
+    --sidebar-ring: 35 70% 47%;
+    --sidebar: 35 40% 10%;
+    --chart-1: 35 70% 47%;
+    --chart-2: 42 80% 60%;
+    --chart-3: 28 70% 55%;
+    --chart-4: 199 70% 50%;
+    --chart-5: 15 75% 55%;
+    --shadow-hsl: 35 70% 47%;
+    --shadow-2xs: 0 1px 2px 0px hsl(var(--shadow-hsl) / 0.08);
+    --shadow-xs: 0 2px 4px 0px hsl(var(--shadow-hsl) / 0.10);
+    --shadow-sm: 0 2px 8px 0px hsl(var(--shadow-hsl) / 0.12), 0 1px 3px -1px hsl(var(--shadow-hsl) / 0.08);
+    --shadow: 0 4px 12px 0px hsl(var(--shadow-hsl) / 0.15), 0 2px 4px -1px hsl(var(--shadow-hsl) / 0.10);
+    --shadow-md: 0 6px 16px 0px hsl(var(--shadow-hsl) / 0.18), 0 2px 6px -2px hsl(var(--shadow-hsl) / 0.12);
+    --shadow-lg: 0 10px 24px 0px hsl(var(--shadow-hsl) / 0.20), 0 4px 8px -2px hsl(var(--shadow-hsl) / 0.15);
+    --shadow-xl: 0 16px 32px 0px hsl(var(--shadow-hsl) / 0.22), 0 6px 12px -2px hsl(var(--shadow-hsl) / 0.18);
+    --shadow-2xl: 0 24px 48px 0px hsl(var(--shadow-hsl) / 0.25), 0 8px 16px -4px hsl(var(--shadow-hsl) / 0.20);
   }
 
   .dark[data-theme="cidade-ouro"] {
-    --background: 43 30% 6%;
-    --foreground: 43 40% 98%;
-    --card: 43 30% 10%;
-    --card-foreground: 43 40% 98%;
-    --primary: 43 70% 55%;
-    --secondary: 35 90% 40%;
-    --border: 43 30% 20%;
+    --background: 35 25% 8%;
+    --foreground: 38 40% 96%;
+    --card: 35 20% 12%;
+    --card-foreground: 38 40% 96%;
+    --popover: 35 20% 12%;
+    --popover-foreground: 38 40% 96%;
+    --primary: 35 68% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 30 60% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 42 75% 55%;
+    --accent-foreground: 35 25% 8%;
+    --muted: 35 15% 18%;
+    --muted-foreground: 38 20% 60%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 35 18% 22%;
+    --input: 35 18% 22%;
+    --ring: 35 68% 52%;
+    --sidebar-background: 35 30% 6%;
+    --sidebar-foreground: 38 30% 95%;
+    --sidebar-primary: 35 68% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 35 25% 14%;
+    --sidebar-accent-foreground: 42 75% 65%;
+    --sidebar-border: 35 20% 16%;
+    --sidebar-ring: 35 68% 52%;
+    --sidebar: 35 30% 6%;
+    --chart-1: 35 68% 52%;
+    --chart-2: 42 75% 55%;
+    --chart-3: 28 65% 50%;
+    --chart-4: 199 70% 55%;
+    --chart-5: 15 75% 60%;
+    --shadow-hsl: 35 70% 47%;
+    --shadow-2xs: 0 1px 2px 0px hsl(var(--shadow-hsl) / 0.15), 0 0 4px hsl(var(--shadow-hsl) / 0.08);
+    --shadow-xs: 0 2px 4px 0px hsl(var(--shadow-hsl) / 0.18), 0 0 8px hsl(var(--shadow-hsl) / 0.10);
+    --shadow-sm: 0 2px 8px 0px hsl(var(--shadow-hsl) / 0.20), 0 1px 3px -1px hsl(var(--shadow-hsl) / 0.15);
+    --shadow: 0 4px 12px 0px hsl(var(--shadow-hsl) / 0.22), 0 2px 4px -1px hsl(var(--shadow-hsl) / 0.18);
+    --shadow-md: 0 6px 16px 0px hsl(var(--shadow-hsl) / 0.25), 0 2px 6px -2px hsl(var(--shadow-hsl) / 0.20);
+    --shadow-lg: 0 10px 24px 0px hsl(var(--shadow-hsl) / 0.28), 0 4px 8px -2px hsl(var(--shadow-hsl) / 0.22);
+    --shadow-xl: 0 16px 32px 0px hsl(var(--shadow-hsl) / 0.30), 0 6px 12px -2px hsl(var(--shadow-hsl) / 0.25);
+    --shadow-2xl: 0 24px 48px 0px hsl(var(--shadow-hsl) / 0.35), 0 8px 16px -4px hsl(var(--shadow-hsl) / 0.30);
+  }
+
+  /* ═══════════════════════════════════════════════
+     ☁️ TEMA 11: CÉU AZUL - Azul Céu
+     Cor: #0EA5E9 ≈ HSL 199 89% 48%
+     ═══════════════════════════════════════════════ */
+  [data-theme="ceu-azul"] {
+    --background: 0 0% 100%;
+    --foreground: 199 40% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 199 40% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 199 40% 12%;
+    --primary: 199 89% 48%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 199 60% 40%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 199 70% 85%;
+    --accent-foreground: 199 40% 12%;
+    --muted: 199 20% 94%;
+    --muted-foreground: 199 15% 45%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 199 30% 88%;
+    --input: 199 30% 88%;
+    --ring: 199 89% 48%;
+    --radius: 1rem;
+    --sidebar-background: 0 0% 99%;
+    --sidebar-foreground: 199 40% 12%;
+    --sidebar-primary: 199 89% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 199 60% 93%;
+    --sidebar-accent-foreground: 199 89% 40%;
+    --sidebar-border: 199 20% 90%;
+    --sidebar-ring: 199 89% 48%;
+    --sidebar: 0 0% 99%;
+    --chart-1: 199 89% 48%;
+    --chart-2: 217 91% 60%;
+    --chart-3: 185 91% 45%;
+    --chart-4: 240 60% 60%;
+    --chart-5: 199 60% 45%;
+    --shadow-hsl: 199 89% 48%;
+    --shadow-2xs: 0 1px 2px 0px hsl(var(--shadow-hsl) / 0.08);
+    --shadow-xs: 0 2px 4px 0px hsl(var(--shadow-hsl) / 0.10);
+    --shadow-sm: 0 2px 8px 0px hsl(var(--shadow-hsl) / 0.12), 0 1px 3px -1px hsl(var(--shadow-hsl) / 0.08);
+    --shadow: 0 4px 12px 0px hsl(var(--shadow-hsl) / 0.15), 0 2px 4px -1px hsl(var(--shadow-hsl) / 0.10);
+    --shadow-md: 0 6px 16px 0px hsl(var(--shadow-hsl) / 0.18), 0 2px 6px -2px hsl(var(--shadow-hsl) / 0.12);
+    --shadow-lg: 0 10px 24px 0px hsl(var(--shadow-hsl) / 0.20), 0 4px 8px -2px hsl(var(--shadow-hsl) / 0.15);
+    --shadow-xl: 0 16px 32px 0px hsl(var(--shadow-hsl) / 0.22), 0 6px 12px -2px hsl(var(--shadow-hsl) / 0.18);
+    --shadow-2xl: 0 24px 48px 0px hsl(var(--shadow-hsl) / 0.25), 0 8px 16px -4px hsl(var(--shadow-hsl) / 0.20);
+  }
+
+  .dark[data-theme="ceu-azul"] {
+    --background: 199 25% 8%;
+    --foreground: 199 40% 98%;
+    --card: 199 20% 12%;
+    --card-foreground: 199 40% 98%;
+    --popover: 199 20% 12%;
+    --popover-foreground: 199 40% 98%;
+    --primary: 199 89% 55%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 199 60% 45%;
+    --secondary-foreground: 0 0% 100%;
+    --accent: 199 75% 55%;
+    --accent-foreground: 199 25% 8%;
+    --muted: 199 15% 18%;
+    --muted-foreground: 199 20% 60%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 199 18% 22%;
+    --input: 199 18% 22%;
+    --ring: 199 89% 55%;
+    --sidebar-background: 199 30% 6%;
+    --sidebar-foreground: 199 30% 95%;
+    --sidebar-primary: 199 89% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 199 25% 14%;
+    --sidebar-accent-foreground: 199 75% 65%;
+    --sidebar-border: 199 20% 16%;
+    --sidebar-ring: 199 89% 55%;
+    --sidebar: 199 30% 6%;
+    --chart-1: 199 89% 55%;
+    --chart-2: 217 91% 65%;
+    --chart-3: 185 91% 50%;
+    --chart-4: 240 60% 65%;
+    --chart-5: 199 60% 50%;
+    --shadow-hsl: 199 89% 48%;
+    --shadow-2xs: 0 1px 2px 0px hsl(var(--shadow-hsl) / 0.15), 0 0 4px hsl(var(--shadow-hsl) / 0.08);
+    --shadow-xs: 0 2px 4px 0px hsl(var(--shadow-hsl) / 0.18), 0 0 8px hsl(var(--shadow-hsl) / 0.10);
+    --shadow-sm: 0 2px 8px 0px hsl(var(--shadow-hsl) / 0.20), 0 1px 3px -1px hsl(var(--shadow-hsl) / 0.15);
+    --shadow: 0 4px 12px 0px hsl(var(--shadow-hsl) / 0.22), 0 2px 4px -1px hsl(var(--shadow-hsl) / 0.18);
+    --shadow-md: 0 6px 16px 0px hsl(var(--shadow-hsl) / 0.25), 0 2px 6px -2px hsl(var(--shadow-hsl) / 0.20);
+    --shadow-lg: 0 10px 24px 0px hsl(var(--shadow-hsl) / 0.28), 0 4px 8px -2px hsl(var(--shadow-hsl) / 0.22);
+    --shadow-xl: 0 16px 32px 0px hsl(var(--shadow-hsl) / 0.30), 0 6px 12px -2px hsl(var(--shadow-hsl) / 0.25);
+    --shadow-2xl: 0 24px 48px 0px hsl(var(--shadow-hsl) / 0.35), 0 8px 16px -4px hsl(var(--shadow-hsl) / 0.30);
   }
 
   /* ═══════════════════════════════════════════════

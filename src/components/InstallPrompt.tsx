@@ -24,6 +24,12 @@ export function InstallPrompt() {
 
     checkInstalled();
 
+    // Verificar se o evento já foi capturado no index.html
+    if ((window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+      setShowPrompt(true);
+    }
+
     // Capturar beforeinstallprompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();

@@ -68,7 +68,8 @@ exports.handler = async (event) => {
 
     // ─── Cache-busting ───────────────────────────────────────────────────────
     const v = Date.now();
-    const iconWithV = `${installerIcon}?v=${v}`;
+    const icon192 = `/pwa-icon-192.png?v=${v}`;
+    const icon512 = `/pwa-icon-512.png?v=${v}`;
 
     // ─── Retorna manifest ─────────────────────────────────────────────────────
     return {
@@ -88,13 +89,25 @@ exports.handler = async (event) => {
         theme_color: themeColor,
         icons: [
           {
-            src: iconWithV,
+            src: icon192,
             sizes: '192x192',
             type: 'image/png',
             purpose: 'any'
           },
           {
-            src: iconWithV,
+            src: icon192,
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
+            src: icon512,
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: icon512,
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
@@ -115,8 +128,8 @@ exports.handler = async (event) => {
         display: 'standalone',
         theme_color: '#2563eb',
         icons: [
-          { src: '/novo-icone-app.png', sizes: '192x192', type: 'image/png' },
-          { src: '/novo-icone-app.png', sizes: '512x512', type: 'image/png' },
+          { src: '/pwa-icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/pwa-icon-512.png', sizes: '512x512', type: 'image/png' },
         ],
       }),
     };

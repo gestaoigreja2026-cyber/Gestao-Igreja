@@ -21,6 +21,8 @@ import { churchesService } from '@/services/churches.service';
 import { pastorsService } from '@/services/pastors.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { PlanBanner, MemberLimitGuard } from '@/components/PlanBanner';
+import { useSubscriptionPlan } from '@/hooks/useSubscriptionPlan';
 
 export default function Members() {
   useDocumentTitle('Membros');
@@ -37,6 +39,7 @@ export default function Members() {
   const [filterMarital, setFilterMarital] = useState<string>('todos');
   const { toast } = useToast();
   const { user, churchId, viewingChurch } = useAuth();
+  const planInfo = useSubscriptionPlan();
   // Prioriza o churchId do contexto (atualizado quando superadmin visualiza uma igreja)
   // Se não houver, usa o churchId do usuário
   const effectiveChurchId = churchId || user?.churchId;
@@ -184,11 +187,17 @@ export default function Members() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      <PlanBanner />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Membros e Congregados</h1>
           <p className="text-muted-foreground">
             Gerencie os membros da igreja
+            {!planInfo.loading && planInfo.maxMembers < 99999 && (
+              <span className="ml-2 text-xs font-semibold text-muted-foreground/70">
+                ({planInfo.currentMembers}/{planInfo.maxMembers} no plano {planInfo.label})
+              </span>
+            )}
           </p>
         </div>
         {!showForm && (
@@ -197,16 +206,29 @@ export default function Members() {
               <ExcelMembersButton />
             )}
             {(user?.role === 'superadmin' || (user?.role !== 'aluno' && user?.role !== 'membro' && user?.role !== 'congregado' && user?.role !== 'tesoureiro')) && (
-              <Button onClick={() => { setEditingMember(null); setShowForm(true); }} className="w-full sm:w-auto">
-                <Plus className="h-4 w-4 mr-2" />
-                Novo Membro
-              </Button>
+              <MemberLimitGuard
+                fallback={
+                  <Button disabled variant="outline" className="w-full sm:w-auto opacity-50 cursor-not-allowed">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Limite Atingido
+                  </Button>
+                }
+              >
+                <Button onClick={() => { setEditingMember(null); setShowForm(true); }} className="w-full sm:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Novo Membro
+                </Button>
+              </MemberLimitGuard>
             )}
           </div>
         )}
       </div>
 
-      {showForm ? (
+      {showForm && planInfo.isLimitReached && !editingMember ? (
+        <MemberLimitGuard>
+          <></>
+        </MemberLimitGuard>
+      ) : showForm ? (
         <MemberForm
           onSubmit={handleAddMember}
           onCancel={() => { setShowForm(false); setEditingMember(null); }}

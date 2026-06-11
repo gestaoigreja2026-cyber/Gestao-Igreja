@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users, Church, FileText, DollarSign, Check, ArrowRight, Download, LogIn, LayoutDashboard, Fingerprint, Video, UserPlus, Gift, Send, Phone, Mail,
-  MessageSquare, TrendingUp, Shield, Smartphone, X
+  MessageSquare, TrendingUp, Shield, Smartphone, X, Crown, Zap, Star, Building2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -47,6 +47,92 @@ const pillars = [
   }
 ];
 
+const plans = [
+  {
+    id: 'starter',
+    icon: Zap,
+    name: 'Starter',
+    memberRange: 'Até 100 membros',
+    price: 199,
+    description: 'Perfeito para igrejas em crescimento que estão dando os primeiros passos na gestão digital.',
+    color: 'from-emerald-500 to-teal-600',
+    textColor: 'text-emerald-600',
+    borderColor: 'border-emerald-200 dark:border-emerald-800',
+    bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
+    featured: false,
+    features: [
+      'Até 100 membros',
+      'Gestão de Células e Ministérios',
+      'Finanças e Caixa Diário',
+      'Relatórios Básicos',
+      'Suporte via WhatsApp',
+    ]
+  },
+  {
+    id: 'growth',
+    icon: Star,
+    name: 'Growth',
+    memberRange: '100 a 500 membros',
+    price: 299,
+    description: 'Para igrejas em expansão que precisam de mais recursos e controle sobre sua congregação.',
+    color: 'from-blue-500 to-indigo-600',
+    textColor: 'text-blue-600',
+    borderColor: 'border-blue-300 dark:border-blue-700',
+    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
+    featured: true,
+    features: [
+      'Até 500 membros',
+      'Tudo do Plano Starter',
+      'Escalas de Culto Avançadas',
+      'Secretaria Digital Completa',
+      'Relatórios Exportáveis (Excel/PDF)',
+      'Suporte Prioritário',
+    ]
+  },
+  {
+    id: 'professional',
+    icon: Crown,
+    name: 'Professional',
+    memberRange: '500 a 2.000 membros',
+    price: 499,
+    description: 'Solução completa para igrejas consolidadas com gestão avançada e análise de dados.',
+    color: 'from-purple-500 to-violet-600',
+    textColor: 'text-purple-600',
+    borderColor: 'border-purple-200 dark:border-purple-800',
+    bgColor: 'bg-purple-50 dark:bg-purple-950/30',
+    featured: false,
+    features: [
+      'Até 2.000 membros',
+      'Tudo do Plano Growth',
+      'Dashboard de Inteligência',
+      'App em Modo Offline (PWA)',
+      'Integrações Avançadas',
+      'Suporte Dedicado',
+    ]
+  },
+  {
+    id: 'enterprise',
+    icon: Building2,
+    name: 'Enterprise',
+    memberRange: 'Mais de 2.000 membros',
+    price: 1200,
+    description: 'Para grandes igrejas e redes com múltiplos campus e gestão centralizada.',
+    color: 'from-orange-500 to-red-600',
+    textColor: 'text-orange-600',
+    borderColor: 'border-orange-200 dark:border-orange-800',
+    bgColor: 'bg-orange-50 dark:bg-orange-950/30',
+    featured: false,
+    features: [
+      'Membros Ilimitados',
+      'Tudo do Plano Professional',
+      'Múltiplos Campus',
+      'API de Integração',
+      'Gerente de Conta Dedicado',
+      'SLA Garantido',
+    ]
+  }
+];
+
 const PurchaseCard = ({ timeLeft }: { timeLeft: number }) => (
   <div className="max-w-xl mx-auto p-1 rounded-3xl bg-gradient-to-br from-primary via-cyan-400 to-blue-600 shadow-2xl backdrop-blur-md">
     <div className="bg-background/95 rounded-[1.4rem] p-8 md:p-10">
@@ -57,16 +143,16 @@ const PurchaseCard = ({ timeLeft }: { timeLeft: number }) => (
         <div className="space-y-2">
           <p className="text-sm font-bold text-primary uppercase tracking-[0.2em]">Oferta de Lançamento</p>
           <h3 className="text-3xl font-black text-foreground leading-tight">
-            Assine por apenas <br />
-            <span className="text-4xl text-primary">R$ 75,00/mês</span>
+            A partir de <br />
+            <span className="text-4xl text-primary">R$ 199/mês</span>
           </h3>
-          <p className="text-muted-foreground line-through">Preço normal: R$ 150,00</p>
+          <p className="text-muted-foreground">Planos a partir de 100 membros</p>
         </div>
         
         <div className="flex flex-col gap-3 w-full">
           <Link to="/checkout">
             <Button size="lg" className="w-full h-16 rounded-2xl font-black text-lg gap-3 bg-blue-900 hover:bg-blue-800 text-white shadow-xl hover:scale-[1.02] transition-all">
-              COMEÇAR AGORA
+              ESCOLHER MEU PLANO
               <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
@@ -195,8 +281,102 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ==================== SEÇÃO DE PLANOS ==================== */}
+      <section className="py-32 bg-background" id="planos">
+        <div className="container max-w-6xl mx-auto px-6">
+          <div className="text-center mb-20 space-y-4">
+            <Badge variant="outline" className="mb-4 px-4 py-1.5 border-primary/30 text-primary bg-primary/5 rounded-full font-bold tracking-widest text-[10px] uppercase">
+              Planos e Preços
+            </Badge>
+            <h2 className="text-3xl md:text-5xl font-black tracking-tight">
+              Escolha o Plano Ideal para <br />
+              <span className="text-primary">Sua Igreja</span>
+            </h2>
+            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+              Planos escaláveis conforme o crescimento da sua congregação. Comece pequeno e expanda quando precisar.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+            {plans.map((plan, idx) => {
+              const Icon = plan.icon;
+              return (
+                <motion.div
+                  key={plan.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.1 }}
+                  className={`relative flex flex-col rounded-[2rem] border-2 p-7 shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl ${
+                    plan.featured
+                      ? 'border-blue-400 bg-gradient-to-br from-blue-600 to-indigo-700 text-white'
+                      : `${plan.borderColor} ${plan.bgColor}`
+                  }`}
+                >
+                  {plan.featured && (
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-black px-4 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
+                      ⭐ Mais Popular
+                    </div>
+                  )}
+
+                  <div className={`p-3 w-fit rounded-xl mb-5 ${plan.featured ? 'bg-white/20' : `bg-gradient-to-br ${plan.color} text-white`}`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+
+                  <div className="mb-6">
+                    <p className={`text-xs font-black uppercase tracking-widest mb-1 ${plan.featured ? 'text-blue-200' : plan.textColor}`}>
+                      {plan.name}
+                    </p>
+                    <p className={`text-sm font-semibold mb-3 ${plan.featured ? 'text-blue-100' : 'text-muted-foreground'}`}>
+                      {plan.memberRange}
+                    </p>
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-4xl font-black ${plan.featured ? 'text-white' : 'text-foreground'}`}>
+                        R$ {plan.price.toLocaleString('pt-BR')}
+                      </span>
+                      <span className={`text-sm font-medium ${plan.featured ? 'text-blue-200' : 'text-muted-foreground'}`}>/mês</span>
+                    </div>
+                    <p className={`text-xs mt-2 leading-relaxed ${plan.featured ? 'text-blue-100' : 'text-muted-foreground'}`}>
+                      {plan.description}
+                    </p>
+                  </div>
+
+                  <ul className="space-y-2.5 flex-1 mb-7">
+                    {plan.features.map(f => (
+                      <li key={f} className="flex items-start gap-2.5 text-sm">
+                        <Check className={`h-4 w-4 mt-0.5 shrink-0 ${plan.featured ? 'text-blue-200' : plan.textColor}`} />
+                        <span className={plan.featured ? 'text-blue-50' : 'text-foreground/80'}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link to={`/checkout?plan=${plan.id}`} className="mt-auto">
+                    <Button
+                      className={`w-full font-bold rounded-xl py-5 gap-2 ${
+                        plan.featured
+                          ? 'bg-white text-blue-700 hover:bg-blue-50 shadow-xl'
+                          : `bg-gradient-to-r ${plan.color} text-white hover:opacity-90 shadow-lg`
+                      }`}
+                    >
+                      Assinar Plano {plan.name}
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </motion.div>
+              );
+            })}
+          </div>
+
+          <div className="mt-16 text-center space-y-4">
+            <p className="text-muted-foreground text-sm">
+              🔒 Todos os planos incluem <strong>7 dias de teste grátis</strong> sem cartão de crédito · Cancele quando quiser · Suporte em Português
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Seção de Vídeo - Imersiva */}
-      <section className="py-24">
+      <section className="py-24 bg-muted/30">
         <div className="container max-w-4xl mx-auto px-6 text-center">
           <div className="mb-12">
             <h2 className="text-3xl md:text-5xl font-black mb-6">Assuma o Controle Total</h2>
@@ -254,7 +434,8 @@ export default function Landing() {
               <h4 className="font-black text-lg">Links Úteis</h4>
               <nav className="flex flex-col gap-3 text-muted-foreground font-medium">
                 <Link to="/login" className="hover:text-primary transition-colors">Entrar no Painel</Link>
-                <Link to="/checkout" className="hover:text-primary transition-colors">Planos e Preços</Link>
+                <a href="#planos" className="hover:text-primary transition-colors">Planos e Preços</a>
+                <Link to="/checkout" className="hover:text-primary transition-colors">Assinar Agora</Link>
                 <Link to="/cadastro-igreja-trial" className="hover:text-primary transition-colors">Abrir Conta Trial</Link>
               </nav>
             </div>
