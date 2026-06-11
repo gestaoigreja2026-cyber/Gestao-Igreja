@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { APP_NAME } from '@/lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AIAssistant } from '@/components/AIAssistant';
+import { InstallPrompt, InstallHeroButton } from '@/components/InstallPrompt';
 
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
@@ -151,7 +152,7 @@ const PurchaseCard = ({ timeLeft }: { timeLeft: number }) => (
         
         <div className="flex flex-col gap-3 w-full">
           <Link to="/checkout">
-            <Button size="lg" className="w-full h-16 rounded-2xl font-black text-lg gap-3 bg-blue-900 hover:bg-blue-800 text-white shadow-xl hover:scale-[1.02] transition-all">
+            <Button size="lg" className="w-full h-16 rounded-2xl font-black text-lg gap-3 bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl hover:scale-[1.02] transition-all">
               ESCOLHER MEU PLANO
               <ArrowRight className="h-5 w-5" />
             </Button>
@@ -178,7 +179,7 @@ export default function Landing() {
   if (isAuthenticated) return null;
 
   return (
-    <div className="min-h-screen bg-background selection:bg-primary/20">
+    <div className="min-h-screen bg-background selection:bg-primary/20" data-theme="ceu-azul">
       {/* Header Premium */}
       <header className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-md border-primary/10">
         <div className="container max-w-6xl mx-auto h-24 flex items-center justify-center gap-8 px-6">
@@ -226,15 +227,16 @@ export default function Landing() {
                   ASSINE AGORA
                 </Button>
               </Link>
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-muted overflow-hidden">
-                    <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" />
-                  </div>
-                ))}
-                <div className="pl-6 text-sm font-bold text-muted-foreground flex items-center">
-                  +500 Igrejas Gerenciadas
+              <InstallHeroButton />
+            </div>
+            <div className="flex -space-x-3 justify-center mt-2">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-muted overflow-hidden">
+                  <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="User" />
                 </div>
+              ))}
+              <div className="pl-6 text-sm font-bold text-muted-foreground flex items-center">
+                +500 Igrejas Gerenciadas
               </div>
             </div>
           </motion.div>
@@ -367,11 +369,7 @@ export default function Landing() {
             })}
           </div>
 
-          <div className="mt-16 text-center space-y-4">
-            <p className="text-muted-foreground text-sm">
-              🔒 Todos os planos incluem <strong>7 dias de teste grátis</strong> sem cartão de crédito · Cancele quando quiser · Suporte em Português
-            </p>
-          </div>
+
         </div>
       </section>
 

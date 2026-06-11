@@ -1,48 +1,36 @@
 import { useState, useEffect } from 'react';
-import { X, Download } from 'lucide-react';
+import { X, Download, Smartphone } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-export function InstallPrompt() {
+// ── Shared hook ──────────────────────────────────────────────────────────────
+export function usePwaInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Verificar se já está instalado
     const checkInstalled = () => {
-      if (window.matchMedia('(display-mode: standalone)').matches) {
-        setIsInstalled(true);
-      }
-      if ((window.navigator as any)?.standalone === true) {
-        setIsInstalled(true);
-      }
+      if (window.matchMedia('(display-mode: standalone)').matches) setIsInstalled(true);
+      if ((window.navigator as any)?.standalone === true) setIsInstalled(true);
     };
-
     checkInstalled();
 
-    // Verificar se o evento já foi capturado no index.html
     if ((window as any).deferredPrompt) {
       setDeferredPrompt((window as any).deferredPrompt);
-      setShowPrompt(true);
     }
 
-    // Capturar beforeinstallprompt
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setShowPrompt(true);
     };
 
-    // Verificar quando o app foi instalado
     const handleAppInstalled = () => {
       setDeferredPrompt(null);
-      setShowPrompt(false);
       setIsInstalled(true);
-      console.log('✓ App instalado com sucesso!');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -54,57 +42,43 @@ export function InstallPrompt() {
     };
   }, []);
 
-  const handleInstall = async () => {
+  const install = async () => {
     if (!deferredPrompt) return;
-
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === 'accepted') {
-      console.log('✓ Usuário aceitou a instalação');
-    }
-    
-    setDeferredPrompt(null);
-    setShowPrompt(false);
-  };
-
-  const handleDismiss = () => {
-    setShowPrompt(false);
+    if (outcome === 'accepted') setIsInstalled(true);
     setDeferredPrompt(null);
   };
 
-  if (!showPrompt || isInstalled || !deferredPrompt) {
-    return null;
-  }
+  return { canInstall: !!deferredPrompt && !isInstalled, isInstalled, install };
+}
+
+// ── Banner fixo no rodapé (usado no App.tsx) ─────────────────────────────────
+export function InstallPrompt() {
+  const { canInstall, install } = usePwaInstall();
+  const [dismissed, setDismissed] = useState(false);
+
+  if (!canInstall || dismissed) return null;
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg p-4 z-50 animate-in slide-in-from-bottom">
       <div className="max-w-md mx-auto flex items-center gap-4">
-        {/* Ícone do App */}
-        <img 
-          src="/pwa-icon-192.png" 
-          alt="Gestão Igreja" 
-          className="w-16 h-16 rounded-lg"
-        />
-
-        {/* Conteúdo */}
+        <img src="/pwa-icon-192.png" alt="Gestão Igreja" className="w-14 h-14 rounded-xl shadow" />
         <div className="flex-1">
-          <h3 className="font-bold text-gray-900">Instalar Gestão Igreja</h3>
-          <p className="text-sm text-gray-600">Acesso rápido na tela inicial</p>
+          <h3 className="font-bold text-gray-900 text-sm">Instalar Gestão Igreja</h3>
+          <p className="text-xs text-gray-500">Acesso rápido na tela inicial do seu celular</p>
         </div>
-
-        {/* Botões */}
         <div className="flex gap-2">
           <button
-            onClick={handleDismiss}
+            onClick={() => setDismissed(true)}
             className="p-2 hover:bg-gray-100 rounded-lg transition"
             aria-label="Fechar"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
           <button
-            onClick={handleInstall}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition"
+            onClick={install}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm"
           >
             <Download className="w-4 h-4" />
             Instalar
@@ -112,5 +86,53 @@ export function InstallPrompt() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ── Botão Hero para a Landing Page — SEMPRE VISÍVEL ──────────────────────────
+export function InstallHeroButton() {
+  const { canInstall, isInstalled, install } = usePwaInstall();
+
+  if (isInstalled) {
+    return (
+      <div className="flex items-center gap-3 h-16 px-6 rounded-2xl border-2 border-emerald-400 bg-emerald-50 text-emerald-700 font-bold text-sm shadow-md">
+        <img src="/pwa-icon-192.png" alt="" className="w-9 h-9 rounded-xl shadow" />
+        <span className="text-left leading-tight">
+          <span className="block text-xs text-emerald-500 uppercase tracking-wider font-bold">Instalado ✓</span>
+          <span className="font-black text-emerald-800">Gestão Igreja</span>
+        </span>
+      </div>
+    );
+  }
+
+  // Sempre mostra o botão — se canInstall estiver pronto, abre o prompt nativo
+  return (
+    <button
+      onClick={canInstall ? install : undefined}
+      title={canInstall ? 'Instalar app na tela inicial' : 'Abra no celular para instalar'}
+      className={`flex items-center gap-3 h-16 px-6 rounded-2xl border-2 font-bold text-sm shadow-lg transition-all group
+        ${canInstall
+          ? 'border-[#0EA5E9] bg-sky-50 hover:bg-sky-100 hover:shadow-sky-200 cursor-pointer hover:scale-105'
+          : 'border-[#0EA5E9]/40 bg-sky-50/60 cursor-default'
+        }`}
+    >
+      <div className="relative">
+        <img src="/pwa-icon-192.png" alt="Gestão Igreja App" className="w-10 h-10 rounded-xl shadow-md" />
+        {canInstall && (
+          <span className="absolute -bottom-1 -right-1 bg-[#0EA5E9] rounded-full p-0.5">
+            <Download className="w-3 h-3 text-white" />
+          </span>
+        )}
+      </div>
+      <span className="text-left leading-tight">
+        <span className="block text-[10px] text-[#0EA5E9] uppercase tracking-wider font-black">
+          {canInstall ? '⬇ Instalar App' : '📲 Disponível como App'}
+        </span>
+        <span className="font-black text-slate-800 text-sm">Gestão Igreja</span>
+        <span className="block text-[10px] text-slate-400 font-normal">
+          {canInstall ? 'Adicionar à tela inicial' : 'Abra no celular para instalar'}
+        </span>
+      </span>
+    </button>
   );
 }

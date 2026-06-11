@@ -51,21 +51,7 @@
   <div id="root" translate="no" class="notranslate"></div>
   <script type="module" src="/src/main.tsx"></script>
   <script>
-    // Limpar Service Workers antigos e cache do PWA para remover ícone conflituoso
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
-        for (const registration of registrations) {
-          registration.unregister().then(() => {
-            console.log('✓ Service Worker antigo removido');
-          });
-        }
-      });
-    }
-    if (window.caches) {
-      caches.keys().then((keys) => {
-        keys.forEach((key) => caches.delete(key));
-      });
-    }
+
 
     // Ensure we capture the PWA prompt event globally 
     window.addEventListener('beforeinstallprompt', (e) => {
