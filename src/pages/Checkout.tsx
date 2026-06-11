@@ -218,7 +218,7 @@ export default function Checkout() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center py-12 px-4">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center py-12 px-4 overflow-x-hidden w-full">
             <div className="mb-8 scale-90">
                 <Logo size="lg" />
             </div>
@@ -339,7 +339,7 @@ export default function Checkout() {
                                             <Globe className="h-4 w-4 text-muted-foreground" /> URL da sua Igreja (Slug)
                                         </label>
                                         <div className="flex items-center group">
-                                            <div className="bg-muted px-3 py-2 border border-r-0 rounded-l-md text-xs text-muted-foreground">
+                                            <div className="bg-muted px-2 sm:px-3 py-2 border border-r-0 rounded-l-md text-[10px] sm:text-xs text-muted-foreground shrink-0">
                                                 app.gestaoigreja.com/
                                             </div>
                                             <Input 
@@ -409,12 +409,17 @@ export default function Checkout() {
                             <CardFooter className="flex flex-col gap-4">
                                 <Button 
                                     type="submit" 
-                                    className={cn('w-full py-7 text-xl font-bold rounded-xl shadow-xl gap-3 group bg-gradient-to-r', selectedPlan.color)}
+                                    className={cn('w-full py-4 sm:py-7 h-auto text-base sm:text-xl font-bold rounded-xl shadow-xl gap-2 sm:gap-3 group bg-gradient-to-r flex-col sm:flex-row text-center whitespace-normal', selectedPlan.color)}
                                     disabled={loading}
                                 >
-                                    {loading ? <Loader2 className="h-6 w-6 animate-spin" /> : <CreditCard className="h-6 w-6" />}
-                                    ASSINAR PLANO {selectedPlan.name.toUpperCase()} — R$ {selectedPlan.price.toLocaleString('pt-BR')}/mês
-                                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                    <div className="flex items-center gap-2">
+                                        {loading ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />}
+                                        <span>ASSINAR PLANO {selectedPlan.name.toUpperCase()}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="opacity-90">— R$ {selectedPlan.price.toLocaleString('pt-BR')}/mês</span>
+                                        <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform hidden sm:block" />
+                                    </div>
                                 </Button>
                                 <p className="text-[11px] text-center text-muted-foreground">
                                     Ao assinar, você concorda com nossos Termos de Uso e Política de Privacidade.
