@@ -34,6 +34,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
       manifest: false,
+      devOptions: {
+        enabled: true,
+      },
       includeAssets: ['pwa-icon-192.png', 'pwa-icon-256.png', 'pwa-icon-512.png', 'favicon.ico', 'robots.txt'],
       workbox: {
         clientsClaim: true,

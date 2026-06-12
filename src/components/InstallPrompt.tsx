@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X, Download, Smartphone } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Download, Smartphone, Share, MoreVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -19,26 +19,40 @@ export function usePwaInstall() {
     };
     checkInstalled();
 
+    // Capturar evento imediatamente se já existir no window (capturado no index.html)
     if ((window as any).deferredPrompt) {
       setDeferredPrompt((window as any).deferredPrompt);
     }
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
+      (window as any).deferredPrompt = e;
       setDeferredPrompt(e as BeforeInstallPromptEvent);
     };
 
     const handleAppInstalled = () => {
       setDeferredPrompt(null);
+      (window as any).deferredPrompt = null;
       setIsInstalled(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    // Polling: tenta capturar o evento por até 10s caso ele dispare depois do mount
+    const poll = setInterval(() => {
+      if ((window as any).deferredPrompt) {
+        setDeferredPrompt((window as any).deferredPrompt);
+        clearInterval(poll);
+      }
+    }, 500);
+    const pollTimeout = setTimeout(() => clearInterval(poll), 10000);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      clearInterval(poll);
+      clearTimeout(pollTimeout);
     };
   }, []);
 
@@ -48,6 +62,7 @@ export function usePwaInstall() {
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') setIsInstalled(true);
     setDeferredPrompt(null);
+    (window as any).deferredPrompt = null;
   };
 
   return { canInstall: !!deferredPrompt && !isInstalled, isInstalled, install };
