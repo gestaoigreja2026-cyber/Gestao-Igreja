@@ -57,12 +57,20 @@ export function usePwaInstall() {
   }, []);
 
   const install = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') setIsInstalled(true);
-    setDeferredPrompt(null);
-    (window as any).deferredPrompt = null;
+    if (!deferredPrompt) {
+      alert('Instalação não está pronta ou já foi concluída.');
+      return;
+    }
+    try {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') setIsInstalled(true);
+      setDeferredPrompt(null);
+      (window as any).deferredPrompt = null;
+    } catch (error: any) {
+      console.error('Erro ao instalar:', error);
+      alert('Não foi possível abrir o instalador nativo. Motivo: ' + error?.message + '\n\nTente instalar clicando no ícone no lado direito da barra de endereços do navegador.');
+    }
   };
 
   return { canInstall: !!deferredPrompt && !isInstalled, isInstalled, install };
