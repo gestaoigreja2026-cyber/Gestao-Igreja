@@ -79,11 +79,8 @@
       const isLocal = host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.');
       const isMainDomain = isLocal || !subdomain || subdomain === 'www' || subdomain === 'church-gest-oficial' || subdomain === 'localhost';
       
-      if (host === 'localhost' || host === '127.0.0.1' || !host.includes('church-gest-oficial')) {
-        link.setAttribute("href", `/manifest.json?v=${version}`);
-      } else {
-        link.setAttribute("href", `/api/manifest?v=${version}`);
-      }
+      // Na Netlify não existe a rota /api/manifest, então usamos sempre o manifest estático
+      link.setAttribute("href", `/manifest.json?v=${version}`);
 
       // Função para aplicar o branding na página
       const applyBranding = (name, logo) => {
