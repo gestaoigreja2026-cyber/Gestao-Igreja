@@ -40,3 +40,14 @@ vite.config.ts.timestamp-*.mjs
 scratch/
 supabase/.temp/
 supabase/.env
+
+# Playwright and test artifacts
+test-results/
+.playwright/
+playwright-report/
+
+# Local tools and generated dist
+dev-dist/
+.dev-dist/
+.claude/
+.codex/

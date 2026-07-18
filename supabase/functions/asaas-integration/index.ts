@@ -3,26 +3,37 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
 
 const ASAAS_API_KEY = Deno.env.get('ASAAS_API_KEY')
 const ASAAS_WEBHOOK_TOKEN = Deno.env.get('ASAAS_WEBHOOK_TOKEN') // Token de segurança do Webhook
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const ASAAS_BASE_URL = ASAAS_API_KEY?.includes('hmlg') ? 'https://api-sandbox.asaas.com/v3' : 'https://api.asaas.com/v3'
+
+const defaultHeaders = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, asaas-access-token'
+}
 
 serve(async (req) => {
   const { method } = req
 
   // 1. Lidar com requisições OPTIONS (CORS)
   if (method === 'OPTIONS') {
-    return new Response('ok', { 
-      headers: { 
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, asaas-access-token'
-      } 
-    })
+    return new Response('ok', { headers: defaultHeaders })
+  }
+
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    return new Response(JSON.stringify({ error: 'Faltam variáveis de ambiente do Supabase: SUPABASE_URL ou SUPABASE_SERVICE_ROLE_KEY.' }), { status: 500, headers: defaultHeaders })
+  }
+
+  if (!ASAAS_API_KEY) {
+    return new Response(JSON.stringify({ error: 'Falta a variável de ambiente ASAAS_API_KEY. Configure-a no Supabase Edge Functions/Secrets.' }), { status: 500, headers: defaultHeaders })
   }
 
   try {
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      SUPABASE_URL,
+      SUPABASE_SERVICE_ROLE_KEY
     )
 
     const body = await req.json()

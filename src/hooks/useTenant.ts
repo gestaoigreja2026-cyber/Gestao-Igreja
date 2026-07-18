@@ -91,11 +91,11 @@ function applyBranding(church: Church) {
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
-let _providerInitialized = false;
+const _providerInitialized = false;
 let _cachedTenant: Church | null = null;
 let _cachedSlug: string | null = null;
 let _cachedIsMain = false;
-let _pendingCallbacks: Array<(v: TenantContextValue) => void> = [];
+const _pendingCallbacks: Array<(v: TenantContextValue) => void> = [];
 let _resolved = false;
 
 async function resolveTenant(): Promise<TenantContextValue> {

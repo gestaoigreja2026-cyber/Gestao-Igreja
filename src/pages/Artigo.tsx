@@ -78,18 +78,6 @@ export default function Artigo() {
 
   const staticMeta = slug ? getArticleBySlug(slug) : undefined;
 
-  useEffect(() => {
-    if (!slug) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    fetchBlogArticleBySlug(slug).then((data) => {
-      setDbArticle(data ?? null);
-      setLoading(false);
-    });
-  }, [slug]);
-
   const article: ArticleMeta | undefined = dbArticle
     ? {
         slug: dbArticle.slug,
@@ -102,9 +90,22 @@ export default function Artigo() {
       }
     : staticMeta;
 
+  useDocumentTitle(article?.title ?? '');
+
+  useEffect(() => {
+    if (!slug) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    fetchBlogArticleBySlug(slug).then((data) => {
+      setDbArticle(data ?? null);
+      setLoading(false);
+    });
+  }, [slug]);
+
   if (!article) return <NotFound />;
 
-  useDocumentTitle(article.title);
   const cat = CATEGORIES[article.category];
   const related = getRelatedArticles(slug!, article.category, 3);
 

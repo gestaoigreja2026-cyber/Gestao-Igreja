@@ -12,8 +12,14 @@ function envCheck(mode: string) {
       const url = env.VITE_SUPABASE_URL || '';
       const key = env.VITE_SUPABASE_ANON_KEY || '';
       const ok = url && key && !url.includes('placeholder') && key !== 'placeholder-key';
+      const message = '\n⚠️  Supabase não configurado: faltam VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY.';
       if (!ok) {
-        console.warn('\n⚠️  Supabase não configurado: faltam VITE_SUPABASE_URL ou VITE_SUPABASE_ANON_KEY.');
+        if (mode === 'production') {
+          this.error(
+            `${message} Defina as variáveis de ambiente antes do build (Vercel/Netlify/CI).`
+          );
+        }
+        console.warn(message);
         console.warn('   Local: configure .env.local e reinicie npm run dev.');
         console.warn('   Vercel: Settings > Environment Variables.\n');
       }

@@ -19,6 +19,11 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
+    "e2e:playwright": "playwright test",
+    "e2e:playwright:headed": "playwright test --headed",
+    "e2e:playwright:install": "npx playwright install",
+    "e2e:playwright:all": "playwright test --config=playwright.config.ts --reporter=list",
+    "e2e:playwright:report": "playwright show-report",
     "electron:build": "npm run build && electron-builder --win",
     "electron:dev": "electron ."
   },
@@ -87,6 +92,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
+    "@playwright/test": "^1.61.1",
     "@tailwindcss/typography": "^0.5.16",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.0.0",

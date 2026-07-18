@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';

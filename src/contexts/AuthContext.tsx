@@ -38,10 +38,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         : role;
 
       // 1. Tentar Login Real no Supabase
-      let { data, error } = await supabase.auth.signInWithPassword({
+      const signInResult = await supabase.auth.signInWithPassword({
         email,
         password: password, // Usando o PIN como senha (obrigatoriamente 6+ caracteres)
       });
+      let data = signInResult.data;
+      const error = signInResult.error;
 
       // 2. Se o usuário não existir, tentamos criar (Auto-provisionamento para migração)
       let wasNewSignup = false;
@@ -63,57 +65,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!authUser) throw new Error('Falha ao obter usuário');
 
       // 3. Buscar Perfil e Igreja
-      let profileResult = await authService.getProfile();
+      const profileResult = await authService.getProfile();
       let profile: any = profileResult;
 
-      // 4. Se não houver perfil ou igreja vinculada (e não for superadmin)
+      // 4. Se não houver perfil ou igreja vinculada
       const isTrialSignup = wasNewSignup && typeof sessionStorage !== 'undefined' && sessionStorage.getItem('trial_signup') === '1';
       if (isTrialSignup) sessionStorage.removeItem('trial_signup');
-
-      if (!profile || (!profile.church_id && effectiveRole !== 'superadmin')) {
-        let targetChurchId: string | undefined;
-
-        if (isTrialSignup) {
-          try {
-            targetChurchId = await trialService.createTrialChurchForUser(
-              authUser.email || '',
-              name || authUser.user_metadata?.name || 'Usuário'
-            );
-          } catch (e: any) {
-            throw new Error(e?.message || 'Não foi possível criar igreja de teste. Limite de 100 vagas pode ter sido atingido.');
-          }
+      if (!profile) {
+        if (effectiveRole === 'superadmin') {
+          // Caso superadmin não tenha perfil ainda, cria um sem igreja obrigatória
+          const { data: newProfile } = await (supabase.from('profiles') as any).upsert({
+            id: authUser.id,
+            church_id: null,
+            full_name: name || authUser.user_metadata?.name || 'Administrador Root',
+            role: 'superadmin',
+            updated_at: new Date().toISOString()
+          }).select().single();
+          profile = newProfile;
         } else {
-          let { data: churches } = await supabase.from('churches').select('id').limit(1);
-          if (!churches || churches.length === 0) {
-            const { data: newChurch } = await (supabase.from('churches') as any).insert({
-              name: 'Igreja Sede',
-              slug: 'sede'
-            }).select().single();
-            targetChurchId = newChurch?.id;
+          let targetChurchId: string | undefined;
+
+          if (isTrialSignup) {
+            try {
+              targetChurchId = await trialService.createTrialChurchForUser(
+                authUser.email || '',
+                name || authUser.user_metadata?.name || 'Usuário'
+              );
+            } catch (e: any) {
+              throw new Error(e?.message || 'Não foi possível criar igreja de teste. Limite de 100 vagas pode ter sido atingido.');
+            }
           } else {
-            targetChurchId = (churches as { id: string }[])[0]?.id;
+            const { data: churches } = await supabase.from('churches').select('id').limit(1);
+            if (!churches || churches.length === 0) {
+              const { data: newChurch } = await (supabase.from('churches') as any).insert({
+                name: 'Igreja Sede',
+                slug: 'sede'
+              }).select().single();
+              targetChurchId = newChurch?.id;
+            } else {
+              targetChurchId = (churches as { id: string }[])[0]?.id;
+            }
           }
+
+          const { data: newProfile } = await (supabase.from('profiles') as any).upsert({
+            id: authUser.id,
+            church_id: targetChurchId,
+            full_name: name || authUser.user_metadata?.name || 'Usuário',
+            role: isTrialSignup ? 'admin' : effectiveRole,
+            updated_at: new Date().toISOString()
+          }).select().single();
+
+          profile = newProfile;
         }
-
-        const { data: newProfile } = await (supabase.from('profiles') as any).upsert({
-          id: authUser.id,
-          church_id: targetChurchId,
-          full_name: name || authUser.user_metadata?.name || 'Usuário',
-          role: isTrialSignup ? 'admin' : effectiveRole,
-          updated_at: new Date().toISOString()
-        }).select().single();
-
-        profile = newProfile;
-      } else if (!profile && effectiveRole === 'superadmin') {
-        // Caso superadmin não tenha perfil ainda, cria um sem igreja obrigatória
-        const { data: newProfile } = await (supabase.from('profiles') as any).upsert({
-          id: authUser.id,
-          church_id: null,
-          full_name: name || authUser.user_metadata?.name || 'Administrador Root',
-          role: 'superadmin',
-          updated_at: new Date().toISOString()
-        }).select().single();
-        profile = newProfile;
       } else if (profile && effectiveRole === 'superadmin' && profile.role !== 'superadmin') {
         // Se o usuário fez login como superadmin mas o perfil tem outro role, atualizar
         const { data: updatedProfile } = await (supabase.from('profiles') as any).update({
@@ -296,7 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           registrationCompleted: !!(profile as any).registration_completed,
         };
         setUser(u);
-        let cid = (profile as any).church_id || undefined;
+        const cid = (profile as any).church_id || undefined;
         if (u.role === 'superadmin') {
           try {
             const viewing = sessionStorage.getItem('superadmin_viewing_church');

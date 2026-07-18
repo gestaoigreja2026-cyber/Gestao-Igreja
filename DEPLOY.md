@@ -26,6 +26,10 @@ No passo de configuração do projeto na Vercel, em **Environment Variables**, a
 |------|-------|------|
 | `VITE_SUPABASE_URL` | `https://xxx.supabase.co` | Supabase → Settings → API |
 | `VITE_SUPABASE_ANON_KEY` | `eyJ...` | Supabase → Settings → API → anon public |
+| `SUPABASE_SERVICE_ROLE_KEY` | `your-service-role-key` | Necessário para Edge Functions/integrações do backend |
+| `ASAAS_API_KEY` | `your-asaas-api-key` | Necessário para integração Asaas |
+| `ASAAS_WEBHOOK_TOKEN` | `your-asaas-webhook-token` | Segurança de webhook Asaas |
+| `RESEND_API_KEY` | `your-resend-api-key` | Necessário para email via Resend / envios automáticos |
 | `VITE_HOTMART_CHECKOUT_URL` | `https://pay.hotmart.com/...` | Opcional |
 | `VITE_VAPID_PUBLIC_KEY` | `BNhH...` | Opcional (notificações push) |
 
@@ -61,6 +65,8 @@ Em **Site settings** → **Environment variables**, adicione:
 | `VITE_SUPABASE_ANON_KEY` | sua anon key |
 | `NODE_VERSION` | `20` (se necessário) |
 | `NPM_FLAGS` | `--legacy-peer-deps` |
+
+> Observação: o Netlify armazena apenas as variáveis do frontend e das suas funções internas. A integração com Asaas no projeto usa Supabase Edge Functions, então as chaves `ASAAS_API_KEY`, `ASAAS_WEBHOOK_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY` e `RESEND_API_KEY` devem ser definidas no Supabase (Settings → Edge Functions / Secrets), não apenas no Netlify.
 
 ### 4. Deploy
 

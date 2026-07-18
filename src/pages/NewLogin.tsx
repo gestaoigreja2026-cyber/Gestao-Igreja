@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type ReactNode } from 'react';
 import { Shield, User, Users, Briefcase, ArrowRight, MapPin, Church, Mail, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,7 +21,6 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-
 type Step = 1 | 2;
 
 const step1Schema = z.object({
@@ -268,40 +267,25 @@ export default function NewLogin() {
                     </Card>
                 )}
 
-                {/* TELA 2: PIN E PERFIL */}
                 {step === 2 && (
-                    <Card className="shadow-sm w-full max-w-sm mx-auto rounded-[2rem] overflow-hidden">
-                        <CardContent className="p-6">
-                            <div className="text-center mb-6">
-                                <h2 className="text-lg font-semibold">Verificação</h2>
-                                <p className="text-sm text-muted-foreground">Informe seu PIN e selecione sua função</p>
+                    <Card className="shadow-sm rounded-[2rem] overflow-hidden">
+                        <CardContent className="p-4">
+                            <div className="text-center mb-4">
+                                <div className="flex justify-center mb-4">
+                                    <Logo size="md" showText={false} />
+                                </div>
+                                <p className="text-xl font-bold text-primary">Quase lá</p>
+                                <h2 className="text-base font-semibold">Escolha seu perfil</h2>
+                                <p className="text-xs text-muted-foreground">Selecione seu cargo e digite o PIN de acesso</p>
                             </div>
 
-                            <form onSubmit={handleFinalSubmit} className="space-y-6">
-                                {/* PIN Container */}
-                                <div className="flex justify-center gap-2 w-full">
-                                    {formData.pin.map((digit, i) => (
-                                        <input
-                                            key={i}
-                                            ref={(el) => (pinRefs.current[i] = el)}
-                                            type="password"
-                                            maxLength={1}
-                                            inputMode="numeric"
-                                            value={digit}
-                                            onChange={(e) => handlePinChange(i, e.target.value)}
-                                            onKeyDown={(e) => handleKeyDown(i, e)}
-                                            className="w-10 h-12 text-center text-lg font-bold border rounded-2xl focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                                        />
-                                    ))}
-                                </div>
-
-                                {/* Seleção de Perfil */}
+                            <form onSubmit={handleFinalSubmit} className="space-y-4">
                                 <div className="grid grid-cols-2 gap-3">
                                     <RoleButton
                                         icon={<Shield size={16} />}
                                         label="Pastor"
-                                        active={formData.role === 'admin'}
-                                        onClick={() => setFormData({ ...formData, role: 'admin' })}
+                                        active={formData.role === 'pastor'}
+                                        onClick={() => setFormData({ ...formData, role: 'pastor' })}
                                     />
                                     <RoleButton
                                         icon={<User size={16} />}
@@ -345,6 +329,26 @@ export default function NewLogin() {
                                         active={formData.role === 'superadmin'}
                                         onClick={() => setFormData({ ...formData, role: 'superadmin' })}
                                     />
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="block text-xs font-medium text-muted-foreground">PIN de 6 dígitos</label>
+                                    <div className="grid grid-cols-6 gap-2">
+                                        {formData.pin.map((digit, index) => (
+                                            <Input
+                                                key={index}
+                                                type="tel"
+                                                inputMode="numeric"
+                                                maxLength={1}
+                                                value={digit}
+                                                onChange={(e) => handlePinChange(index, e.target.value)}
+                                                onKeyDown={(e) => handleKeyDown(index, e)}
+                                                ref={(el) => (pinRefs.current[index] = el)}
+                                                className="h-12 rounded-2xl text-center text-lg font-semibold"
+                                                required
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {error && (
@@ -449,7 +453,7 @@ function RoleButton({
     active,
     onClick,
 }: {
-    icon: React.ReactNode;
+    icon: ReactNode;
     label: string;
     active: boolean;
     onClick: () => void;
@@ -458,11 +462,11 @@ function RoleButton({
         <button
             type="button"
             onClick={onClick}
-            className={`flex items-center justify-start gap-3 rounded-2xl border px-4 py-2.5 text-sm transition w-full
-        ${active
+            className={`flex items-center justify-start gap-3 rounded-2xl border px-4 py-2.5 text-sm transition w-full ${
+                active
                     ? 'border-primary bg-primary/10 text-primary font-bold shadow-sm'
                     : 'border-muted hover:bg-muted text-muted-foreground'
-                }`}
+            }`}
         >
             <span className={active ? 'text-primary' : 'text-muted-foreground opacity-70'}>
                 {icon}

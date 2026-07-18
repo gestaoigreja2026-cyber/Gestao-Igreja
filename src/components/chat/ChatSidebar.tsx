@@ -41,7 +41,7 @@ export function ChatSidebar({ conversations, activeConversationId, onSelectConve
 
   const getConversationDetails = (conv: ChatConversation) => {
     let name = conv.name || conv.participants[0]?.name || 'Chat';
-    let avatar = conv.participants[0]?.avatar_url || '';
+    const avatar = conv.participants[0]?.avatar_url || '';
     
     // Default names/icons for special groups
     if (conv.type === 'cell') {
