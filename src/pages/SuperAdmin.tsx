@@ -24,6 +24,7 @@ import {
     Upload,
     ImageIcon,
     CheckCircle2,
+    Download,
 } from 'lucide-react';
 import {
     Card,
@@ -92,11 +93,13 @@ export default function SuperAdmin() {
     const [activeTab, setActiveTab] = useState<TabValue>('gestao');
     const { toast } = useToast();
 
-    const [formData, setFormData] = useState({ name: '', slug: '', adminEmail: '', logo_url: '' });
+    const [formData, setFormData] = useState({ name: '', slug: '', adminEmail: '', logo_url: '', banner_url: '' });
     const [submitting, setSubmitting] = useState(false);
     const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [uploadingBanner, setUploadingBanner] = useState(false);
     const [uploadSuccess, setUploadSuccess] = useState(false);
     const logoFileInputRef = useRef<HTMLInputElement>(null);
+    const bannerFileInputRef = useRef<HTMLInputElement>(null);
     const [actionChurchId, setActionChurchId] = useState<string | null>(null);
     const [excludeConfirm, setExcludeConfirm] = useState<{ churchId: string; name: string } | null>(null);
     const [removeChurchConfirm, setRemoveChurchConfirm] = useState<{ id: string; name: string } | null>(null);
@@ -224,10 +227,10 @@ export default function SuperAdmin() {
     const handleOpenDialog = (church?: Church) => {
         if (church) {
             setEditingChurch(church);
-            setFormData({ name: church.name, slug: church.slug, adminEmail: '', logo_url: (church as any).logo_url || '' });
+            setFormData({ name: church.name, slug: church.slug, adminEmail: '', logo_url: (church as any).logo_url || '', banner_url: (church as any).banner_url || '' });
         } else {
             setEditingChurch(null);
-            setFormData({ name: '', slug: '', adminEmail: '', logo_url: '' });
+            setFormData({ name: '', slug: '', adminEmail: '', logo_url: '', banner_url: '' });
         }
         setUploadSuccess(false);
         setIsDialogOpen(true);
@@ -266,6 +269,39 @@ export default function SuperAdmin() {
         }
     };
 
+    const handleBannerUpload = async (file: File) => {
+        if (!file) return;
+        setUploadingBanner(true);
+        setUploadSuccess(false);
+        try {
+            // Garante que o bucket 'banners' existe (ignora erro se já existir)
+            await supabase.storage.createBucket('banners', { public: true }).catch(() => {});
+
+            const ext = file.name.split('.').pop();
+            const slug = formData.slug || `church-${Date.now()}`;
+            const fileName = `${slug}-banner-${Date.now()}.${ext}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('banners')
+                .upload(fileName, file, { upsert: true, contentType: file.type });
+
+            if (uploadError) throw uploadError;
+
+            const { data: urlData } = supabase.storage.from('banners').getPublicUrl(fileName);
+            const publicUrl = urlData?.publicUrl;
+
+            if (!publicUrl) throw new Error('Não foi possível obter a URL pública da imagem.');
+
+            setFormData(prev => ({ ...prev, banner_url: publicUrl }));
+            setUploadSuccess(true);
+            toast({ title: 'Banner enviado!', description: 'A imagem foi salva e a URL foi preenchida automaticamente.' });
+        } catch (e: any) {
+            toast({ title: 'Erro no upload', description: e?.message || 'Não foi possível enviar o banner.', variant: 'destructive' });
+        } finally {
+            setUploadingBanner(false);
+        }
+    };
+
     const handleRemoveChurch = async () => {
         if (!removeChurchConfirm) return;
         try {
@@ -289,6 +325,7 @@ export default function SuperAdmin() {
             if (editingChurch) {
                 const updatePayload: any = { name: formData.name, slug: formData.slug };
                 if (formData.logo_url !== undefined) updatePayload.logo_url = formData.logo_url || null;
+                if (formData.banner_url !== undefined) updatePayload.banner_url = formData.banner_url || null;
                 await churchesService.update(editingChurch.id, updatePayload);
                 toast({ title: 'Sucesso', description: 'Igreja atualizada com sucesso.' });
             } else {
@@ -815,7 +852,27 @@ export default function SuperAdmin() {
                                                     </div>
                                                 )}
                                                 <p className="text-xs text-muted-foreground truncate">{formData.logo_url}</p>
-                                                <p className="text-[10px] text-primary mt-1 group-hover:underline">Clique para trocar a imagem</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <p className="text-[10px] text-primary group-hover:underline cursor-pointer">Clique para trocar a imagem</p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const link = document.createElement('a');
+                                                            link.href = formData.logo_url;
+                                                            link.download = `logo-${formData.slug || 'church'}.png`;
+                                                            link.target = '_blank';
+                                                            link.rel = 'noopener noreferrer';
+                                                            document.body.appendChild(link);
+                                                            link.click();
+                                                            document.body.removeChild(link);
+                                                        }}
+                                                        className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                                                    >
+                                                        <Download className="h-3 w-3" />
+                                                        Baixar
+                                                    </button>
+                                                </div>
                                                 <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: Quadrado (ex: 512x512) • Fundo transparente</p>
                                             </div>
                                         </div>
@@ -848,13 +905,150 @@ export default function SuperAdmin() {
                                 {/* Campo URL manual como fallback */}
                                 <details className="mt-1">
                                     <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-primary transition-colors">Ou cole uma URL manualmente</summary>
-                                    <Input
-                                        type="url"
-                                        placeholder="https://... (URL pública da imagem)"
-                                        value={formData.logo_url}
-                                        onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
-                                        className="mt-2"
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <Input
+                                            type="url"
+                                            placeholder="https://... (URL pública da imagem)"
+                                            value={formData.logo_url}
+                                            onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
+                                            className="flex-1"
+                                        />
+                                        {formData.logo_url && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const link = document.createElement('a');
+                                                    link.href = formData.logo_url;
+                                                    link.download = `logo-${formData.slug || 'church'}.png`;
+                                                    link.target = '_blank';
+                                                    link.rel = 'noopener noreferrer';
+                                                    document.body.appendChild(link);
+                                                    link.click();
+                                                    document.body.removeChild(link);
+                                                }}
+                                                className="p-2 border rounded-md hover:bg-muted transition-colors"
+                                            >
+                                                <Download className="h-4 w-4 text-primary" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </details>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Banner de Culto</label>
+
+                                {/* Área de upload do banner */}
+                                <div
+                                    className="relative border-2 border-dashed border-primary/20 rounded-xl p-4 flex flex-col items-center gap-3 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer group"
+                                    onClick={() => !uploadingBanner && bannerFileInputRef.current?.click()}
+                                >
+                                    <input
+                                        ref={bannerFileInputRef}
+                                        type="file"
+                                        accept="image/png,image/jpeg,image/webp"
+                                        className="hidden"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) handleBannerUpload(file);
+                                        }}
                                     />
+
+                                    {formData.banner_url ? (
+                                        <div className="flex items-center gap-4 w-full">
+                                            <img
+                                                src={formData.banner_url}
+                                                alt="Banner de culto"
+                                                className="h-14 w-20 object-cover rounded-lg bg-white border shadow-sm"
+                                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                {uploadSuccess && (
+                                                    <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-medium mb-1">
+                                                        <CheckCircle2 className="h-3.5 w-3.5" />
+                                                        Banner enviado com sucesso!
+                                                    </div>
+                                                )}
+                                                <p className="text-xs text-muted-foreground truncate">{formData.banner_url}</p>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <p className="text-[10px] text-primary group-hover:underline cursor-pointer">Clique para trocar a imagem</p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            const link = document.createElement('a');
+                                                            link.href = formData.banner_url;
+                                                            link.download = `banner-${formData.slug || 'church'}.png`;
+                                                            link.target = '_blank';
+                                                            link.rel = 'noopener noreferrer';
+                                                            document.body.appendChild(link);
+                                                            link.click();
+                                                            document.body.removeChild(link);
+                                                        }}
+                                                        className="text-[10px] text-primary hover:underline flex items-center gap-1"
+                                                    >
+                                                        <Download className="h-3 w-3" />
+                                                        Baixar
+                                                    </button>
+                                                </div>
+                                                <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: 1200x320px (horizontal)</p>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col items-center gap-2 py-2">
+                                            {uploadingBanner ? (
+                                                <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                                            ) : (
+                                                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                                                    <ImageIcon className="h-6 w-6 text-primary" />
+                                                </div>
+                                            )}
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium text-foreground">
+                                                    {uploadingBanner ? 'Enviando...' : 'Clique para enviar o banner'}
+                                                </p>
+                                                <p className="text-[10px] text-muted-foreground mt-0.5">PNG, JPG ou WEBP</p>
+                                                <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: 1200x320px (horizontal)</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {uploadingBanner && (
+                                        <div className="absolute inset-0 rounded-xl bg-background/60 flex items-center justify-center">
+                                            <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Campo URL manual como fallback */}
+                                <details className="mt-1">
+                                    <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-primary transition-colors">Ou cole uma URL manualmente</summary>
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <Input
+                                            type="url"
+                                            placeholder="https://... (URL pública da imagem)"
+                                            value={formData.banner_url}
+                                            onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
+                                            className="flex-1"
+                                        />
+                                        {formData.banner_url && (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const link = document.createElement('a');
+                                                    link.href = formData.banner_url;
+                                                    link.download = `banner-${formData.slug || 'church'}.png`;
+                                                    link.target = '_blank';
+                                                    link.rel = 'noopener noreferrer';
+                                                    document.body.appendChild(link);
+                                                    link.click();
+                                                    document.body.removeChild(link);
+                                                }}
+                                                className="p-2 border rounded-md hover:bg-muted transition-colors"
+                                            >
+                                                <Download className="h-4 w-4 text-primary" />
+                                            </button>
+                                        )}
+                                    </div>
                                 </details>
                             </div>
                             {!editingChurch && (

@@ -8,6 +8,7 @@ const MAIN_DOMAIN = 'church-gest-oficial.com.br';
 export let globalChurchLogo: string | null = null;
 export let globalChurchName: string | null = null;
 export let globalChurchThemeColor: string | null = null;
+export let globalChurchBanner: string | null = null;
 
 // ─── Context ─────────────────────────────────────────────────────────────────
 interface TenantContextValue {
@@ -78,6 +79,13 @@ function applyBranding(church: Church) {
     window.dispatchEvent(new CustomEvent('churchLogoUpdated', { detail: church.logo_url }));
   }
 
+  // Banner de culto
+  if (church.banner_url) {
+    globalChurchBanner = church.banner_url;
+    // Evento para banner atualizado
+    window.dispatchEvent(new CustomEvent('churchBannerUpdated', { detail: church.banner_url }));
+  }
+
   // theme-color meta tag (cor primária da igreja)
   const themeColor = church.theme_color || '#2563eb';
   globalChurchThemeColor = themeColor;
@@ -86,7 +94,7 @@ function applyBranding(church: Church) {
 
   // Dispara evento geral de branding atualizado
   window.dispatchEvent(new CustomEvent('churchBrandingUpdated', {
-    detail: { name: church.name, logo: church.logo_url, themeColor },
+    detail: { name: church.name, logo: church.logo_url, banner: church.banner_url, themeColor },
   }));
 }
 

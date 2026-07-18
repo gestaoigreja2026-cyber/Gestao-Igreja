@@ -1,5 +1,6 @@
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, User, Users, Briefcase, MapPin, Church, Archive } from 'lucide-react';
+import { Shield, User, Users, Briefcase, MapPin, Church, Archive, UploadCloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Logo } from '@/components/Logo';
@@ -9,6 +10,8 @@ import { UserRole } from '@/types';
 export default function SimpleLogin() {
     const { login } = useAuth();
     const navigate = useNavigate();
+    const [logoSrc, setLogoSrc] = useState<string | undefined>();
+    const [bannerSrc, setBannerSrc] = useState('/banner-login.png');
 
     const handleLogin = (role: UserRole, name: string) => {
         login('user@igreja.com', '123456', role, name);
@@ -17,18 +20,61 @@ export default function SimpleLogin() {
 
     return (
         <div className="min-h-screen flex items-center justify-center relative px-4 py-12 bg-background">
-            {/* Background */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-secondary/5" />
-            </div>
+            {/* Background (removed banner) */}
 
             <div className="w-full max-w-2xl relative z-10">
                 <Card className="shadow-2xl border-primary/10 overflow-hidden">
                     <CardContent className="p-8">
                         <div className="text-center mb-10">
-                            <div className="flex justify-center mb-6">
-                                <Logo size="xl" showText={false} />
-                            </div>
+                                <div className="flex justify-center mb-6 relative">
+                                    <Logo
+                                        size="xl"
+                                        showText={false}
+                                        overrideSrc={logoSrc}
+                                        editable
+                                        onFile={(file) => {
+                                            const reader = new FileReader();
+                                            reader.onload = () => setLogoSrc(String(reader.result));
+                                            reader.readAsDataURL(file);
+                                        }}
+                                    />
+                                </div>
+
+                                <div className="w-full max-w-xl mx-auto mb-8">
+                                    <div className="relative w-full h-48 rounded-2xl overflow-hidden border border-primary/20 shadow-md">
+
+                                        <img
+                                            src={bannerSrc}
+                                            alt="Banner Login"
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                        <label className="absolute bottom-3 right-3 cursor-pointer">
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                    const file = e.target.files?.[0];
+                                                    if (!file) return;
+
+                                                    const reader = new FileReader();
+
+                                                    reader.onload = () =>
+                                                        setBannerSrc(String(reader.result));
+
+                                                    reader.readAsDataURL(file);
+                                                }}
+                                            />
+
+                                            <div className="bg-primary text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 hover:opacity-90 transition">
+                                                <UploadCloud className="w-5 h-5" />
+                                                Alterar Banner
+                                            </div>
+                                        </label>
+
+                                    </div>
+                                </div>
                             <h1 className="text-3xl font-black tracking-tight mb-2">
                                 Gestão <span className="text-primary">Church</span>
                             </h1>

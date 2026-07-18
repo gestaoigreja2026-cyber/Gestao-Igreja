@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react';
-import { Shield, User, Users, Briefcase, ArrowRight, MapPin, Church, Mail, Archive } from 'lucide-react';
+import { Shield, User, Users, Briefcase, ArrowRight, MapPin, Church, Mail, Archive, Calendar, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -43,6 +43,30 @@ export default function NewLogin() {
     useDocumentTitle('Login');
 
     const { tenant } = useTenant();
+    const [customLogoSrc, setCustomLogoSrc] = useState<string | null>(null);
+    const [customBannerSrc, setCustomBannerSrc] = useState<string | null>(null);
+    const [bannerError, setBannerError] = useState(false);
+
+    const handleLoginLogoUpload = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (reader.result) {
+                setCustomLogoSrc(String(reader.result));
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleLoginBannerUpload = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            if (reader.result) {
+                setCustomBannerSrc(String(reader.result));
+                setBannerError(false);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
 
     // Força o tema oceano nas páginas públicas
     useEffect(() => {
@@ -193,55 +217,130 @@ export default function NewLogin() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative px-4 bg-gradient-to-br from-primary/5 via-background to-primary/10">
+        <div className="min-h-screen flex items-center justify-center relative px-4 bg-slate-50 overflow-hidden">
+            {/* EFEITOS DE BRILHO MÁXIMO (Backend Developer Creativity) */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
+                {/* 1. Glow Central Forte (Brilho no branco) */}
+                <div className="absolute w-[600px] h-[600px] bg-white rounded-full blur-[100px] opacity-100 z-0" />
+                
+                {/* 2. Orbs coloridos sutis para dar vida */}
+                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-200/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-200/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDelay: '2s' }} />
+
+                {/* 3. SVG Pattern de pontinhos de brilho */}
+                <svg className="absolute inset-0 w-full h-full opacity-30 z-0" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="brilho" width="60" height="60" patternUnits="userSpaceOnUse">
+                            <circle cx="3" cy="3" r="1.5" fill="#3b82f6" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#brilho)" />
+                </svg>
+            </div>
             <div className="w-full max-w-[360px] relative z-10">
                 {/* TELA 1: BOAS-VINDAS */}
                 {step === 1 && (
-                    <Card className="shadow-sm rounded-[2rem] overflow-hidden">
+                    <Card className="shadow-[0_0_50px_-12px_rgba(59,130,246,0.15)] border-white/60 bg-white/90 backdrop-blur-2xl rounded-[2rem] overflow-hidden">
                         <CardContent className="p-4">
-                            <div className="text-center mb-4">
-                                <div className="flex justify-center mb-4">
-                                    <Logo size="md" showText={false} />
+                            <div className="text-center space-y-4">
+                                {/* Logo */}
+                                <div className="flex flex-col items-center justify-center">
+                                    <Logo size="md" showText={false} overrideSrc={customLogoSrc ?? undefined} />
+                                    <label className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-primary cursor-pointer hover:text-primary/80">
+                                        <Upload className="h-4 w-4" />
+                                        <span>Alterar logo</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) handleLoginLogoUpload(file);
+                                            }}
+                                        />
+                                    </label>
                                 </div>
+
+                                {/* Banner de Culto - Espaço para imagem dinâmica */}
+                                <div className="relative w-full h-48 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 group flex items-center justify-center">
+                                    {/* Imagem do Banner */}
+                                    {(!bannerError || customBannerSrc) && (
+                                        <img 
+                                            src={customBannerSrc || tenant?.banner_url || '/banner-culto.jpg'} 
+                                            alt="Banner de Culto" 
+                                            className="absolute inset-0 w-full h-full object-cover"
+                                            onError={(e) => {
+                                                if (!customBannerSrc) {
+                                                    setBannerError(true);
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    
+                                    {/* Overlay de Upload (aparece no hover se tiver imagem, ou sempre se não tiver) */}
+                                    <label className={`absolute inset-0 z-10 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                                        ((customBannerSrc || tenant?.banner_url) && !bannerError) 
+                                            ? 'bg-black/40 opacity-0 group-hover:opacity-100 text-white' 
+                                            : 'bg-transparent opacity-100 text-slate-400 hover:text-primary'
+                                    }`}>
+                                        <Upload className="h-6 w-6 mb-1" />
+                                        <span className="text-xs font-medium">Alterar banner</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) handleLoginBannerUpload(file);
+                                            }}
+                                        />
+                                    </label>
+                                </div>
+
+                                {/* Nome da igreja */}
                                 {tenant?.name && (
                                     <h1 className="text-xl font-bold">
                                         <span className="text-slate-900">{tenant.name}</span>
                                     </h1>
                                 )}
-                                <p className="text-xl font-bold text-primary mt-3">Seja bem Vindo</p>
-                                <h2 className="text-base font-semibold">Acessar sistema</h2>
-                                <p className="text-xs text-muted-foreground">Entre com seus dados para continuar</p>
+
+                                {/* Mensagens de boas-vindas */}
+                                <div className="space-y-0.5">
+                                    <p className="text-lg font-bold text-primary">Seja bem Vindo</p>
+                                    <h2 className="text-sm font-semibold">Acessar sistema</h2>
+                                    <p className="text-[10px] text-muted-foreground mt-1">Entre com seus dados para continuar</p>
+                                </div>
                             </div>
 
-                            <form onSubmit={handleWelcomeSubmit} className="space-y-3">
-                                <div className="space-y-2">
+                            <form onSubmit={handleWelcomeSubmit} className="space-y-2 mt-3">
+                                <div>
                                     <Input
                                         type="text"
                                         placeholder="Seu Nome"
                                         value={formData.fullName}
                                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                        className="h-10 rounded-full"
+                                        className="h-8 text-xs rounded-full"
                                         required
                                     />
                                 </div>
-                                <div className="space-y-2">
+                                <div>
                                     <Input
                                         type="email"
                                         placeholder="E-mail"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="h-10 rounded-full"
+                                        className="h-8 text-xs rounded-full"
                                         required
                                     />
                                 </div>
 
                                 {error && (
-                                    <div className="text-xs text-destructive text-center">
+                                    <div className="text-[10px] text-destructive text-center">
                                         {error}
                                     </div>
                                 )}
 
-                                <Button type="submit" className="w-full h-10 rounded-full" size="sm">
+                                <Button type="submit" className="w-full h-8 text-xs rounded-full" size="sm">
                                     Próximo
                                 </Button>
                                 
@@ -268,7 +367,7 @@ export default function NewLogin() {
                 )}
 
                 {step === 2 && (
-                    <Card className="shadow-sm rounded-[2rem] overflow-hidden">
+                    <Card className="shadow-[0_0_50px_-12px_rgba(59,130,246,0.15)] border-white/60 bg-white/90 backdrop-blur-2xl rounded-[2rem] overflow-hidden">
                         <CardContent className="p-4">
                             <div className="text-center mb-4">
                                 <div className="flex justify-center mb-4">

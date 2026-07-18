@@ -97,7 +97,7 @@ export default function Dashboard() {
       <SystemStatusBanner />
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-5xl font-bold tracking-tight text-foreground">
             Olá, {user?.name ? user.name.split(' ')[0] : 'Bem-vindo'}!
           </h1>
           <p className="text-muted-foreground">Bem-vindo ao painel de gestão</p>

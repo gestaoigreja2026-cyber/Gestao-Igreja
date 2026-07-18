@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Upload, Save, Download, Landmark, User, Phone, Mail, MapPin } from 'lucide-react';
+import { Building2, Upload, Save, Download, Landmark, User, Phone, Mail, MapPin, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -29,11 +29,13 @@ export default function Institutional() {
     email: '',
     about: '',
     logoUrl: '',
+    bannerUrl: '',
     presidentName: '',
   });
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
 
   useEffect(() => {
     if (effectiveChurchId) loadChurch();
@@ -52,6 +54,7 @@ export default function Institutional() {
         email: church?.email || '',
         about: church?.about || '',
         logoUrl: church?.logo_url || '',
+        bannerUrl: church?.banner_url || '',
         presidentName: church?.president_name || '',
       });
     } catch (e: any) {
@@ -73,6 +76,7 @@ export default function Institutional() {
         email: churchData.email,
         about: churchData.about,
         logo_url: churchData.logoUrl || null,
+        banner_url: churchData.bannerUrl || null,
         president_name: churchData.presidentName || null,
       } as any);
       const nameFilled = churchData.name?.trim() && churchData.name !== DEFAULT_CHURCH_NAME;
@@ -320,6 +324,83 @@ export default function Institutional() {
                 <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">Clique ou arraste uma imagem para trocar a logo</p>
               </div>
+            </div>
+          )}
+
+          {/* Upload banner (apenas admin) */}
+          {canEdit && (
+            <div className="pt-4 border-t">
+              <Label className="text-sm font-medium block mb-2">Banner de Culto (Página de Login)</Label>
+              <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-all relative bg-primary/5 cursor-pointer">
+                <input
+                  type="file"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  accept="image/*"
+                  disabled={uploadingBanner}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    setUploadingBanner(true);
+                    try {
+                      // Garante que o bucket 'banners' existe
+                      await supabase.storage.createBucket('banners', { public: true }).catch(() => {});
+                      
+                      const { data, error } = await supabase.storage
+                        .from('banners')
+                        .upload(`${effectiveChurchId}-banner-${Date.now()}-${file.name}`, file);
+                      if (error) throw error;
+                      const { data: { publicUrl } } = supabase.storage
+                        .from('banners')
+                        .getPublicUrl(data.path);
+                      setChurchData({ ...churchData, bannerUrl: publicUrl });
+                      toast({ title: 'Banner atualizado!', description: 'Salve as alterações para aplicar.' });
+                    } catch (err: any) {
+                      toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
+                    } finally {
+                      setUploadingBanner(false);
+                    }
+                  }}
+                />
+                {uploadingBanner ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+                    <p className="text-sm text-muted-foreground">Enviando banner...</p>
+                  </div>
+                ) : (
+                  <>
+                    <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">Clique ou arraste uma imagem para trocar o banner</p>
+                    <p className="text-xs text-muted-foreground mt-1">Tamanho ideal: 1200x320px (horizontal)</p>
+                  </>
+                )}
+              </div>
+              {churchData.bannerUrl && (
+                <div className="mt-4 rounded-lg overflow-hidden border relative group">
+                  <img
+                    src={churchData.bannerUrl}
+                    alt="Banner de culto"
+                    className="w-full h-32 object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = churchData.bannerUrl;
+                      link.download = `banner-${churchData.name.replace(/\s+/g, '-').toLowerCase()}.png`;
+                      link.target = '_blank';
+                      link.rel = 'noopener noreferrer';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      toast({ title: 'Download iniciado', description: 'O banner foi enviado para download.' });
+                    }}
+                    className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Download className="h-4 w-4 text-primary" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
