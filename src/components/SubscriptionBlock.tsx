@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AlertCircle, Copy, CreditCard, Loader2 } from 'lucide-react';
+import { AlertCircle, Copy, CreditCard, Loader2, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { SUBSCRIPTION_PIX } from '@/lib/subscriptionConfig';
 import { churchesService } from '@/services/churches.service';
@@ -7,6 +7,7 @@ import { asaasService } from '@/services/asaas.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Bloqueia o uso do sistema quando a igreja está inadimplente ou suspensa.
@@ -15,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 export function SubscriptionBlock({ children }: { children: React.ReactNode }) {
   const { user, church } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [status, setStatus] = useState<{ status: string; blocked: boolean; asaas_customer_id?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState(false);
@@ -25,8 +27,27 @@ export function SubscriptionBlock({ children }: { children: React.ReactNode }) {
       setLoading(false);
       return;
     }
+    // Tesoureiro, secretário, diretor de patrimônio e pastor_admin não precisam verificar status de assinatura para acessar funcionalidades básicas
+    if (user.role === 'tesoureiro' || user.role === 'secretario' || user.role === 'diretor_patrimonio' || user.role === 'pastor_admin') {
+      console.log('SubscriptionBlock: User exempt from subscription check - Role:', user.role);
+      setStatus({ status: 'ativa', blocked: false });
+      setLoading(false);
+      return;
+    }
+    // TEMPORÁRIO: Desabilitar bloqueio para permitir acesso a todos
+    console.log('SubscriptionBlock: TEMPORARY - Blocking disabled for all users');
+    setStatus({ status: 'ativa', blocked: false });
+    setLoading(false);
+    return;
+    
+    console.log('SubscriptionBlock: Checking subscription status for role:', user.role);
     churchesService.getMyChurchSubscriptionStatus().then((s) => {
+      console.log('SubscriptionBlock: Status received:', s);
       setStatus(s);
+      setLoading(false);
+    }).catch((error) => {
+      console.error('SubscriptionBlock: Error checking status:', error);
+      setStatus({ status: 'ativa', blocked: false });
       setLoading(false);
     });
   }, [user?.id, user?.role]);
@@ -63,6 +84,17 @@ export function SubscriptionBlock({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-muted/30">
       <div className="max-w-md w-full bg-card border border-destructive/30 rounded-xl shadow-lg p-8 text-center">
+        <div className="flex justify-start mb-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate('/dashboard')}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Voltar ao App
+          </Button>
+        </div>
         <div className="mx-auto w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mb-6">
           <AlertCircle className="h-8 w-8 text-destructive" />
         </div>
@@ -88,7 +120,6 @@ export function SubscriptionBlock({ children }: { children: React.ReactNode }) {
         )}
 
         <div className="space-y-2 text-left text-sm text-muted-foreground bg-muted/50 rounded-lg p-4">
-          <p>• Período de teste: <strong>7 dias</strong> grátis para novas igrejas</p>
           <p>• Vencimento: <strong>30 dias</strong> após o pagamento (ou fim do teste)</p>
           <p>• Tolerância: <strong>5 dias</strong> após o vencimento</p>
           <p>• Após essa data: <strong>suspensão automática</strong> até regularização</p>

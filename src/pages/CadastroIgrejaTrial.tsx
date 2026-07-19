@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Church, User, Image } from 'lucide-react';
+import { Gift, Church, User, Image, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,8 @@ const initialForm: TrialChurchFormData = {
   state: '',
   pastorName: '',
   pastorPhone: '',
+  pastorEmail: '',
+  pastorPassword: '',
   logoUrl: '',
 };
 
@@ -36,6 +38,7 @@ export default function CadastroIgrejaTrial() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
   const handleChange = (field: keyof TrialChurchFormData, value: string) => {
@@ -75,11 +78,35 @@ export default function CadastroIgrejaTrial() {
       toast({ title: 'Preencha o nome da igreja', variant: 'destructive' });
       return;
     }
+    if (!form.pastorEmail.trim()) {
+      toast({ title: 'Preencha o e-mail do pastor', variant: 'destructive' });
+      return;
+    }
+    if (form.pastorPassword.length < 6) {
+      toast({ title: 'Senha muito curta', description: 'A senha deve ter pelo menos 6 caracteres.', variant: 'destructive' });
+      return;
+    }
     setSubmitting(true);
     try {
+      // Cria a conta do pastor no Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: form.pastorEmail.trim(),
+        password: form.pastorPassword,
+        options: {
+          data: {
+            full_name: form.pastorName || 'Pastor',
+            role: 'pastor',
+          }
+        }
+      });
+
+      if (authError && !authError.message.includes('already registered')) {
+        throw authError;
+      }
+
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(form));
       sessionStorage.setItem('trial_signup', '1');
-      toast({ title: 'Dados salvos!', description: 'Redirecionando para a página de pagamento para ativar sua conta.' });
+      toast({ title: 'Conta criada!', description: 'Redirecionando para o pagamento para ativar sua conta.' });
       navigate('/checkout');
     } catch (err: any) {
       toast({ title: 'Erro', description: err?.message, variant: 'destructive' });
@@ -221,6 +248,47 @@ export default function CadastroIgrejaTrial() {
                   placeholder="(11) 99999-9999"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="pastorEmail" className="flex items-center gap-1.5">
+                  <Mail className="h-3.5 w-3.5 text-primary" />
+                  E-mail de Acesso do Pastor *
+                </Label>
+                <Input
+                  id="pastorEmail"
+                  type="email"
+                  value={form.pastorEmail}
+                  onChange={(e) => handleChange('pastorEmail', e.target.value)}
+                  placeholder="pastor@minhaigreja.com"
+                  required
+                />
+                <p className="text-[10px] text-muted-foreground">O pastor usará este e-mail para acessar o sistema.</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pastorPassword" className="flex items-center gap-1.5">
+                  <Lock className="h-3.5 w-3.5 text-primary" />
+                  Senha de Acesso *
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="pastorPassword"
+                    type={showPassword ? 'text' : 'password'}
+                    value={form.pastorPassword}
+                    onChange={(e) => handleChange('pastorPassword', e.target.value)}
+                    placeholder="Mínimo 6 caracteres"
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    onClick={() => setShowPassword(v => !v)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="text-[10px] text-muted-foreground">Esta será a senha usada para entrar no app.</p>
+              </div>
             </CardContent>
           </Card>
 
@@ -276,7 +344,7 @@ export default function CadastroIgrejaTrial() {
                   Li e concordo com os termos do serviço
                 </Label>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  7 dias para teste. Após os 7 dias começa a cobrança. Na falta de pagamento o serviço é pausado. O cancelamento do serviço não gera multa e pode ser encerrado a qualquer momento.
+                  Na falta de pagamento o serviço é pausado. O serviço pode ser cancelado a qualquer momento sem prejuízo de multas. O pagamento é cobrado após 30 dias da data da contratação.
                 </p>
               </div>
             </CardContent>

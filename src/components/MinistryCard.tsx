@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Ministry } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const iconMap: Record<string, React.ElementType> = {
   Users, Heart, User, Zap, Star, Baby, HandHelping, Music, Palette, Video, Globe, Church, UserPlus
@@ -23,7 +24,8 @@ export function MinistryCard({ ministry, onDelete, onAddMember }: MinistryCardPr
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const Icon = iconMap[ministry.icon] || Church;
   const { user } = useAuth();
-  const isAdmin = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'secretario' || user?.role === 'pastor' || user?.role === 'lider_ministerio';
+  const { canEditMinistries } = usePermissions();
+  const isAdmin = canEditMinistries;
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();

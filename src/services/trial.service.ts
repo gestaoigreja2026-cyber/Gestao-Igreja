@@ -32,6 +32,8 @@ export type TrialChurchFormData = {
   state: string;
   pastorName: string;
   pastorPhone: string;
+  pastorEmail: string;
+  pastorPassword: string;
   logoUrl: string;
 };
 

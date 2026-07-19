@@ -94,9 +94,10 @@ export interface Database {
                     id: string
                     church_id: string | null
                     full_name: string | null
-                    role: 'superadmin' | 'admin' | 'pastor' | 'secretario' | 'tesoureiro' | 'membro' | 'lider_celula' | 'lider_ministerio' | 'aluno' | 'congregado' | null
+                    role: 'superadmin' | 'admin' | 'pastor' | 'pastor_admin' | 'secretario' | 'tesoureiro' | 'membro' | 'lider_celula' | 'lider_ministerio' | 'aluno' | 'congregado' | null
                     phone: string | null
                     avatar_url: string | null
+                    managed_churches?: string[] | null
                     created_at: string
                     updated_at: string
                 }
@@ -104,9 +105,10 @@ export interface Database {
                     id: string
                     church_id?: string | null
                     full_name?: string | null
-                    role?: 'superadmin' | 'admin' | 'pastor' | 'secretario' | 'tesoureiro' | 'membro' | 'lider_celula' | 'lider_ministerio' | 'aluno' | 'congregado' | null
+                    role?: 'superadmin' | 'admin' | 'pastor' | 'pastor_admin' | 'secretario' | 'tesoureiro' | 'membro' | 'lider_celula' | 'lider_ministerio' | 'aluno' | 'congregado' | null
                     phone?: string | null
                     avatar_url?: string | null
+                    managed_churches?: string[] | null
                     created_at?: string
                     updated_at?: string
                 }
@@ -114,9 +116,10 @@ export interface Database {
                     id?: string
                     church_id?: string | null
                     full_name?: string | null
-                    role?: 'superadmin' | 'admin' | 'pastor' | 'secretario' | 'tesoureiro' | 'membro' | 'lider_celula' | 'lider_ministerio' | 'aluno' | 'congregado' | null
+                    role?: 'superadmin' | 'admin' | 'pastor' | 'pastor_admin' | 'secretario' | 'tesoureiro' | 'membro' | 'lider_celula' | 'lider_ministerio' | 'aluno' | 'congregado' | null
                     phone?: string | null
                     avatar_url?: string | null
+                    managed_churches?: string[] | null
                     created_at?: string
                     updated_at?: string
                 }

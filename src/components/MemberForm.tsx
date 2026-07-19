@@ -38,6 +38,7 @@ export interface MemberFormData {
   phone: string;
   category: 'membro' | 'congregado';
   photoUrl?: string;
+  churchName?: string;
 }
 
 export function MemberForm({ onSubmit, onCancel, initialData, churchName, pastorName, isSubmitting, disabled }: MemberFormProps) {
@@ -50,6 +51,7 @@ export function MemberForm({ onSubmit, onCancel, initialData, churchName, pastor
     phone: '',
     category: 'membro',
     photoUrl: '',
+    churchName: churchName || '',
   });
 
   const [uploading, setUploading] = useState(false);
@@ -106,28 +108,30 @@ export function MemberForm({ onSubmit, onCancel, initialData, churchName, pastor
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
-          {(churchName || pastorName) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-muted/50 border border-border">
-              {churchName && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2 text-muted-foreground font-medium">
-                    <Church className="h-4 w-4" />
-                    Nome da Igreja
-                  </Label>
-                  <p className="text-sm font-semibold">{churchName}</p>
-                </div>
-              )}
-              {pastorName && (
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2 text-muted-foreground font-medium">
-                    <User className="h-4 w-4" />
-                    Nome do Pastor da Igreja
-                  </Label>
-                  <p className="text-sm font-semibold">{pastorName}</p>
-                </div>
-              )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-muted/50 border border-border">
+            <div className="space-y-2">
+              <Label htmlFor="churchName" className="flex items-center gap-2 text-muted-foreground font-medium">
+                <Church className="h-4 w-4" />
+                Nome da Igreja
+              </Label>
+              <Input
+                id="churchName"
+                value={formData.churchName ?? ''}
+                onChange={(e) => setFormData({ ...formData, churchName: e.target.value })}
+                placeholder="Ex: Igreja Batista Central"
+                disabled={disabled}
+              />
             </div>
-          )}
+            {pastorName && (
+              <div className="space-y-2">
+                <Label className="flex items-center gap-2 text-muted-foreground font-medium">
+                  <User className="h-4 w-4" />
+                  Nome do Pastor da Igreja
+                </Label>
+                <p className="text-sm font-semibold">{pastorName}</p>
+              </div>
+            )}
+          </div>
           {/* Photo Upload Section */}
           <div className="flex flex-col items-center gap-4 mb-6">
             <div className="relative group">

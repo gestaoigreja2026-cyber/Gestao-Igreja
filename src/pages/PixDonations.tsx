@@ -14,6 +14,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { churchesService } from '@/services/churches.service';
 
 // qrcode-pix exporta QrCodePix como export nomeado
@@ -44,11 +45,10 @@ export default function PixDonations() {
   useDocumentTitle('Contas e PIX Igreja');
   const { churchId, viewingChurch, user } = useAuth();
   const { toast } = useToast();
+  const { canEditPixDonations } = usePermissions();
   const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
 
-  const canEdit = ['admin', 'pastor', 'secretario', 'superadmin'].includes(
-    user?.role || ''
-  );
+  const canEdit = canEditPixDonations;
 
   const [church, setChurch] = useState<{
     pix_key?: string | null;

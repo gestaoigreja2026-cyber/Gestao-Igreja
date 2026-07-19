@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Search, Trash2, Edit, Phone, Mail, MapPin, Cake, MessageSquare, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,8 +32,8 @@ export function MemberList({ members, onDelete, onEdit, deletingId }: MemberList
   const [search, setSearch] = useState('');
   const [memberToDelete, setMemberToDelete] = useState<Member | null>(null);
   const { user } = useAuth();
-  const canDelete = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'secretario';
-  const canEdit = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'secretario';
+  const { canEdit } = usePermissions();
+  const canDelete = canEdit;
 
   const filteredMembers = members.filter(member =>
     member.name.toLowerCase().includes(search.toLowerCase()) ||

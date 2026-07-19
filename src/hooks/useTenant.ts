@@ -106,6 +106,15 @@ let _cachedIsMain = false;
 const _pendingCallbacks: Array<(v: TenantContextValue) => void> = [];
 let _resolved = false;
 
+/**
+ * Invalida o cache do tenant e força o re-fetch na próxima renderização.
+ * Use após atualizar logo_url ou banner_url no banco.
+ */
+export function invalidateTenantCache() {
+  _resolved = false;
+  _cachedTenant = null;
+}
+
 async function resolveTenant(): Promise<TenantContextValue> {
   if (_resolved) {
     return { tenant: _cachedTenant, loading: false, isMainDomain: _cachedIsMain, subdomain: _cachedSlug };
@@ -115,6 +124,23 @@ async function resolveTenant(): Promise<TenantContextValue> {
   _cachedSlug = slug;
 
   if (!slug) {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocal) {
+      try {
+        const { data: churches } = await supabase.from('churches').select('*').limit(1);
+        if (churches && churches.length > 0) {
+          const church = churches[0];
+          _cachedTenant = church;
+          _cachedSlug = church.slug;
+          applyBranding(church);
+          _resolved = true;
+          return { tenant: _cachedTenant, loading: false, isMainDomain: false, subdomain: church.slug };
+        }
+      } catch (e) {
+        console.warn('Erro ao buscar igreja fallback local', e);
+      }
+    }
+
     _cachedIsMain = true;
     _resolved = true;
     return { tenant: null, loading: false, isMainDomain: true, subdomain: null };

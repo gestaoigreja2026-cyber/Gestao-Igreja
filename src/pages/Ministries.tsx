@@ -32,6 +32,7 @@ import { Ministry, Member } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import MinistryMonthlyReportExcel from '@/components/MinistryMonthlyReportExcel';
 export default function Ministries() {
   useDocumentTitle('Ministérios');
@@ -45,8 +46,9 @@ export default function Ministries() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, churchId } = useAuth();
+  const { canEditMinistries } = usePermissions();
   const effectiveChurchId = churchId ?? user?.churchId;
-  const canCreate = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'lider_ministerio';
+  const canCreate = canEditMinistries;
 
   useEffect(() => {
     loadMinistries();
@@ -298,8 +300,9 @@ function MinistryDetailsDialog({ open, onOpenChange, ministry, onSuccess }: {
   const [monthlyReport, setMonthlyReport] = useState('');
   const { toast } = useToast();
   const { churchId, user } = useAuth();
+  const { canEditMinistries } = usePermissions();
   const effectiveChurchId = churchId ?? user?.churchId;
-  const canEdit = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'lider_ministerio';
+  const canEdit = canEditMinistries;
 
   useEffect(() => {
     if (open) {

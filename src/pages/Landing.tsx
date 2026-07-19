@@ -48,6 +48,16 @@ const pillars = [
   }
 ];
 
+const PLAN_FEATURES = [
+  'Gestão completa de membros',
+  'Controle financeiro',
+  'Células e ministérios',
+  'Relatórios avançados',
+  'Boletins e avisos',
+  'Suporte prioritário',
+  'Cancele quando quiser',
+];
+
 const plans = [
   {
     id: 'starter',
@@ -61,13 +71,7 @@ const plans = [
     borderColor: 'border-emerald-200 dark:border-emerald-800',
     bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
     featured: false,
-    features: [
-      'Até 100 membros',
-      'Gestão de Células e Ministérios',
-      'Finanças e Caixa Diário',
-      'Relatórios Básicos',
-      'Suporte via WhatsApp',
-    ]
+    features: PLAN_FEATURES
   },
   {
     id: 'growth',
@@ -81,14 +85,7 @@ const plans = [
     borderColor: 'border-blue-300 dark:border-blue-700',
     bgColor: 'bg-blue-50 dark:bg-blue-950/30',
     featured: true,
-    features: [
-      'Até 500 membros',
-      'Tudo do Plano Starter',
-      'Escalas de Culto Avançadas',
-      'Secretaria Digital Completa',
-      'Relatórios Exportáveis (Excel/PDF)',
-      'Suporte Prioritário',
-    ]
+    features: PLAN_FEATURES
   },
   {
     id: 'professional',
@@ -102,14 +99,7 @@ const plans = [
     borderColor: 'border-purple-200 dark:border-purple-800',
     bgColor: 'bg-purple-50 dark:bg-purple-950/30',
     featured: false,
-    features: [
-      'Até 2.000 membros',
-      'Tudo do Plano Growth',
-      'Dashboard de Inteligência',
-      'App em Modo Offline (PWA)',
-      'Integrações Avançadas',
-      'Suporte Dedicado',
-    ]
+    features: PLAN_FEATURES
   },
   {
     id: 'enterprise',
@@ -123,14 +113,7 @@ const plans = [
     borderColor: 'border-orange-200 dark:border-orange-800',
     bgColor: 'bg-orange-50 dark:bg-orange-950/30',
     featured: false,
-    features: [
-      'Membros Ilimitados',
-      'Tudo do Plano Professional',
-      'Múltiplos Campus',
-      'API de Integração',
-      'Gerente de Conta Dedicado',
-      'SLA Garantido',
-    ]
+    features: PLAN_FEATURES
   }
 ];
 

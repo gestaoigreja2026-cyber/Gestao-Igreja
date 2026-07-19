@@ -29,7 +29,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { canWriteInRestrictedModules } from '@/lib/permissions';
+import { usePermissions } from '@/hooks/usePermissions';
 import { discipleshipService } from '@/services/discipleship.service';
 import { membersService } from '@/services/members.service';
 import ExcelDiscipleshipMonthlyReportButton from '@/components/ExcelDiscipleshipMonthlyReport';
@@ -52,7 +52,8 @@ export default function Discipleship() {
     const { user, churchId } = useAuth();
     const effectiveChurchId = churchId ?? user?.churchId;
     const { toast } = useToast();
-    const canEdit = canWriteInRestrictedModules(user?.role);
+    const { canEditDiscipleship } = usePermissions();
+    const canEdit = canEditDiscipleship;
 
     useEffect(() => {
         loadData();

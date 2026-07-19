@@ -30,6 +30,13 @@ const ROUTE_LABELS: Record<string, string> = {
   '/como-acessar': 'Como Acessar',
   '/superadmin': 'Super Admin',
   '/escolas': 'Escolas',
+  '/chat': 'Chat',
+  '/discipulado': 'Discipulado',
+  '/acessos': 'Acessos de Liderança',
+  '/rede': 'Rede de Igrejas',
+  '/patrimonio': 'Patrimonial',
+  '/ministerios': 'Ministérios',
+  '/consolidacao': 'Consolidação',
 };
 
 interface BreadcrumbConfig {

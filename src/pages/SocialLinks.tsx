@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { churchesService } from '@/services/churches.service';
 
 const NETWORKS = [
@@ -33,9 +34,10 @@ export default function SocialLinks() {
   useDocumentTitle('Redes Sociais');
   const { churchId, viewingChurch, user } = useAuth();
   const { toast } = useToast();
+  const { canEditSocialMedia } = usePermissions();
   const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
 
-  const canEdit = user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'secretario' || user?.role === 'superadmin';
+  const canEdit = canEditSocialMedia;
 
   const [links, setLinks] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);

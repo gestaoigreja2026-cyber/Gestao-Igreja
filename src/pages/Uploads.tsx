@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { EmptyState } from '@/components/EmptyState';
 
 const typeLabels: Record<string, string> = {
@@ -48,7 +49,8 @@ export default function Uploads() {
   const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
   const { user, churchId } = useAuth();
   const { toast } = useToast();
-  const canManage = user?.role !== 'aluno' && user?.role !== 'membro' && user?.role !== 'congregado';
+  const { canEditUploads } = usePermissions();
+  const canManage = canEditUploads;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeCategory, setActiveCategory] = useState('study');
   const [deleteConfirm, setDeleteConfirm] = useState<ChurchDocument | null>(null);

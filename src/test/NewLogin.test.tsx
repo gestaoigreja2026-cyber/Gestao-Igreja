@@ -68,7 +68,7 @@ beforeEach(() => {
 });
 
 describe('NewLogin', () => {
-  it('deve enviar o role pastor ao entrar', async () => {
+  it('deve enviar o role membro ao entrar', async () => {
     render(<NewLogin />);
 
     fireEvent.change(screen.getByPlaceholderText('Seu Nome'), {
@@ -81,7 +81,7 @@ describe('NewLogin', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /próximo/i }));
 
-    fireEvent.click(screen.getByRole('button', { name: /pastor/i }));
+    fireEvent.click(screen.getByRole('button', { name: /membro/i }));
 
     const pinInputs = document.querySelectorAll('input[type="tel"]');
     pinInputs.forEach((input, index) => {
@@ -93,7 +93,7 @@ describe('NewLogin', () => {
     expect(loginMock).toHaveBeenCalledWith(
       'joao@email.com',
       '123456',
-      'pastor',
+      'membro',
       'João'
     );
   });

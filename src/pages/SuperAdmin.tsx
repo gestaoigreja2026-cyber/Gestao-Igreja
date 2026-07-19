@@ -25,6 +25,7 @@ import {
     ImageIcon,
     CheckCircle2,
     Download,
+    Network,
 } from 'lucide-react';
 import {
     Card,
@@ -71,10 +72,12 @@ import { SUBSCRIPTION_PIX } from '@/lib/subscriptionConfig';
 import { supabase } from '@/lib/supabaseClient';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Checkbox } from '@/components/ui/checkbox';
+import { SuperAdminNetwork } from '@/components/SuperAdminNetwork';
 
 const MAX_CHURCHES = 100;
 
-type TabValue = 'gestao' | 'relatorios' | 'mensalidades' | 'logs_asaas';
+type TabValue = 'gestao' | 'relatorios' | 'mensalidades' | 'logs_asaas' | 'rede';
 
 export default function SuperAdmin() {
     useDocumentTitle('Painel Root - 100 Igrejas');
@@ -110,8 +113,8 @@ export default function SuperAdmin() {
     const [selectedLog, setSelectedLog] = useState<any | null>(null);
 
     useEffect(() => {
-        // Segurança: Bloqueia acesso se não for o e-mail master
-        if (user && user.email !== 'edukadoshmda@gmail.com') {
+        // Segurança: Bloqueia acesso se não for superadmin
+        if (user && user.role !== 'superadmin') {
             toast({
                 title: 'Acesso Negado',
                 description: 'Você não tem permissão para acessar o Painel Root.',
@@ -356,9 +359,6 @@ export default function SuperAdmin() {
                     <h1 className="text-3xl font-bold tracking-tight text-primary">
                         Painel Super Admin — 100 Igrejas
                     </h1>
-                    <p className="text-muted-foreground mt-1 text-lg">
-                        Gestão centralizada, relatórios consolidados e acompanhamento de mensalidades (R$ 150/mês).
-                    </p>
                 </div>
                 <Button onClick={() => handleOpenDialog()} disabled={!canAddChurch} className="gap-2 shadow-lg shadow-primary/20">
                     <Plus className="h-4 w-4" /> Nova Igreja
@@ -428,12 +428,15 @@ export default function SuperAdmin() {
             )}
 
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
-                <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+                <TabsList className="grid w-full grid-cols-5 max-w-4xl">
                     <TabsTrigger value="gestao" className="gap-2">
                         <Building2 className="h-4 w-4" /> Gestão
                     </TabsTrigger>
                     <TabsTrigger value="relatorios" className="gap-2">
                         <BarChart3 className="h-4 w-4" /> Relatórios
+                    </TabsTrigger>
+                    <TabsTrigger value="rede" className="gap-2">
+                        <Network className="h-4 w-4" /> PastorAdmin
                     </TabsTrigger>
                     <TabsTrigger value="mensalidades" className="gap-2">
                         <DollarSign className="h-4 w-4" /> Mensalidades
@@ -794,6 +797,10 @@ export default function SuperAdmin() {
                             </div>
                         </CardContent>
                     </Card>
+                </TabsContent>
+                
+                <TabsContent value="rede" className="mt-6">
+                    <SuperAdminNetwork />
                 </TabsContent>
             </Tabs>
 

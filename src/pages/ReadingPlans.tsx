@@ -35,6 +35,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { EmptyState } from '@/components/EmptyState';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
@@ -44,8 +45,9 @@ export default function ReadingPlans() {
   useDocumentTitle('Planos de Leitura');
   const { user, churchId, viewingChurch } = useAuth();
   const { toast } = useToast();
+  const { canDeleteReadingPlans } = usePermissions();
   const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
-  const canManage = user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'secretario' || user?.role === 'superadmin';
+  const canManage = canDeleteReadingPlans;
 
   const [plans, setPlans] = useState<ReadingPlan[]>([]);
   const [loading, setLoading] = useState(true);

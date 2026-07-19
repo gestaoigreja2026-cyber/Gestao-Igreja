@@ -13,6 +13,7 @@ import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Logo } from './Logo';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { GlobalSearch } from './GlobalSearch';
+import { cn } from '@/lib/utils';
 
 
 interface MainLayoutProps {
@@ -25,6 +26,7 @@ export function MainLayout({ children }: MainLayoutProps) {
     const { user, viewingChurch, exitChurchView } = useAuth();
     const { toast } = useToast();
     const showRootBanner = user?.role === 'superadmin' && viewingChurch;
+    const showNetworkBanner = user?.role === 'pastor_admin' && viewingChurch;
     const showSubscriptionNotice = ['pastor', 'secretario', 'tesoureiro'].includes(user?.role ?? '');
     const copyPixKey = () => {
         navigator.clipboard?.writeText('(91) 99383-7093');
@@ -71,7 +73,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                     <NotificationCenter />
                 </header>
 
-                <main id="main-content" className="flex-1 overflow-y-auto overflow-x-hidden safe-area-padding" tabIndex={-1}>
+                <main id="main-content" className={cn("flex-1 overflow-y-auto overflow-x-hidden safe-area-padding", showNetworkBanner && "read-only-mode")} tabIndex={-1}>
                     {showRootBanner && (
                         <div className="sticky top-0 z-40 print:hidden flex items-center justify-between gap-3 px-4 py-2 sm:px-6 bg-amber-100 dark:bg-amber-950/50 border-b border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200">
                             <span className="text-sm font-medium truncate">
@@ -87,30 +89,22 @@ export function MainLayout({ children }: MainLayoutProps) {
                             </button>
                         </div>
                     )}
-                    {showSubscriptionNotice && !showRootBanner && (
-                        <div className="sticky top-0 z-40 print:hidden px-4 py-3 sm:px-6 bg-blue-50 dark:bg-blue-950/30 border-b border-blue-200 dark:border-blue-800 text-blue-900 dark:text-blue-200">
-                            <div className="flex items-start gap-3">
-                                <Info className="h-5 w-5 shrink-0 mt-0.5 text-blue-600 dark:text-blue-400" />
-                                <div className="text-sm space-y-1 min-w-0">
-                                    <p className="font-medium">
-                                        <strong>Assinatura:</strong> 7 dias grátis para testar. Mensalidades via Asaas. 50 primeiras igrejas: R$ 75/mês. Demais: R$ 150/mês. Vencimento 30 dias + 5 de tolerância.
-                                    </p>
-                                    <p>
-                                        <strong>PIX:</strong> <span className="font-mono bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 rounded">(91) 99383-7093</span> — Luiz Eduardo · Nubank.
-                                        <button
-                                            type="button"
-                                            onClick={copyPixKey}
-                                            className="ml-1.5 inline-flex items-center gap-1 text-blue-700 dark:text-blue-300 hover:underline"
-                                            title="Copiar chave PIX"
-                                        >
-                                            <Copy className="h-3.5 w-3.5" /> Copiar
-                                        </button>
-                                    </p>
-                                    <p className="text-xs text-blue-700/90 dark:text-blue-300/90">1) Informe o nome da igreja no PIX antes de pagar. 2) Envie o comprovante para <a href={`mailto:${SUBSCRIPTION_PIX.receiptEmail}?subject=Comprovante%20PIX%20-%20Mensalidade`} className="underline font-medium">{SUBSCRIPTION_PIX.receiptEmail}</a></p>
-                                </div>
-                            </div>
+                    {showNetworkBanner && (
+                        <div className="sticky top-0 z-40 print:hidden flex items-center justify-between gap-3 px-4 py-2 sm:px-6 bg-purple-100 dark:bg-purple-950/50 border-b border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-200">
+                            <span className="text-sm font-medium truncate">
+                                Supervisão: Visualizando <strong>{viewingChurch.name}</strong> em modo Leitura
+                            </span>
+                            <button
+                                type="button"
+                                onClick={() => { exitChurchView(); navigate('/rede'); }}
+                                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-200/80 dark:bg-purple-900/50 hover:bg-purple-300/80 dark:hover:bg-purple-800/50 font-medium text-sm transition-colors"
+                            >
+                                <ArrowLeft className="h-4 w-4" />
+                                Voltar à Rede
+                            </button>
                         </div>
                     )}
+
                     <div className="container mx-auto p-4 sm:p-6 md:p-8 lg:p-8 max-w-7xl animate-in fade-in duration-500">
                         <PageBreadcrumbs />
                         {children}

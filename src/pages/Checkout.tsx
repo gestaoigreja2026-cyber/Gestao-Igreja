@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Church, User, Mail, CreditCard, ArrowRight, Loader2, CheckCircle2, ShieldCheck, Globe, AlertCircle, Zap, Star, Crown, Building2, Check } from 'lucide-react';
+import { Church, User, Mail, CreditCard, ArrowRight, Loader2, CheckCircle2, ShieldCheck, Globe, AlertCircle, Zap, Star, Crown, Building2, Check, Lock, Eye, EyeOff } from 'lucide-react';
 import { 
     Dialog, 
     DialogContent, 
@@ -11,11 +11,23 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
+
+const PLAN_FEATURES = [
+  'Gestão completa de membros',
+  'Controle financeiro',
+  'Células e ministérios',
+  'Relatórios avançados',
+  'Boletins e avisos',
+  'Suporte prioritário',
+  'Cancele quando quiser',
+];
 
 const PLANS = [
   {
@@ -29,7 +41,7 @@ const PLANS = [
     borderDefault: 'border-border',
     textColor: 'text-emerald-600',
     bgSelected: 'bg-emerald-50 dark:bg-emerald-950/30',
-    features: ['Até 100 membros', 'Gestão completa', 'Suporte WhatsApp'],
+    features: PLAN_FEATURES,
   },
   {
     id: 'growth',
@@ -42,7 +54,7 @@ const PLANS = [
     borderDefault: 'border-border',
     textColor: 'text-blue-600',
     bgSelected: 'bg-blue-50 dark:bg-blue-950/30',
-    features: ['Até 500 membros', 'Relatórios avançados', 'Suporte prioritário'],
+    features: PLAN_FEATURES,
     popular: true,
   },
   {
@@ -56,7 +68,7 @@ const PLANS = [
     borderDefault: 'border-border',
     textColor: 'text-purple-600',
     bgSelected: 'bg-purple-50 dark:bg-purple-950/30',
-    features: ['Até 2.000 membros', 'Dashboard inteligente', 'Suporte dedicado'],
+    features: PLAN_FEATURES,
   },
   {
     id: 'enterprise',
@@ -69,7 +81,7 @@ const PLANS = [
     borderDefault: 'border-border',
     textColor: 'text-orange-600',
     bgSelected: 'bg-orange-50 dark:bg-orange-950/30',
-    features: ['Membros ilimitados', 'Múltiplos campus', 'Gerente dedicado'],
+    features: PLAN_FEATURES,
   },
 ];
 
@@ -92,9 +104,12 @@ export default function Checkout() {
         churchSlug: '',
         adminName: '',
         adminEmail: '',
+        adminPassword: '',
         cpfCnpj: '',
         mobilePhone: ''
     });
+    const [showPassword, setShowPassword] = useState(false);
+    const [termsAccepted, setTermsAccepted] = useState(false);
     
     useEffect(() => {
         const stored = sessionStorage.getItem('trial_church_form_data');
@@ -126,9 +141,27 @@ export default function Checkout() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (formData.adminPassword.length < 6) {
+            toast({ title: 'Senha muito curta', description: 'A senha deve ter pelo menos 6 caracteres.', variant: 'destructive' });
+            return;
+        }
         setLoading(true);
 
         try {
+            // Cria a conta do administrador no Supabase Auth
+            const { error: authError } = await supabase.auth.signUp({
+                email: formData.adminEmail.trim(),
+                password: formData.adminPassword,
+                options: {
+                    data: {
+                        full_name: formData.adminName || 'Administrador',
+                        role: 'pastor',
+                    }
+                }
+            });
+            if (authError && !authError.message.includes('already registered')) {
+                throw authError;
+            }
             const { data, error } = await supabase.functions.invoke('asaas-integration', {
                 body: { 
                     action: 'init_checkout', 
@@ -291,10 +324,7 @@ export default function Checkout() {
                                         <span>{f}</span>
                                     </div>
                                 ))}
-                                <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-                                    <ShieldCheck className="h-4 w-4" />
-                                    <span>7 dias grátis · Cancele quando quiser</span>
-                                </div>
+
                             </CardContent>
                             <CardFooter className="bg-muted/50 p-4 border-t">
                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -404,13 +434,54 @@ export default function Checkout() {
                                         />
                                         <p className="text-[10px] text-muted-foreground italic">Você usará este e-mail para fazer login.</p>
                                     </div>
+                                    <div className="sm:col-span-2 space-y-2">
+                                        <label className="text-sm font-medium flex items-center gap-2">
+                                            <Lock className="h-4 w-4 text-muted-foreground" /> Senha de Acesso *
+                                        </label>
+                                        <div className="relative">
+                                            <Input
+                                                type={showPassword ? 'text' : 'password'}
+                                                placeholder="Mínimo 6 caracteres"
+                                                required
+                                                value={formData.adminPassword}
+                                                onChange={(e) => setFormData({ ...formData, adminPassword: e.target.value })}
+                                                className="pr-10"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                                onClick={() => setShowPassword(v => !v)}
+                                                tabIndex={-1}
+                                            >
+                                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                            </button>
+                                        </div>
+                                        <p className="text-[10px] text-muted-foreground italic">Esta será a sua senha de acesso ao sistema.</p>
+                                    </div>
                                 </div>
                             </CardContent>
                             <CardFooter className="flex flex-col gap-4">
+                                {/* Termos de Serviço */}
+                                <div className="w-full flex items-start gap-3 p-4 rounded-xl border border-primary/20 bg-primary/5">
+                                    <Checkbox
+                                        id="checkout-terms"
+                                        checked={termsAccepted}
+                                        onCheckedChange={(c) => setTermsAccepted(c === true)}
+                                        className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+                                    />
+                                    <div className="space-y-1">
+                                        <Label htmlFor="checkout-terms" className="text-sm font-semibold cursor-pointer leading-none">
+                                            Li e concordo com os termos do serviço
+                                        </Label>
+                                        <p className="text-xs text-muted-foreground leading-relaxed">
+                                            Na falta de pagamento o serviço é pausado. O serviço pode ser cancelado a qualquer momento sem prejuízo de multas. O pagamento é cobrado após 30 dias da data da contratação.
+                                        </p>
+                                    </div>
+                                </div>
                                 <Button 
                                     type="submit" 
                                     className={cn('w-full py-4 sm:py-7 h-auto text-base sm:text-xl font-bold rounded-xl shadow-xl gap-2 sm:gap-3 group bg-gradient-to-r flex-col sm:flex-row text-center whitespace-normal', selectedPlan.color)}
-                                    disabled={loading}
+                                    disabled={loading || !termsAccepted}
                                 >
                                     <div className="flex items-center gap-2">
                                         {loading ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" /> : <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />}
@@ -421,9 +492,6 @@ export default function Checkout() {
                                         <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 group-hover:translate-x-1 transition-transform hidden sm:block" />
                                     </div>
                                 </Button>
-                                <p className="text-[11px] text-center text-muted-foreground">
-                                    Ao assinar, você concorda com nossos Termos de Uso e Política de Privacidade.
-                                </p>
                             </CardFooter>
                         </form>
                     </Card>

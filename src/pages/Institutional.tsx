@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { supabase } from '@/lib/supabaseClient';
 import { churchesService } from '@/services/churches.service';
 import { trialService } from '@/services/trial.service';
@@ -19,8 +20,9 @@ export default function Institutional() {
   useDocumentTitle('Página Institucional');
   const { toast } = useToast();
   const { user, churchId, viewingChurch } = useAuth();
+  const { canEditInstitutional } = usePermissions();
   const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
-  const canEdit = user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'secretario' || user?.role === 'superadmin';
+  const canEdit = canEditInstitutional;
 
   const [churchData, setChurchData] = useState({
     name: DEFAULT_CHURCH_NAME,

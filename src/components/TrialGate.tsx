@@ -22,6 +22,12 @@ export function TrialGate({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Tesoureiro, secretário, diretor de patrimônio e pastor_admin não precisam preencher institucional
+    if (user.role === 'tesoureiro' || user.role === 'secretario' || user.role === 'diretor_patrimonio' || user.role === 'pastor_admin') {
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     setChecking(true);
 

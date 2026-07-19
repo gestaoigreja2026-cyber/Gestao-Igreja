@@ -23,7 +23,7 @@ import { membersService } from '@/services/members.service';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
-import { canWriteInRestrictedModules } from '@/lib/permissions';
+import { usePermissions } from '@/hooks/usePermissions';
 import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { EmptyState } from '@/components/EmptyState';
@@ -33,8 +33,9 @@ export default function PrayerRequests() {
   useDocumentTitle('Solicitações de Oração');
   const { user, churchId, viewingChurch, switchChurch } = useAuth();
   const { toast } = useToast();
+  const { canDeletePrayerRequests } = usePermissions();
   const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
-  const canEdit = canWriteInRestrictedModules(user?.role);
+  const canEdit = canDeletePrayerRequests;
   const isSuperAdmin = user?.role === 'superadmin';
 
   const [requests, setRequests] = useState<PrayerRequest[]>([]);

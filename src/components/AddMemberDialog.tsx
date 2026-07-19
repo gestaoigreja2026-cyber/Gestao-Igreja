@@ -20,6 +20,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 
 interface AddMemberDialogProps {
     open: boolean;
@@ -46,12 +47,11 @@ export function AddMemberDialog({
     const [removeConfirm, setRemoveConfirm] = useState<{ open: boolean; memberId: string; memberName: string }>({ open: false, memberId: '', memberName: '' });
     const { toast } = useToast();
     const { user, churchId } = useAuth();
+    const { canEditCells, canEditMinistries } = usePermissions();
     const effectiveChurchId = churchId ?? user?.churchId;
 
     // Permissions check
-    const canManage = (user?.role === 'admin' || user?.role === 'secretario' || user?.role === 'pastor' ||
-        (type === 'cell' && (user?.role === 'lider_celula')) ||
-        (type === 'ministry' && (user?.role === 'lider_ministerio'))) && user?.role !== 'tesoureiro';
+    const canManage = (type === 'cell' ? canEditCells : canEditMinistries) && user?.role !== 'tesoureiro';
 
     useEffect(() => {
         if (open) {

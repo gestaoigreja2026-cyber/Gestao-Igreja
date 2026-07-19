@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
     Select,
     SelectContent,
@@ -45,10 +46,11 @@ export default function Secretariat() {
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
     const { user, churchId } = useAuth();
+    const { canEditSecretariat } = usePermissions();
     const effectiveChurchId = churchId ?? user?.churchId;
 
     // Permissão: Pastor, Secretário e SuperAdmin podem editar
-    const canEdit = user?.role === 'pastor' || user?.role === 'secretario' || user?.role === 'superadmin';
+    const canEdit = canEditSecretariat;
 
     const handlePrint = () => {
         window.print();

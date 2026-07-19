@@ -1,4 +1,4 @@
-export type UserRole = 'superadmin' | 'admin' | 'pastor' | 'secretario' | 'tesoureiro' | 'membro' | 'lider_celula' | 'lider_ministerio' | 'aluno' | 'congregado' | 'diretor_patrimonio';
+export type UserRole = 'superadmin' | 'admin' | 'pastor' | 'pastor_admin' | 'secretario' | 'tesoureiro' | 'membro' | 'lider_celula' | 'lider_ministerio' | 'aluno' | 'congregado' | 'diretor_patrimonio';
 
 export interface Church {
   id: string;
@@ -13,6 +13,8 @@ export interface Profile {
   churchId: string;
   fullName: string;
   role: UserRole;
+  phone?: string;
+  managed_churches?: string[]; // Array de IDs das igrejas que este pastor_admin supervisiona
   updatedAt: string;
 }
 

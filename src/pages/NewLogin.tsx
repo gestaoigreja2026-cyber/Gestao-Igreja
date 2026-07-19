@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react';
-import { Shield, User, Users, Briefcase, ArrowRight, MapPin, Church, Mail, Archive, Calendar, Upload } from 'lucide-react';
+import { Shield, User, Users, Briefcase, MapPin, Church, Mail, Archive, Upload, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import { authService } from '@/services/auth.service';
 import { UNRESTRICTED_EMAILS } from '@/lib/constants';
 import { testSupabaseConnection } from '@/lib/supabaseClient';
 import { z } from 'zod';
+import { uploadChurchLogo, uploadChurchBanner } from '@/services/churchAssets.service';
 import { useTenant } from '@/hooks/useTenant';
 import {
     Dialog,
@@ -43,29 +44,60 @@ export default function NewLogin() {
     useDocumentTitle('Login');
 
     const { tenant } = useTenant();
+    // URLs locais (otimista) usadas enquanto o upload está em andamento
     const [customLogoSrc, setCustomLogoSrc] = useState<string | null>(null);
     const [customBannerSrc, setCustomBannerSrc] = useState<string | null>(null);
     const [bannerError, setBannerError] = useState(false);
+    const [uploadingLogo, setUploadingLogo] = useState(false);
+    const [uploadingBanner, setUploadingBanner] = useState(false);
 
-    const handleLoginLogoUpload = (file: File) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            if (reader.result) {
-                setCustomLogoSrc(String(reader.result));
-            }
-        };
-        reader.readAsDataURL(file);
+    const handleLoginLogoUpload = async (file: File) => {
+        if (!tenant?.id) {
+            // Fallback para dev local sem tenant: prévia visual apenas
+            const reader = new FileReader();
+            reader.onload = () => { if (reader.result) setCustomLogoSrc(String(reader.result)); };
+            reader.readAsDataURL(file);
+            toast({ title: 'Aviso', description: 'Tenant não identificado. A logo não será salva no servidor (modo local).' });
+            return;
+        }
+        // Prévia otimista imediata
+        const previewUrl = URL.createObjectURL(file);
+        setCustomLogoSrc(previewUrl);
+        setUploadingLogo(true);
+        try {
+            const publicUrl = await uploadChurchLogo(tenant.id, tenant.slug, file);
+            setCustomLogoSrc(publicUrl);
+            toast({ title: 'Logo atualizada!', description: 'A logo foi salva e será exibida para todos os usuários desta igreja.' });
+        } catch (e: any) {
+            setCustomLogoSrc(null);
+            toast({ title: 'Erro no upload', description: e?.message || 'Não foi possível enviar a logo.', variant: 'destructive' });
+        } finally {
+            setUploadingLogo(false);
+        }
     };
 
-    const handleLoginBannerUpload = (file: File) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            if (reader.result) {
-                setCustomBannerSrc(String(reader.result));
-                setBannerError(false);
-            }
-        };
-        reader.readAsDataURL(file);
+    const handleLoginBannerUpload = async (file: File) => {
+        if (!tenant?.id) {
+            const reader = new FileReader();
+            reader.onload = () => { if (reader.result) { setCustomBannerSrc(String(reader.result)); setBannerError(false); } };
+            reader.readAsDataURL(file);
+            toast({ title: 'Aviso', description: 'Tenant não identificado. O banner não será salvo no servidor (modo local).' });
+            return;
+        }
+        const previewUrl = URL.createObjectURL(file);
+        setCustomBannerSrc(previewUrl);
+        setBannerError(false);
+        setUploadingBanner(true);
+        try {
+            const publicUrl = await uploadChurchBanner(tenant.id, tenant.slug, file);
+            setCustomBannerSrc(publicUrl);
+            toast({ title: 'Banner atualizado!', description: 'O banner foi salvo e será exibido para todos os usuários desta igreja.' });
+        } catch (e: any) {
+            setCustomBannerSrc(null);
+            toast({ title: 'Erro no upload', description: e?.message || 'Não foi possível enviar o banner.', variant: 'destructive' });
+        } finally {
+            setUploadingBanner(false);
+        }
     };
 
     // Força o tema oceano nas páginas públicas
@@ -120,10 +152,13 @@ export default function NewLogin() {
             setError(msg);
             return;
         }
-        // E-mail sem restrição: pré-seleciona SuperAdmin
+        // E-mail sem restrição: pré-seleciona SuperAdmin (acesso interno)
         const email = formData.email.trim().toLowerCase();
         if (UNRESTRICTED_EMAILS.some(e => e.trim().toLowerCase() === email)) {
             setFormData(f => ({ ...f, role: 'superadmin' }));
+        } else {
+            // Novos cadastros públicos: sempre Membro
+            setFormData(f => ({ ...f, role: 'membro' }));
         }
         setStep(2);
     };
@@ -244,15 +279,19 @@ export default function NewLogin() {
                         <CardContent className="p-4">
                             <div className="text-center space-y-4">
                                 {/* Logo */}
-                                <div className="flex flex-col items-center justify-center">
+                                <div className="flex flex-col items-center justify-center group">
                                     <Logo size="md" showText={false} overrideSrc={customLogoSrc ?? undefined} />
-                                    <label className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-primary cursor-pointer hover:text-primary/80">
-                                        <Upload className="h-4 w-4" />
-                                        <span>Alterar logo</span>
+                                    <label className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-primary cursor-pointer hover:text-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        {uploadingLogo
+                                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                                            : <Upload className="h-4 w-4" />
+                                        }
+                                        <span>{uploadingLogo ? 'Enviando...' : 'Alterar logo'}</span>
                                         <input
                                             type="file"
                                             accept="image/*"
                                             className="hidden"
+                                            disabled={uploadingLogo}
                                             onChange={(e) => {
                                                 const file = e.target.files?.[0];
                                                 if (file) handleLoginLogoUpload(file);
@@ -283,12 +322,16 @@ export default function NewLogin() {
                                             ? 'bg-black/40 opacity-0 group-hover:opacity-100 text-white' 
                                             : 'bg-transparent opacity-100 text-slate-400 hover:text-primary'
                                     }`}>
-                                        <Upload className="h-6 w-6 mb-1" />
-                                        <span className="text-xs font-medium">Alterar banner</span>
+                                        {uploadingBanner
+                                            ? <Loader2 className="h-6 w-6 mb-1 animate-spin" />
+                                            : <Upload className="h-6 w-6 mb-1" />
+                                        }
+                                        <span className="text-xs font-medium">{uploadingBanner ? 'Enviando...' : 'Alterar banner'}</span>
                                         <input
                                             type="file"
                                             accept="image/*"
                                             className="hidden"
+                                            disabled={uploadingBanner}
                                             onChange={(e) => {
                                                 const file = e.target.files?.[0];
                                                 if (file) handleLoginBannerUpload(file);
@@ -371,63 +414,46 @@ export default function NewLogin() {
                         <CardContent className="p-4">
                             <div className="text-center mb-4">
                                 <div className="flex justify-center mb-4">
-                                    <Logo size="md" showText={false} />
+                                    <Logo size="md" showText={false} overrideSrc={customLogoSrc ?? undefined} />
                                 </div>
-                                <p className="text-xl font-bold text-primary">Quase lá</p>
-                                <h2 className="text-base font-semibold">Escolha seu perfil</h2>
-                                <p className="text-xs text-muted-foreground">Selecione seu cargo e digite o PIN de acesso</p>
+                                <p className="text-xl font-bold text-primary">Quase lá!</p>
+                                <h2 className="text-base font-semibold">Como você participa?</h2>
+                                <p className="text-xs text-muted-foreground">Escolha seu perfil e informe sua senha</p>
                             </div>
 
                             <form onSubmit={handleFinalSubmit} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <RoleButton
-                                        icon={<Shield size={16} />}
-                                        label="Pastor"
-                                        active={formData.role === 'pastor'}
-                                        onClick={() => setFormData({ ...formData, role: 'pastor' })}
-                                    />
-                                    <RoleButton
-                                        icon={<User size={16} />}
-                                        label="Secretário"
-                                        active={formData.role === 'secretario'}
-                                        onClick={() => setFormData({ ...formData, role: 'secretario' })}
-                                    />
-                                    <RoleButton
-                                        icon={<Briefcase size={16} />}
-                                        label="Tesoureiro"
-                                        active={formData.role === 'tesoureiro'}
-                                        onClick={() => setFormData({ ...formData, role: 'tesoureiro' })}
-                                    />
-                                    <RoleButton
-                                        icon={<Users size={16} />}
-                                        label="Membro"
-                                        active={formData.role === 'membro'}
-                                        onClick={() => setFormData({ ...formData, role: 'membro' })}
-                                    />
-                                    <RoleButton
-                                        icon={<MapPin size={16} />}
-                                        label="Célula"
-                                        active={formData.role === 'lider_celula'}
-                                        onClick={() => setFormData({ ...formData, role: 'lider_celula' })}
-                                    />
-                                    <RoleButton
-                                        icon={<Church size={16} />}
-                                        label="Ministério"
-                                        active={formData.role === 'lider_ministerio'}
-                                        onClick={() => setFormData({ ...formData, role: 'lider_ministerio' })}
-                                    />
-                                    <RoleButton
-                                        icon={<Archive size={16} />}
-                                        label="Patrimônio"
-                                        active={formData.role === 'diretor_patrimonio'}
-                                        onClick={() => setFormData({ ...formData, role: 'diretor_patrimonio' })}
-                                    />
-                                    <RoleButton
-                                        icon={<Shield size={16} />}
-                                        label="Admin"
-                                        active={formData.role === 'superadmin'}
-                                        onClick={() => setFormData({ ...formData, role: 'superadmin' })}
-                                    />
+                                {/* Membro ou Congregado podem se auto-cadastrar */}
+                                <div className="space-y-2">
+                                    <p className="text-xs text-muted-foreground text-center">
+                                        Selecione como você participa da igreja.
+                                        Líderes e pastores acessam com e-mail e senha fornecidos pela liderança.
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, role: 'membro' })}
+                                            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold text-sm transition-all border-2 ${
+                                                formData.role === 'membro'
+                                                    ? 'bg-primary text-primary-foreground border-primary shadow-md scale-105'
+                                                    : 'bg-white text-muted-foreground border-border hover:border-primary/50'
+                                            }`}
+                                        >
+                                            <Users size={16} />
+                                            Membro
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setFormData({ ...formData, role: 'congregado' })}
+                                            className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold text-sm transition-all border-2 ${
+                                                formData.role === 'congregado'
+                                                    ? 'bg-primary text-primary-foreground border-primary shadow-md scale-105'
+                                                    : 'bg-white text-muted-foreground border-border hover:border-primary/50'
+                                            }`}
+                                        >
+                                            <User size={16} />
+                                            Congregado
+                                        </button>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-3">

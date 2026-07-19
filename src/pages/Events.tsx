@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { MonthCalendar } from '@/components/MonthCalendar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { eventsService } from '@/services/events.service';
 import { membersService } from '@/services/members.service';
 import { broadcastsService } from '@/services/broadcasts.service';
@@ -111,6 +112,8 @@ export default function Events() {
 
     const { user } = useAuth();
     const { toast } = useToast();
+    const { canEditEvents } = usePermissions();
+    const isAdmin = canEditEvents;
 
     useEffect(() => {
         loadEvents();
@@ -285,7 +288,7 @@ export default function Events() {
                         Calendário com notificações • Cultos, ensaios e reuniões • Compartilhamento nas redes
                     </p>
                 </div>
-                {user?.role && !['aluno', 'membro', 'congregado', 'tesoureiro'].includes(user.role) && (
+                {isAdmin && (
                     <div className="grid grid-cols-2 sm:flex gap-3">
                         <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
                             <DialogTrigger asChild>

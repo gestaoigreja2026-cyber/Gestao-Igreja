@@ -19,6 +19,7 @@ import { schoolsService, type School, type SchoolStudent, type SchoolReport } fr
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ExcelSchoolMonthlyReportButton } from '@/components/ExcelSchoolMonthlyReport';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -47,9 +48,10 @@ export default function Schools() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string } | null>(null);
   const { toast } = useToast();
   const { user, churchId } = useAuth();
+  const { canEditSchools } = usePermissions();
   const effectiveChurchId = churchId ?? user?.churchId;
 
-  const canCreate = ['admin', 'pastor', 'secretario', 'superadmin'].includes(user?.role ?? '');
+  const canCreate = canEditSchools;
 
   useEffect(() => {
     loadSchools();

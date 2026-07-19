@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { supabase } from '@/lib/supabaseClient';
 import { pastorsService, ChurchPastor } from '@/services/pastors.service';
 
@@ -15,8 +16,9 @@ export default function Pastors() {
   useDocumentTitle('Pastores');
   const { toast } = useToast();
   const { user, churchId, viewingChurch } = useAuth();
+  const { canEditPastors } = usePermissions();
   const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
-  const canEdit = user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'secretario' || user?.role === 'superadmin';
+  const canEdit = canEditPastors;
 
   const [pastors, setPastors] = useState<ChurchPastor[]>([]);
   const [loading, setLoading] = useState(true);

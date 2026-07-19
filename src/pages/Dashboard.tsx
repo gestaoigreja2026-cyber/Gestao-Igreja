@@ -53,22 +53,22 @@ interface QuickActionDef {
 }
 
 const quickActionsList: QuickActionDef[] = [
-  { icon: Users, label: 'Ministérios', href: '/ministerios', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#8B5CF6' },
-  { icon: MapPin, label: 'Células', href: '/celulas', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#F43F5E' },
-  { icon: FileText, label: 'Secretaria', href: '/secretaria', roles: ['pastor', 'secretario', 'superadmin'], color: '#2563EB' },
-  { icon: BarChart3, label: 'Relatórios', href: '/relatorios', roles: ['admin', 'pastor', 'secretario', 'lider_ministerio', 'superadmin'], color: '#D97706' },
-  { icon: Upload, label: 'Uploads e Atas', href: '/uploads', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#0891B2' },
-  { icon: GraduationCap, label: 'Escolas', href: '/escolas', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#F97316' },
-  { icon: HeartHandshake, label: 'Discipulado', href: '/discipulado', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#EC4899' },
-  { icon: DollarSign, label: 'Caixa Diário', href: '/caixa-diario', roles: ['pastor', 'tesoureiro', 'superadmin'], color: '#10B981' },
-  { icon: Calendar, label: 'Eventos', href: '/eventos', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#7C3AED' },
-  { icon: HandHeart, label: 'Solicitações de Oração', href: '/solicitacoes-oracao', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#059669' },
-  { icon: CreditCard, label: 'Contas e PIX Igreja', href: '/pix-donacoes', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#84CC16' },
-  { icon: Landmark, label: 'Página Institucional', href: '/institucional', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#475569' },
-  { icon: UserRound, label: 'Pastores', href: '/pastores', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#0EA5E9' },
-  { icon: Shield, label: 'Privacidade e LGPD', href: '/privacidade', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#DC2626' },
-  { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'secretario', 'superadmin', 'diretor_patrimonio', 'tesoureiro'], color: '#B45309' },
-  { icon: HelpCircle, label: 'Como Acessar', href: '/como-acessar', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin'], color: '#64748B' },
+  { icon: Users, label: 'Ministérios', href: '/ministerios', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#8B5CF6' },
+  { icon: MapPin, label: 'Células', href: '/celulas', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#F43F5E' },
+  { icon: FileText, label: 'Secretaria', href: '/secretaria', roles: ['pastor', 'pastor_admin', 'secretario', 'superadmin'], color: '#2563EB' },
+  { icon: BarChart3, label: 'Relatórios', href: '/relatorios', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'lider_ministerio', 'superadmin'], color: '#D97706' },
+  { icon: Upload, label: 'Uploads e Atas', href: '/uploads', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#0891B2' },
+  { icon: GraduationCap, label: 'Escolas', href: '/escolas', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#F97316' },
+  { icon: HeartHandshake, label: 'Discipulado', href: '/discipulado', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#EC4899' },
+  { icon: DollarSign, label: 'Caixa Diário', href: '/caixa-diario', roles: ['pastor', 'pastor_admin', 'tesoureiro', 'superadmin'], color: '#10B981' },
+  { icon: Calendar, label: 'Eventos', href: '/eventos', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#7C3AED' },
+  { icon: HandHeart, label: 'Solicitações de Oração', href: '/solicitacoes-oracao', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#059669' },
+  { icon: CreditCard, label: 'Contas e PIX Igreja', href: '/pix-donacoes', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#84CC16' },
+  { icon: Landmark, label: 'Página Institucional', href: '/institucional', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#475569' },
+  { icon: UserRound, label: 'Pastores', href: '/pastores', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], color: '#0EA5E9' },
+  { icon: Shield, label: 'Privacidade e LGPD', href: '/privacidade', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#DC2626' },
+  { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'superadmin', 'diretor_patrimonio', 'tesoureiro'], color: '#B45309' },
+  { icon: HelpCircle, label: 'Como Acessar', href: '/como-acessar', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'], color: '#64748B' },
 ];
 
 export default function Dashboard() {
@@ -84,11 +84,10 @@ export default function Dashboard() {
     setConfig(getDashboardConfig(user?.id, user?.role));
   }, [user?.id, user?.role]);
 
-  // Tesoureiro, secretário e diretor de patrimônio veem todos os ícones; permissões são mantidas nas rotas
-  const rolesQueVeemTodos = ['tesoureiro', 'secretario', 'diretor_patrimonio'];
-  const visibleActions = user && rolesQueVeemTodos.includes(user.role ?? '')
-    ? quickActionsList
-    : quickActionsList.filter((a) => user && a.roles.includes(user.role));
+  // Filtra ações baseado nas permissões reais de cada role
+  const visibleActions = user
+    ? quickActionsList.filter((a) => a.roles.includes(user.role))
+    : [];
 
   const orderedWidgets = config.widgetOrder.filter((id) => config.visibleWidgets.includes(id));
 
@@ -130,42 +129,6 @@ export default function Dashboard() {
           <div data-widget-birthdays>
             <BirthdayCard />
           </div>
-        )}
-        {showPixNotice && (
-          <Card className="xl:col-span-2 border-primary/30 bg-primary/5 shadow-lg" data-widget-pix-mensalidade>
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="flex items-center gap-3 shrink-0">
-                  <div className="p-3 rounded-xl bg-primary/20">
-                    <CreditCard className="h-8 w-8 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg">Mensalidade da plataforma</h3>
-                    <p className="text-sm text-muted-foreground">Pague via PIX e envie o comprovante</p>
-                  </div>
-                </div>
-                <div className="flex-1 grid sm:grid-cols-2 gap-4 text-sm">
-                  <div className="space-y-1">
-                    <p><strong>Chave PIX:</strong> <span className="font-mono bg-muted px-2 py-1 rounded">{SUBSCRIPTION_PIX.pixKey}</span>
-                      <Button variant="ghost" size="sm" className="h-7 ml-2" onClick={() => { navigator.clipboard?.writeText(SUBSCRIPTION_PIX.pixKey); toast({ title: 'Chave PIX copiada!', duration: 2000 }); }}>
-                        <Copy className="h-4 w-4 mr-1" /> Copiar
-                      </Button>
-                    </p>
-                    <p><strong>Banco:</strong> {SUBSCRIPTION_PIX.holderName} · {SUBSCRIPTION_PIX.bank}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p><strong>Envie o comprovante para:</strong></p>
-                    <a href={`mailto:${SUBSCRIPTION_PIX.receiptEmail}?subject=Comprovante%20PIX%20-%20Mensalidade`} className="inline-flex items-center gap-2 text-primary font-medium hover:underline">
-                      <Mail className="h-4 w-4" />
-                      {SUBSCRIPTION_PIX.receiptEmail}
-                    </a>
-                    <p className="text-xs text-muted-foreground">Informe o nome da igreja no PIX antes de pagar.</p>
-                  </div>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground mt-4">50 primeiras igrejas: R$ {SUBSCRIPTION_PIX.promoPrice}/mês · Demais: R$ {SUBSCRIPTION_PIX.fullPrice}/mês</p>
-            </CardContent>
-          </Card>
         )}
       </div>
 

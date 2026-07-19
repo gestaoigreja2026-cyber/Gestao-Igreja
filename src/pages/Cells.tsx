@@ -29,6 +29,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { cellsService } from '@/services/cells.service';
 import { membersService } from '@/services/members.service';
 import { Member } from '@/types';
@@ -73,10 +74,11 @@ export default function Cells() {
 
   const { toast } = useToast();
   const { user, churchId } = useAuth();
+  const { canEditCells } = usePermissions();
   const effectiveChurchId = churchId ?? user?.churchId;
 
-  const canReport = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'lider_celula';
-  const isAdmin = user?.role === 'superadmin' || user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'lider_celula';
+  const canReport = canEditCells;
+  const isAdmin = canEditCells;
 
   useEffect(() => {
     loadData();

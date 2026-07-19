@@ -24,6 +24,9 @@ import {
   BarChart3,
   UserPlus,
   MessageSquare,
+  Key,
+  Network,
+  Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,6 +34,7 @@ import { Logo } from '@/components/Logo';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
+import { hasProfileCompleted } from '@/lib/profileCompletion';
 
 interface NavItem {
   icon: React.ElementType;
@@ -50,21 +54,23 @@ const dashboardItem: NavItem = {
   icon: LayoutDashboard,
   label: 'Dashboard',
   href: '/dashboard',
-  roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'],
+  roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'],
 };
 
 const navGroups: NavGroup[] = [
   {
     title: '',
     items: [
-      { icon: MessageSquare, label: 'Chat', href: '/chat', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'] },
-      { icon: Users, label: 'Membros e Congregados', href: '/membros', roles: ['pastor', 'secretario', 'superadmin'] },
-      { icon: UserPlus, label: 'Consolidação', href: '/consolidacao', roles: ['pastor', 'secretario', 'lider_celula', 'superadmin'] },
-      { icon: Send, label: 'Boletins e Avisos', href: '/boletins', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-      { icon: BookOpen, label: 'Planos de Leitura', href: '/planos-leitura', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-      { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'superadmin', 'diretor_patrimonio'] },
-      { icon: Share2, label: 'Redes Sociais', href: '/redes-sociais', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'] },
-      { icon: Gift, label: 'Cadastrar Igreja', href: '/cadastro-igreja-trial', roles: ['admin', 'pastor', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin'], openInNewTab: true },
+      { icon: MessageSquare, label: 'Chat', href: '/chat', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio'] },
+      { icon: Users, label: 'Membros e Congregados', href: '/membros', roles: ['pastor', 'pastor_admin', 'secretario', 'superadmin', 'lider_celula', 'lider_ministerio'] },
+      { icon: UserPlus, label: 'Consolidação', href: '/consolidacao', roles: ['pastor', 'pastor_admin', 'secretario', 'lider_celula', 'lider_ministerio', 'superadmin'] },
+      { icon: Send, label: 'Boletins e Avisos', href: '/boletins', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'diretor_patrimonio', 'superadmin'] },
+      { icon: BookOpen, label: 'Planos de Leitura', href: '/planos-leitura', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'diretor_patrimonio', 'superadmin'] },
+      { icon: Package, label: 'Patrimonial', href: '/patrimonio', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'superadmin', 'diretor_patrimonio', 'tesoureiro'] },
+      { icon: Key, label: 'Acessos de Liderança', href: '/acessos', roles: ['admin', 'pastor', 'pastor_admin', 'superadmin'] },
+      { icon: Network, label: 'Rede de Igrejas', href: '/rede', roles: ['pastor_admin'] },
+      { icon: Share2, label: 'Redes Sociais', href: '/redes-sociais', roles: ['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'diretor_patrimonio', 'superadmin'] },
+      { icon: Gift, label: 'Cadastrar Igreja', href: '/cadastro-igreja-trial', roles: ['superadmin', 'pastor_admin', 'pastor', 'secretario'], openInNewTab: true },
     ],
   },
 ];
@@ -78,6 +84,7 @@ const formatRole = (role: string | undefined): string => {
   if (!role) return '';
   const roleLower = role.toLowerCase();
   if (roleLower === 'superadmin') return 'Super Admin';
+  if (roleLower === 'pastor_admin') return 'Pastor (Rede)';
   if (roleLower === 'lider_celula') return 'Líder Célula';
   if (roleLower === 'lider_ministerio') return 'Líder Ministério';
   // Capitaliza a primeira letra e mantém o resto
@@ -88,19 +95,23 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout, updateAvatar } = useAuth();
+  const { user, logout, updateAvatar, viewingChurch } = useAuth();
   const { toast } = useToast();
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
-  // Tesoureiro, secretário e diretor de patrimônio veem todos os itens da sidebar (exceto Painel Root)
-  const rolesQueVeemTudoSidebar = ['tesoureiro', 'secretario', 'diretor_patrimonio'];
+  // Filtra itens baseado nas permissões reais de cada role
   const canSee = (item: NavItem) => {
     if (!user) return false;
     if (item.href === '/superadmin') return user.role === 'superadmin';
-    if (rolesQueVeemTudoSidebar.includes(user.role ?? '')) return true;
     return item.roles.includes(user.role);
   };
+
+  // Verifica se membro/congregado já completou o cadastro
+  const isMemberRole = user?.role === 'membro' || user?.role === 'congregado';
+  const hasCompletedReg = user?.registrationCompleted === true || (user?.id ? hasProfileCompleted(user.id) : false);
+  const isBlocked = isMemberRole && !hasCompletedReg;
+
   const filteredGroups = navGroups.map((grp) => ({
     ...grp,
     items: grp.items.filter(canSee),
@@ -108,8 +119,8 @@ export function Sidebar() {
   const filteredOther = otherItems.filter(canSee);
   const showDashboard = canSee(dashboardItem);
 
-  // Garantir que superadmin sempre veja o Painel Root (apenas para o e-mail master)
-  const isSuperAdmin = user?.role === 'superadmin' && user?.email === 'edukadoshmda@gmail.com';
+  // Garantir que superadmin sempre veja o Painel Root
+  const isSuperAdmin = user?.role === 'superadmin';
 
   const handleAvatarClick = () => {
     avatarInputRef.current?.click();
@@ -204,12 +215,28 @@ export function Sidebar() {
             )}
             {group.items.map((item) => {
               const isActive = !item.openInNewTab && location.pathname === item.href;
+              const lockedForMember = isBlocked;
               const className = cn(
                 'flex items-center gap-4 px-4 min-h-[48px] py-3.5 rounded-xl transition-all duration-300 font-medium active:scale-[0.98]',
                 isActive
                   ? 'bg-primary text-primary-foreground shadow-md hover:shadow-lg'
+                  : lockedForMember
+                  ? 'text-muted-foreground opacity-50 cursor-not-allowed'
                   : 'text-foreground hover:bg-primary/5 hover:shadow-sm'
               );
+              if (lockedForMember) {
+                return (
+                  <div
+                    key={item.href}
+                    title="Complete seu cadastro para acessar este recurso"
+                    className={cn(className, 'relative select-none')}
+                  >
+                    <item.icon className="h-6 w-6 flex-shrink-0 text-muted-foreground" />
+                    {!collapsed && <span className="text-[12px] flex-1">{item.label}</span>}
+                    {!collapsed && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+                  </div>
+                );
+              }
               if (item.openInNewTab) {
                 return (
                   <a
@@ -325,6 +352,11 @@ export function Sidebar() {
               <p className="text-xs text-muted-foreground truncate">
                 <span>{formatRole(user?.role || '')}</span>
               </p>
+              {viewingChurch && (
+                <p className="text-xs text-primary font-medium truncate mt-1">
+                  <span>{viewingChurch.name}</span>
+                </p>
+              )}
             </div>
           </div>
         )}

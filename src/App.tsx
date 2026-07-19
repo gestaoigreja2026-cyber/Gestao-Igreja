@@ -38,6 +38,8 @@ const Privacy = lazy(() => import("./pages/Privacy"));
 const Pastors = lazy(() => import("./pages/Pastors"));
 const Secretariat = lazy(() => import("./pages/Secretariat"));
 const Broadcasts = lazy(() => import("./pages/Broadcasts"));
+const LeadershipAccess = lazy(() => import("./pages/LeadershipAccess"));
+const ChurchNetwork = lazy(() => import("./pages/ChurchNetwork"));
 const ReadingPlans = lazy(() => import("./pages/ReadingPlans"));
 const PrayerRequests = lazy(() => import("./pages/PrayerRequests"));
 const SocialLinks = lazy(() => import("./pages/SocialLinks"));
@@ -98,18 +100,6 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const needsProfile = user && (user.role === 'membro' || user.role === 'congregado') && !hasCompleted;
   if (needsProfile && location.pathname !== '/cadastro') {
     return <Navigate to="/cadastro" replace />;
-  }
-
-  // Tesoureiro: acesso somente a Dashboard, Caixa Diário, Relatórios e Como Acessar (via Dashboard)
-  const tesoureiroOnlyPaths = ['/dashboard', '/caixa-diario', '/relatorios', '/como-acessar', '/discipulado'];
-  if (user?.role === 'tesoureiro' && !tesoureiroOnlyPaths.includes(location.pathname)) {
-    return <Navigate to="/caixa-diario" replace />;
-  }
-
-  // Líder de célula: acesso somente a Dashboard, Células, Consolidação e páginas acessíveis via Dashboard
-  const liderCelulaOnlyPaths = ['/dashboard', '/celulas', '/consolidacao', '/escolas', '/discipulado', '/institucional', '/pastores', '/privacidade', '/como-acessar'];
-  if (user?.role === 'lider_celula' && !liderCelulaOnlyPaths.includes(location.pathname)) {
-    return <Navigate to="/celulas" replace />;
   }
 
   return (
@@ -194,28 +184,30 @@ function AppRoutes() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/membros" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'superadmin']}><Members /></RoleProtectedRoute>} />
         <Route path="/consolidacao" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'lider_celula', 'superadmin']}><Consolidacao /></RoleProtectedRoute>} />
-        <Route path="/celulas" element={<ProtectedRoute><Cells /></ProtectedRoute>} />
-        <Route path="/ministerios" element={<ProtectedRoute><Ministries /></ProtectedRoute>} />
-        <Route path="/eventos" element={<ProtectedRoute><Events /></ProtectedRoute>} />
-        <Route path="/patrimonio" element={<RoleProtectedRoute roles={['admin', 'pastor', 'superadmin', 'diretor_patrimonio']}><Assets /></RoleProtectedRoute>} />
-        <Route path="/caixa-diario" element={<RoleProtectedRoute roles={['pastor', 'tesoureiro', 'superadmin']}><DailyCash /></RoleProtectedRoute>} />
+        <Route path="/celulas" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Cells /></RoleProtectedRoute>} />
+        <Route path="/ministerios" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Ministries /></RoleProtectedRoute>} />
+        <Route path="/eventos" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin']}><Events /></RoleProtectedRoute>} />
+        <Route path="/patrimonio" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'superadmin', 'diretor_patrimonio', 'tesoureiro']}><Assets /></RoleProtectedRoute>} />
+        <Route path="/caixa-diario" element={<RoleProtectedRoute roles={['pastor', 'pastor_admin', 'tesoureiro', 'superadmin']}><DailyCash /></RoleProtectedRoute>} />
         <Route path="/cadastro" element={<ProtectedRoute><Registration /></ProtectedRoute>} />
-        <Route path="/relatorios" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
-        <Route path="/uploads" element={<ProtectedRoute><Uploads /></ProtectedRoute>} />
-        <Route path="/secretaria" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'superadmin']}><Secretariat /></RoleProtectedRoute>} />
-        <Route path="/boletins" element={<ProtectedRoute><Broadcasts /></ProtectedRoute>} />
-        <Route path="/planos-leitura" element={<ProtectedRoute><ReadingPlans /></ProtectedRoute>} />
-        <Route path="/solicitacoes-oracao" element={<ProtectedRoute><PrayerRequests /></ProtectedRoute>} />
-        <Route path="/redes-sociais" element={<ProtectedRoute><SocialLinks /></ProtectedRoute>} />
-        <Route path="/pix-donacoes" element={<ProtectedRoute><PixDonations /></ProtectedRoute>} />
-        <Route path="/institucional" element={<ProtectedRoute><Institutional /></ProtectedRoute>} />
-        <Route path="/privacidade" element={<ProtectedRoute><Privacy /></ProtectedRoute>} />
+        <Route path="/relatorios" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'lider_ministerio', 'superadmin']}><Reports /></RoleProtectedRoute>} />
+        <Route path="/uploads" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin']}><Uploads /></RoleProtectedRoute>} />
+        <Route path="/secretaria" element={<RoleProtectedRoute roles={['pastor', 'pastor_admin', 'secretario', 'superadmin']}><Secretariat /></RoleProtectedRoute>} />
+        <Route path="/boletins" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin']}><Broadcasts /></RoleProtectedRoute>} />
+        <Route path="/planos-leitura" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin']}><ReadingPlans /></RoleProtectedRoute>} />
+        <Route path="/solicitacoes-oracao" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><PrayerRequests /></RoleProtectedRoute>} />
+        <Route path="/redes-sociais" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin']}><SocialLinks /></RoleProtectedRoute>} />
+        <Route path="/pix-donacoes" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><PixDonations /></RoleProtectedRoute>} />
+        <Route path="/institucional" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Institutional /></RoleProtectedRoute>} />
+        <Route path="/privacidade" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Privacy /></RoleProtectedRoute>} />
         <Route path="/como-acessar" element={<ProtectedRoute><ComoAcessar /></ProtectedRoute>} />
-        <Route path="/pastores" element={<ProtectedRoute><Pastors /></ProtectedRoute>} />
-        <Route path="/escolas" element={<ProtectedRoute><Schools /></ProtectedRoute>} />
-        <Route path="/discipulado" element={<ProtectedRoute><Discipleship /></ProtectedRoute>} />
+        <Route path="/pastores" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'superadmin']}><Pastors /></RoleProtectedRoute>} />
+        <Route path="/escolas" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Schools /></RoleProtectedRoute>} />
+        <Route path="/discipulado" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Discipleship /></RoleProtectedRoute>} />
         <Route path="/superadmin" element={<RoleProtectedRoute roles={['superadmin']}><SuperAdmin /></RoleProtectedRoute>} />
-        <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        <Route path="/rede" element={<RoleProtectedRoute roles={['pastor_admin', 'superadmin']}><ChurchNetwork /></RoleProtectedRoute>} />
+        <Route path="/acessos" element={<RoleProtectedRoute roles={['admin', 'pastor', 'superadmin', 'pastor_admin']}><LeadershipAccess /></RoleProtectedRoute>} />
+        <Route path="/chat" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Chat /></RoleProtectedRoute>} />
         <Route path="/confirmar/:id" element={<ConfirmScale />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<NotFound />} />

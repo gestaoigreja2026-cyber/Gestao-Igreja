@@ -17,6 +17,7 @@ import { broadcastsService, BroadcastType } from '@/services/broadcasts.service'
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 
 const BROADCAST_TYPES: { value: BroadcastType; label: string; icon: typeof FileText }[] = [
   { value: 'aviso', label: 'Aviso', icon: Megaphone },
@@ -34,9 +35,10 @@ export default function Broadcasts() {
   useDocumentTitle('Boletins e Avisos');
   const { user, churchId, viewingChurch } = useAuth();
   const { toast } = useToast();
+  const { canEditBroadcasts } = usePermissions();
 
   const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
-  const canSend = user?.role === 'admin' || user?.role === 'pastor' || user?.role === 'secretario' || user?.role === 'superadmin';
+  const canSend = canEditBroadcasts;
 
   const [broadcastType, setBroadcastType] = useState<BroadcastType>('aviso');
   const [title, setTitle] = useState('');

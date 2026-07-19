@@ -29,6 +29,8 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { AssetMaintenanceModal } from '@/components/AssetMaintenanceModal';
 import { ExcelPatrimonyReportButton } from '@/components/ExcelPatrimonyReport';
+import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from '@/hooks/usePermissions';
 
 // Formatadores de moeda brasileira
 const formatCurrencyInput = (value: string): string => {
@@ -50,10 +52,14 @@ const parseCurrencyInput = (value: string): string => {
 };
 
 export default function Assets() {
+    const { user } = useAuth();
+    const { canEditAssets } = usePermissions();
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingAsset, setEditingAsset] = useState<Asset | null>(null);
+
+    const canEdit = canEditAssets;
 
     const [isMaintenanceOpen, setIsMaintenanceOpen] = useState(false);
     const [maintenanceAsset, setMaintenanceAsset] = useState<Asset | null>(null);

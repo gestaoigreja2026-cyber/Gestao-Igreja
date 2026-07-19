@@ -126,6 +126,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (updatedProfile) profile = updatedProfile;
       }
 
+      // Se o profile existe mas não tem church_id vinculado (exceto superadmin), vincular a uma igreja
+      if (profile && !profile.church_id && effectiveRole !== 'superadmin') {
+        let targetChurchId: string | undefined;
+
+        if (isTrialSignup) {
+          try {
+            targetChurchId = await trialService.createTrialChurchForUser(
+              authUser.email || '',
+              name || authUser.user_metadata?.name || 'Usuário'
+            );
+          } catch (e: any) {
+            throw new Error(e?.message || 'Não foi possível criar igreja de teste. Limite de 100 vagas pode ter sido atingido.');
+          }
+        } else {
+          const { data: churches } = await supabase.from('churches').select('id').limit(1);
+          if (!churches || churches.length === 0) {
+            const { data: newChurch } = await (supabase.from('churches') as any).insert({
+              name: 'Igreja Sede',
+              slug: 'sede'
+            }).select().single();
+            targetChurchId = newChurch?.id;
+          } else {
+            targetChurchId = (churches as { id: string }[])[0]?.id;
+          }
+        }
+
+        if (targetChurchId) {
+          const { data: updatedProfile } = await (supabase.from('profiles') as any).update({
+            church_id: targetChurchId,
+            updated_at: new Date().toISOString()
+          }).eq('id', authUser.id).select().single();
+          if (updatedProfile) profile = updatedProfile;
+        }
+      }
+
       if (!profile) throw new Error('Falha ao carregar ou criar perfil');
 
       // Garantir que o role seja atualizado se o usuário fez login com um role diferente
@@ -136,6 +171,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           updated_at: new Date().toISOString()
         }).eq('id', authUser.id);
         profile.role = 'superadmin';
+      }
+
+      // Sincronizar profile com members table para que usuários apareçam na lista de membros
+      if (profile.church_id && profile.role !== 'superadmin') {
+        try {
+          // Verificar se o usuário já existe como membro pelo e-mail (já que user_id não existe na tabela)
+          const { data: existingMember } = await supabase
+            .from('members')
+            .select('id')
+            .eq('email', authUser.email)
+            .eq('church_id', profile.church_id)
+            .maybeSingle();
+
+          // Se não existir, criar o registro de membro
+          if (!existingMember) {
+            await supabase
+              .from('members')
+              .insert({
+                church_id: profile.church_id,
+                name: profile.full_name || name || 'Usuário',
+                email: authUser.email || '',
+                phone: authUser.user_metadata?.phone || null,
+                status: 'ativo'
+              });
+          }
+        } catch (syncError) {
+          // Não bloquear o login se a sincronização falhar
+          console.error('Erro ao sincronizar profile com members:', syncError);
+        }
+      }
+
+      // Para PastorAdmin: garantir que o managed_churches criado no Auth vá para o Profile
+      if (profile.role === 'pastor_admin' && (!profile.managed_churches || profile.managed_churches.length === 0)) {
+        let metaChurches = authUser.user_metadata?.managed_churches;
+        
+        // Se metadata falhar, busca no localStorage o backup local
+        if (!metaChurches || metaChurches.length === 0) {
+           const backupKey = `pending_churches_${authUser.email?.toLowerCase()}`;
+           const backup = localStorage.getItem(backupKey);
+           if (backup) {
+               try { metaChurches = JSON.parse(backup); } catch(e) {}
+               localStorage.removeItem(backupKey); // limpa após uso
+           }
+        }
+
+        if (typeof metaChurches === 'string') {
+           try { metaChurches = JSON.parse(metaChurches); } catch(e) {}
+        }
+        
+        if (Array.isArray(metaChurches) && metaChurches.length > 0) {
+          const { data: updatedProfile, error: updateError } = await (supabase.from('profiles') as any).update({
+            managed_churches: metaChurches
+          }).eq('id', authUser.id).select().single();
+          
+          if (updateError) {
+             console.error("Erro ao sincronizar managed_churches:", updateError);
+             try { localStorage.setItem('debug_update_error', JSON.stringify(updateError)); } catch(e){}
+          }
+          if (updatedProfile) profile = updatedProfile;
+        }
       }
 
       if (isTrialSignup && profile.church_id) {
@@ -241,7 +336,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const switchChurch = (targetChurchId: string | null, churchName = 'Igreja') => {
-    if (user?.role !== 'superadmin') return;
+    if (user?.role !== 'superadmin' && user?.role !== 'pastor_admin') return;
     if (!targetChurchId) {
       exitChurchView();
       return;
@@ -254,7 +349,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const exitChurchView = () => {
-    if (user?.role !== 'superadmin') return;
+    if (user?.role !== 'superadmin' && user?.role !== 'pastor_admin') return;
     sessionStorage.removeItem('superadmin_viewing_church');
     setViewingChurch(null);
     setChurchId(undefined);

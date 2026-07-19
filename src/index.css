@@ -958,3 +958,20 @@
     display: none !important;
   }
 }
+
+/* Modo Leitura para PastorAdmin (Supervisão) */
+.read-only-mode button:not(.shrink-0), 
+.read-only-mode input, 
+.read-only-mode select, 
+.read-only-mode textarea, 
+.read-only-mode [role="switch"], 
+.read-only-mode [role="checkbox"] {
+  pointer-events: none !important;
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+}
+
+/* Ocultar elementos de ação como Floating Action Buttons no modo leitura */
+.read-only-mode .fixed.bottom-6.right-6 {
+  display: none !important;
+}

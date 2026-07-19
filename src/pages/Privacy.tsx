@@ -7,11 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useDocumentTitle } from '@/hooks/useDocumentTitle';
+import { usePermissions } from '@/hooks/usePermissions';
 import { authService } from '@/services/auth.service';
 
 export default function Privacy() {
   useDocumentTitle('Privacidade e LGPD');
   const { toast } = useToast();
+  const { canEditPrivacy } = usePermissions();
+  const canEdit = canEditPrivacy;
 
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
