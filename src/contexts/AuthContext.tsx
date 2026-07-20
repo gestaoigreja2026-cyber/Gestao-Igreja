@@ -4,6 +4,7 @@ import { UNRESTRICTED_EMAILS } from '@/lib/constants';
 import { authService } from '@/services/auth.service';
 import { trialService } from '@/services/trial.service';
 import { supabase } from '@/lib/supabaseClient';
+import { clearTenantSession } from '@/hooks/useTenant';
 
 interface AuthContextType {
   user: User | null;
@@ -333,6 +334,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setChurchId(undefined);
     setViewingChurch(null);
     sessionStorage.removeItem('superadmin_viewing_church');
+    clearTenantSession();
   };
 
   const switchChurch = (targetChurchId: string | null, churchName = 'Igreja') => {

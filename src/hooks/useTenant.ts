@@ -1,8 +1,10 @@
 import { useState, useEffect, createContext, useContext, type ReactNode } from 'react';
 import { createElement } from 'react';
 import { churchesService, Church } from '@/services/churches.service';
+import { supabase } from '@/lib/supabaseClient';
 
 const MAIN_DOMAIN = 'church-gest-oficial.com.br';
+const SESSION_KEY = 'church_slug';
 
 // ─── Global singleton (para Logo.tsx antes do React montar) ────
 export let globalChurchLogo: string | null = null;
@@ -29,25 +31,35 @@ const TenantContext = createContext<TenantContextValue>({
 function extractSlug(): string | null {
   const host = window.location.hostname;
 
-  // Parâmetro de URL para testes locais: ?slug=ibma ou ?church=ibma
+  // 1. Parâmetro de URL: ?slug=ibma ou ?church=ibma (funciona em produção e local)
   const urlParams = new URLSearchParams(window.location.search);
   const slugParam = urlParams.get('slug') || urlParams.get('church');
-  if (slugParam) return slugParam;
+  if (slugParam) {
+    // Persiste no sessionStorage para sobreviver à navegação interna (ex: após login)
+    try { sessionStorage.setItem(SESSION_KEY, slugParam); } catch {}
+    return slugParam;
+  }
 
-  // localhost / 127.0.0.1 sem subdomínio → domínio principal
+  // 2. Recupera do sessionStorage caso o usuário tenha navegado (perdeu o ?church= da URL)
+  try {
+    const saved = sessionStorage.getItem(SESSION_KEY);
+    if (saved) return saved;
+  } catch {}
+
+  // 3. localhost / 127.0.0.1 sem parâmetro → fallback via banco (dev local)
   const isLocal = host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.');
   if (isLocal) return null;
 
-  // Domínio principal
+  // 4. Domínio principal sem subdomínio
   if (host === MAIN_DOMAIN || host === `www.${MAIN_DOMAIN}`) return null;
 
-  // Subdomínio do domínio principal: batista.church-gest-oficial.com.br
+  // 5. Subdomínio do domínio principal: batista.church-gest-oficial.com.br
   if (host.endsWith(MAIN_DOMAIN)) {
     const slug = host.replace(`.${MAIN_DOMAIN}`, '').split('.').pop() || '';
     return slug && slug !== 'www' ? slug : null;
   }
 
-  // Domínio customizado: o primeiro segmento pode ser www → ignorar
+  // 6. Domínio customizado: o primeiro segmento pode ser www → ignorar
   const first = host.split('.')[0];
   return first && first !== 'www' ? first : null;
 }
@@ -82,7 +94,6 @@ function applyBranding(church: Church) {
   // Banner de culto
   if (church.banner_url) {
     globalChurchBanner = church.banner_url;
-    // Evento para banner atualizado
     window.dispatchEvent(new CustomEvent('churchBannerUpdated', { detail: church.banner_url }));
   }
 
@@ -99,11 +110,9 @@ function applyBranding(church: Church) {
 }
 
 // ─── Provider ─────────────────────────────────────────────────────────────────
-const _providerInitialized = false;
 let _cachedTenant: Church | null = null;
 let _cachedSlug: string | null = null;
 let _cachedIsMain = false;
-const _pendingCallbacks: Array<(v: TenantContextValue) => void> = [];
 let _resolved = false;
 
 /**
@@ -115,6 +124,17 @@ export function invalidateTenantCache() {
   _cachedTenant = null;
 }
 
+/**
+ * Limpa o slug salvo no sessionStorage (use no logout para não vazar entre sessões).
+ */
+export function clearTenantSession() {
+  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  _resolved = false;
+  _cachedTenant = null;
+  _cachedSlug = null;
+  _cachedIsMain = false;
+}
+
 async function resolveTenant(): Promise<TenantContextValue> {
   if (_resolved) {
     return { tenant: _cachedTenant, loading: false, isMainDomain: _cachedIsMain, subdomain: _cachedSlug };
@@ -124,6 +144,7 @@ async function resolveTenant(): Promise<TenantContextValue> {
   _cachedSlug = slug;
 
   if (!slug) {
+    // Fallback para desenvolvimento local: carrega a primeira igreja do banco
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (isLocal) {
       try {
