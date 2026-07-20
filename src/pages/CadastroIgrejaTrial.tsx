@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Church, User, Image, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Gift, Church, User, Image, Mail, Lock, Eye, EyeOff, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -326,6 +326,26 @@ export default function CadastroIgrejaTrial() {
                   >
                     {uploadingLogo ? 'Enviando...' : 'Selecionar imagem'}
                   </Button>
+                  {form.logoUrl && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="text-primary"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = form.logoUrl;
+                        link.download = 'logo-igreja.png';
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar Logo
+                    </Button>
+                  )}
                 </div>
               </div>
             </CardContent>
