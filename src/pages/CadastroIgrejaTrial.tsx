@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Church, User, Image, Mail, Lock, Eye, EyeOff, Download } from 'lucide-react';
+import { Gift, Church, User, Image, Mail, Lock, Eye, EyeOff, Download, ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,8 @@ export default function CadastroIgrejaTrial() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [bannerUrl, setBannerUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -344,6 +346,84 @@ export default function CadastroIgrejaTrial() {
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Baixar Logo
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Card: Banner da Tela de Login */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5 text-primary" />
+                Imagem da Tela de Login
+              </CardTitle>
+              <CardDescription>Banner que aparece na tela de login da sua igreja</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <div className="w-40 h-24 rounded-xl overflow-hidden bg-muted/50 flex items-center justify-center border-2 border-dashed border-border">
+                  {bannerUrl ? (
+                    <img src={bannerUrl} alt="Banner" className="w-full h-full object-cover" />
+                  ) : (
+                    <ImageIcon className="h-10 w-10 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex flex-row flex-wrap gap-2">
+                  <label>
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
+                      {uploadingBanner
+                        ? <><div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" /><span>Enviando...</span></>
+                        : <><ImageIcon className="h-4 w-4" /><span>Selecionar imagem</span></>}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingBanner}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        setUploadingBanner(true);
+                        try {
+                          const ext = file.name.split('.').pop() || 'jpg';
+                          const path = `banner-trial-${Date.now()}.${ext}`;
+                          const { data, error } = await supabase.storage
+                            .from('banners')
+                            .upload(path, file, { upsert: true, contentType: file.type });
+                          if (error) throw error;
+                          const { data: { publicUrl } } = supabase.storage
+                            .from('banners')
+                            .getPublicUrl(data.path);
+                          setBannerUrl(publicUrl);
+                          toast({ title: 'Banner enviado!', description: 'Imagem carregada com sucesso.' });
+                        } catch (err: any) {
+                          toast({ title: 'Erro ao enviar banner', description: err?.message, variant: 'destructive' });
+                        } finally {
+                          setUploadingBanner(false);
+                        }
+                      }}
+                    />
+                  </label>
+                  {bannerUrl && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = bannerUrl;
+                        link.download = 'banner-login.jpg';
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      }}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar
                     </Button>
                   )}
                 </div>
