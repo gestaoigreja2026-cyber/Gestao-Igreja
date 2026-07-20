@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, type ReactNode } from 'react';
-import { Shield, User, Users, Briefcase, MapPin, Church, Mail, Archive, Upload, Loader2 } from 'lucide-react';
+import { Shield, User, Users, Briefcase, MapPin, Church, Mail, Archive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +12,7 @@ import { authService } from '@/services/auth.service';
 import { UNRESTRICTED_EMAILS } from '@/lib/constants';
 import { testSupabaseConnection } from '@/lib/supabaseClient';
 import { z } from 'zod';
-import { uploadChurchLogo, uploadChurchBanner } from '@/services/churchAssets.service';
+
 import { useTenant } from '@/hooks/useTenant';
 import {
     Dialog,

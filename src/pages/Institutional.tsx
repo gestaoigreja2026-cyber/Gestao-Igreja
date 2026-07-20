@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Upload, Save, Download, Landmark, User, Phone, Mail, MapPin, ImageIcon } from 'lucide-react';
+import { Building2, Upload, Save, Download, Landmark, User, Phone, Mail, MapPin, ImageIcon, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -38,6 +38,7 @@ export default function Institutional() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     if (effectiveChurchId) loadChurch();
@@ -183,10 +184,51 @@ export default function Institutional() {
                   onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_LOGO; }}
                 />
               </div>
-              <Button variant="outline" onClick={handleDownloadLogo} className="w-full">
-                <Download className="h-4 w-4 mr-2" />
-                Baixar Logo
-              </Button>
+              {/* Botões: Upload Logo e Download Logo */}
+              <div className="flex flex-col gap-2 w-full max-w-[180px]">
+                {canEdit && (
+                  <label className="w-full">
+                    <div className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
+                      {uploadingLogo
+                        ? <Loader2 className="h-4 w-4 animate-spin" />
+                        : <Upload className="h-4 w-4" />}
+                      <span>{uploadingLogo ? 'Enviando...' : 'Trocar Logo'}</span>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingLogo}
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file || !effectiveChurchId) return;
+                        setUploadingLogo(true);
+                        try {
+                          const ext = file.name.split('.').pop();
+                          const fileName = `logo-${effectiveChurchId}-${Date.now()}.${ext}`;
+                          const { data, error } = await supabase.storage
+                            .from('logos')
+                            .upload(fileName, file, { upsert: true, contentType: file.type });
+                          if (error) throw error;
+                          const { data: { publicUrl } } = supabase.storage
+                            .from('logos')
+                            .getPublicUrl(data.path);
+                          setChurchData(prev => ({ ...prev, logoUrl: publicUrl }));
+                          toast({ title: 'Logo atualizada!', description: 'Clique em "Salvar Alterações" para aplicar.' });
+                        } catch (err: any) {
+                          toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
+                        } finally {
+                          setUploadingLogo(false);
+                        }
+                      }}
+                    />
+                  </label>
+                )}
+                <Button variant="outline" onClick={handleDownloadLogo} className="w-full">
+                  <Download className="h-4 w-4 mr-2" />
+                  Baixar Logo
+                </Button>
+              </div>
             </div>
 
             {/* Dados textuais */}
@@ -295,39 +337,6 @@ export default function Institutional() {
               )}
             </div>
           </div>
-
-          {/* Upload logo (apenas admin) */}
-          {canEdit && (
-            <div className="pt-4 border-t">
-              <Label className="text-sm font-medium block mb-2">Atualizar Logo</Label>
-              <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-all relative bg-primary/5 cursor-pointer">
-                <input
-                  type="file"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    try {
-                      const { data, error } = await supabase.storage
-                        .from('church-documents')
-                        .upload(`logo/${Date.now()}-${file.name}`, file);
-                      if (error) throw error;
-                      const { data: { publicUrl } } = supabase.storage
-                        .from('church-documents')
-                        .getPublicUrl(data.path);
-                      setChurchData({ ...churchData, logoUrl: publicUrl });
-                      toast({ title: 'Logo atualizada!', description: 'Salve as alterações para aplicar.' });
-                    } catch (err: any) {
-                      toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
-                    }
-                  }}
-                />
-                <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">Clique ou arraste uma imagem para trocar a logo</p>
-              </div>
-            </div>
-          )}
 
           {/* Upload banner (apenas admin) */}
           {canEdit && (
