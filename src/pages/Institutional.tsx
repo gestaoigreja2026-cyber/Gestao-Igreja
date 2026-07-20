@@ -185,10 +185,10 @@ export default function Institutional() {
                 />
               </div>
               {/* Botões: Upload Logo e Download Logo */}
-              <div className="flex flex-col gap-2 w-full max-w-[180px]">
+              <div className="flex flex-row flex-wrap gap-2 w-full max-w-[180px]">
                 {canEdit && (
-                  <label className="w-full">
-                    <div className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
+                  <label className="flex-1">
+                    <div className="flex items-center justify-center gap-1 w-full px-3 py-2 rounded-lg border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
                       {uploadingLogo
                         ? <Loader2 className="h-4 w-4 animate-spin" />
                         : <Upload className="h-4 w-4" />}
@@ -224,10 +224,12 @@ export default function Institutional() {
                     />
                   </label>
                 )}
-                <Button variant="outline" onClick={handleDownloadLogo} className="w-full">
-                  <Download className="h-4 w-4 mr-2" />
-                  Baixar Logo
-                </Button>
+                {churchData.logoUrl && (
+                  <Button variant="outline" onClick={handleDownloadLogo} className="flex-1">
+                    <Download className="h-4 w-4 mr-1" />
+                    Baixar
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -338,63 +340,60 @@ export default function Institutional() {
             </div>
           </div>
 
-          {/* Upload banner (apenas admin) */}
+          {/* Upload + Download banner (apenas admin) */}
           {canEdit && (
             <div className="pt-4 border-t">
-              <Label className="text-sm font-medium block mb-2">Banner de Culto (Página de Login)</Label>
-              <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 transition-all relative bg-primary/5 cursor-pointer">
-                <input
-                  type="file"
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                  accept="image/*"
-                  disabled={uploadingBanner}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    setUploadingBanner(true);
-                    try {
-                      // Garante que o bucket 'banners' existe
-                      await supabase.storage.createBucket('banners', { public: true }).catch(() => {});
-                      
-                      const { data, error } = await supabase.storage
-                        .from('banners')
-                        .upload(`${effectiveChurchId}-banner-${Date.now()}-${file.name}`, file);
-                      if (error) throw error;
-                      const { data: { publicUrl } } = supabase.storage
-                        .from('banners')
-                        .getPublicUrl(data.path);
-                      setChurchData({ ...churchData, bannerUrl: publicUrl });
-                      toast({ title: 'Banner atualizado!', description: 'Salve as alterações para aplicar.' });
-                    } catch (err: any) {
-                      toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
-                    } finally {
-                      setUploadingBanner(false);
-                    }
-                  }}
-                />
-                {uploadingBanner ? (
-                  <div className="flex flex-col items-center gap-2">
-                    <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
-                    <p className="text-sm text-muted-foreground">Enviando banner...</p>
-                  </div>
-                ) : (
-                  <>
-                    <ImageIcon className="h-10 w-10 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">Clique ou arraste uma imagem para trocar o banner</p>
-                    <p className="text-xs text-muted-foreground mt-1">Tamanho ideal: 1200x320px (horizontal)</p>
-                  </>
-                )}
-              </div>
+              <Label className="text-sm font-medium block mb-3">Banner de Culto (Página de Login)</Label>
+              {/* Preview do banner atual */}
               {churchData.bannerUrl && (
-                <div className="mt-4 rounded-lg overflow-hidden border relative group">
+                <div className="mb-3 rounded-lg overflow-hidden border relative group">
                   <img
                     src={churchData.bannerUrl}
                     alt="Banner de culto"
                     className="w-full h-32 object-cover"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                   />
-                  <button
-                    type="button"
+                </div>
+              )}
+              {/* Botões lado a lado */}
+              <div className="flex flex-row gap-2">
+                <label className="flex-1">
+                  <div className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
+                    {uploadingBanner
+                      ? <><div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" /><span>Enviando...</span></>
+                      : <><ImageIcon className="h-4 w-4" /><span>Trocar Banner</span></>}
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingBanner}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      setUploadingBanner(true);
+                      try {
+                        const { data, error } = await supabase.storage
+                          .from('banners')
+                          .upload(`${effectiveChurchId}-banner-${Date.now()}-${file.name}`, file);
+                        if (error) throw error;
+                        const { data: { publicUrl } } = supabase.storage
+                          .from('banners')
+                          .getPublicUrl(data.path);
+                        setChurchData({ ...churchData, bannerUrl: publicUrl });
+                        toast({ title: 'Banner atualizado!', description: 'Salve as alterações para aplicar.' });
+                      } catch (err: any) {
+                        toast({ title: 'Erro no upload', description: err.message, variant: 'destructive' });
+                      } finally {
+                        setUploadingBanner(false);
+                      }
+                    }}
+                  />
+                </label>
+                {churchData.bannerUrl && (
+                  <Button
+                    variant="outline"
+                    className="flex-1"
                     onClick={() => {
                       const link = document.createElement('a');
                       link.href = churchData.bannerUrl;
@@ -406,12 +405,13 @@ export default function Institutional() {
                       document.body.removeChild(link);
                       toast({ title: 'Download iniciado', description: 'O banner foi enviado para download.' });
                     }}
-                    className="absolute top-2 right-2 bg-white/90 hover:bg-white p-2 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                   >
-                    <Download className="h-4 w-4 text-primary" />
-                  </button>
-                </div>
-              )}
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar
+                  </Button>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Tamanho ideal: 1200x320px (horizontal)</p>
             </div>
           )}
         </CardContent>
