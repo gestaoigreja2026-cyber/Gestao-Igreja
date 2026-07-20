@@ -44,61 +44,6 @@ export default function NewLogin() {
     useDocumentTitle('Login');
 
     const { tenant } = useTenant();
-    // URLs locais (otimista) usadas enquanto o upload está em andamento
-    const [customLogoSrc, setCustomLogoSrc] = useState<string | null>(null);
-    const [customBannerSrc, setCustomBannerSrc] = useState<string | null>(null);
-    const [bannerError, setBannerError] = useState(false);
-    const [uploadingLogo, setUploadingLogo] = useState(false);
-    const [uploadingBanner, setUploadingBanner] = useState(false);
-
-    const handleLoginLogoUpload = async (file: File) => {
-        if (!tenant?.id) {
-            // Fallback para dev local sem tenant: prévia visual apenas
-            const reader = new FileReader();
-            reader.onload = () => { if (reader.result) setCustomLogoSrc(String(reader.result)); };
-            reader.readAsDataURL(file);
-            toast({ title: 'Aviso', description: 'Tenant não identificado. A logo não será salva no servidor (modo local).' });
-            return;
-        }
-        // Prévia otimista imediata
-        const previewUrl = URL.createObjectURL(file);
-        setCustomLogoSrc(previewUrl);
-        setUploadingLogo(true);
-        try {
-            const publicUrl = await uploadChurchLogo(tenant.id, tenant.slug, file);
-            setCustomLogoSrc(publicUrl);
-            toast({ title: 'Logo atualizada!', description: 'A logo foi salva e será exibida para todos os usuários desta igreja.' });
-        } catch (e: any) {
-            setCustomLogoSrc(null);
-            toast({ title: 'Erro no upload', description: e?.message || 'Não foi possível enviar a logo.', variant: 'destructive' });
-        } finally {
-            setUploadingLogo(false);
-        }
-    };
-
-    const handleLoginBannerUpload = async (file: File) => {
-        if (!tenant?.id) {
-            const reader = new FileReader();
-            reader.onload = () => { if (reader.result) { setCustomBannerSrc(String(reader.result)); setBannerError(false); } };
-            reader.readAsDataURL(file);
-            toast({ title: 'Aviso', description: 'Tenant não identificado. O banner não será salvo no servidor (modo local).' });
-            return;
-        }
-        const previewUrl = URL.createObjectURL(file);
-        setCustomBannerSrc(previewUrl);
-        setBannerError(false);
-        setUploadingBanner(true);
-        try {
-            const publicUrl = await uploadChurchBanner(tenant.id, tenant.slug, file);
-            setCustomBannerSrc(publicUrl);
-            toast({ title: 'Banner atualizado!', description: 'O banner foi salvo e será exibido para todos os usuários desta igreja.' });
-        } catch (e: any) {
-            setCustomBannerSrc(null);
-            toast({ title: 'Erro no upload', description: e?.message || 'Não foi possível enviar o banner.', variant: 'destructive' });
-        } finally {
-            setUploadingBanner(false);
-        }
-    };
 
     // Força o tema oceano nas páginas públicas
     useEffect(() => {
@@ -280,64 +225,20 @@ export default function NewLogin() {
                             <div className="text-center space-y-4">
                                 {/* Logo */}
                                 <div className="flex flex-col items-center justify-center group">
-                                    <Logo size="md" showText={false} overrideSrc={customLogoSrc ?? undefined} />
-                                    <label className="mt-2 inline-flex items-center gap-2 text-sm font-semibold text-primary cursor-pointer hover:text-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                        {uploadingLogo
-                                            ? <Loader2 className="h-4 w-4 animate-spin" />
-                                            : <Upload className="h-4 w-4" />
-                                        }
-                                        <span>{uploadingLogo ? 'Enviando...' : 'Alterar logo'}</span>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            disabled={uploadingLogo}
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) handleLoginLogoUpload(file);
-                                            }}
-                                        />
-                                    </label>
+                                    <Logo size="md" showText={false} />
                                 </div>
 
                                 {/* Banner de Culto - Espaço para imagem dinâmica */}
                                 <div className="relative w-full h-48 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 group flex items-center justify-center">
                                     {/* Imagem do Banner */}
-                                    {(!bannerError || customBannerSrc) && (
-                                        <img 
-                                            src={customBannerSrc || tenant?.banner_url || '/banner-culto.jpg'} 
-                                            alt="Banner de Culto" 
-                                            className="absolute inset-0 w-full h-full object-cover"
-                                            onError={(e) => {
-                                                if (!customBannerSrc) {
-                                                    setBannerError(true);
-                                                }
-                                            }}
-                                        />
-                                    )}
-                                    
-                                    {/* Overlay de Upload (aparece no hover se tiver imagem, ou sempre se não tiver) */}
-                                    <label className={`absolute inset-0 z-10 flex flex-col items-center justify-center cursor-pointer transition-all ${
-                                        ((customBannerSrc || tenant?.banner_url) && !bannerError) 
-                                            ? 'bg-black/40 opacity-0 group-hover:opacity-100 text-white' 
-                                            : 'bg-transparent opacity-100 text-slate-400 hover:text-primary'
-                                    }`}>
-                                        {uploadingBanner
-                                            ? <Loader2 className="h-6 w-6 mb-1 animate-spin" />
-                                            : <Upload className="h-6 w-6 mb-1" />
-                                        }
-                                        <span className="text-xs font-medium">{uploadingBanner ? 'Enviando...' : 'Alterar banner'}</span>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            className="hidden"
-                                            disabled={uploadingBanner}
-                                            onChange={(e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) handleLoginBannerUpload(file);
-                                            }}
-                                        />
-                                    </label>
+                                    <img 
+                                        src={tenant?.banner_url || '/banner-culto.jpg'} 
+                                        alt="Banner de Culto" 
+                                        className="absolute inset-0 w-full h-full object-cover"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = '/banner-culto.jpg';
+                                        }}
+                                    />
                                 </div>
 
                                 {/* Nome da igreja */}
@@ -414,7 +315,7 @@ export default function NewLogin() {
                         <CardContent className="p-4">
                             <div className="text-center mb-4">
                                 <div className="flex justify-center mb-4">
-                                    <Logo size="md" showText={false} overrideSrc={customLogoSrc ?? undefined} />
+                                    <Logo size="md" showText={false} />
                                 </div>
                                 <p className="text-xl font-bold text-primary">Quase lá!</p>
                                 <h2 className="text-base font-semibold">Como você participa?</h2>
