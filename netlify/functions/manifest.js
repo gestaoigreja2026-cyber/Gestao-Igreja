@@ -32,7 +32,10 @@ exports.handler = async (event) => {
     let nome = 'Gestão Igreja';
     let themeColor = '#2563eb';
     let shortName = 'Igreja';
-    const installerIcon = '/novo-icone-app.png';
+    // ─── Cache-busting (Variáveis ajustáveis) ────────────────────────────────
+    const v = Date.now();
+    let icon192 = `/pwa-icon-192.png?v=${v}`;
+    let icon512 = `/pwa-icon-512.png?v=${v}`;
 
     // ─── Buscar tenant no Supabase ───────────────────────────────────────────
     if (!isMain) {
@@ -41,7 +44,7 @@ exports.handler = async (event) => {
 
       if (supabaseUrl && supabaseKey) {
         const response = await fetch(
-          `${supabaseUrl}/rest/v1/churches?slug=eq.${encodeURIComponent(subdomain)}&select=name,theme_color`,
+          `${supabaseUrl}/rest/v1/churches?slug=eq.${encodeURIComponent(subdomain)}&select=name,theme_color,logo_url`,
           {
             headers: {
               apikey: supabaseKey,
@@ -61,15 +64,14 @@ exports.handler = async (event) => {
               shortName = nome.split(' ').slice(0, 2).join(' ').substring(0, 12);
             }
             if (igreja.theme_color) themeColor = igreja.theme_color;
+            if (igreja.logo_url) {
+              icon192 = `${igreja.logo_url}?v=${v}`;
+              icon512 = `${igreja.logo_url}?v=${v}`;
+            }
           }
         }
       }
     }
-
-    // ─── Cache-busting ───────────────────────────────────────────────────────
-    const v = Date.now();
-    const icon192 = `/pwa-icon-192.png?v=${v}`;
-    const icon512 = `/pwa-icon-512.png?v=${v}`;
 
     // ─── Retorna manifest ─────────────────────────────────────────────────────
     return {
