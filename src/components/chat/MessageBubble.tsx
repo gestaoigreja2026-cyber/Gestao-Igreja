@@ -36,7 +36,7 @@ export function MessageBubble({ message, isMine, isDarkMode }: MessageBubbleProp
         <div className="flex justify-between items-start gap-2 group">
           <div className="text-[15px] break-words whitespace-pre-wrap leading-relaxed flex-1">
             {message.type === 'image' && message.file_url ? (
-              <div className="rounded-lg overflow-hidden border border-black/5 mb-1 cursor-pointer">
+              <div className="rounded-xl overflow-hidden border border-black/5 mb-1 cursor-pointer">
                 <img 
                   src={message.file_url} 
                   alt="Anexo" 
@@ -66,7 +66,7 @@ export function MessageBubble({ message, isMine, isDarkMode }: MessageBubbleProp
                   <Music className="w-4 h-4 text-gray-400" />
                 </div>
               ) : (
-                <div className="flex items-center gap-3 p-2 bg-black/5 rounded-lg border border-black/5">
+                <div className="flex items-center gap-3 p-2 bg-black/5 rounded-xl border border-black/5">
                   <div className="w-10 h-10 rounded bg-primary/20 flex items-center justify-center shrink-0">
                     <FileText className="w-6 h-6 text-primary" />
                   </div>

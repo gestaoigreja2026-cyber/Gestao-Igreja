@@ -273,7 +273,7 @@ export default function Uploads() {
                             Adicionar YouTube
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-lg sm:h-auto overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
+                        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-lg sm:h-auto overflow-y-auto p-4 sm:p-6 rounded-xl">
                           <DialogHeader>
                             <DialogTitle>Adicionar Vídeo do YouTube</DialogTitle>
                             <DialogDescription>
@@ -337,11 +337,11 @@ export default function Uploads() {
                       {getFilesByType(type).map((file) => (
                         <div
                           key={file.id}
-                          className="flex flex-col p-3 rounded-lg bg-muted/30 hover:bg-muted/60 transition-colors border border-transparent hover:border-border"
+                          className="flex flex-col p-3 rounded-xl bg-muted/30 hover:bg-muted/60 transition-colors border border-transparent hover:border-border"
                         >
                           <div className="flex items-center justify-between w-full">
                             <div className="flex items-center gap-3 min-w-0">
-                              <div className="bg-primary/10 p-2 rounded-md">
+                              <div className="bg-primary/10 p-2 rounded-xl">
                                 <Icon className="h-5 w-5 text-primary flex-shrink-0" />
                               </div>
                               <div className="truncate">

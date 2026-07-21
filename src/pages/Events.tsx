@@ -297,7 +297,7 @@ export default function Events() {
                                     <span>Evento</span>
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
                                 <DialogHeader>
                                     <DialogTitle className="text-xl">Criar Novo Evento</DialogTitle>
                                     <DialogDescription>
@@ -315,7 +315,7 @@ export default function Events() {
                                     <span>Culto</span>
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
                                 <DialogHeader>
                                     <DialogTitle className="text-xl">Planejar Culto</DialogTitle>
                                     <DialogDescription>
@@ -333,7 +333,7 @@ export default function Events() {
                                     <span>Ensaio</span>
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
                                 <DialogHeader>
                                     <DialogTitle className="text-xl">Agendar Ensaio</DialogTitle>
                                     <DialogDescription>
@@ -351,7 +351,7 @@ export default function Events() {
                                     <span>Reunião</span>
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
                                 <DialogHeader>
                                     <DialogTitle className="text-xl">Agendar Reunião</DialogTitle>
                                     <DialogDescription>
@@ -369,7 +369,7 @@ export default function Events() {
                                     <span>Checklist</span>
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
                                 <DialogHeader>
                                     <DialogTitle className="text-xl">Gerar Checklist Operacional</DialogTitle>
                                     <DialogDescription>
@@ -391,7 +391,7 @@ export default function Events() {
                                     <span>Escalar</span>
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
                                 <DialogHeader>
                                     <DialogTitle className="text-xl">Escalar Equipe de Serviço</DialogTitle>
                                     <DialogDescription>
@@ -528,7 +528,7 @@ export default function Events() {
             />
 
             <Dialog open={!!eventToEdit} onOpenChange={(open) => !open && setEventToEdit(null)}>
-                <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
+                <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-xl">
                     <DialogHeader>
                         <DialogTitle>Editar Evento</DialogTitle>
                     </DialogHeader>
@@ -709,7 +709,7 @@ function CalendarView({ events, getEventTypeColor, onEdit, onDelete, isAdmin }: 
                                     .map(event => (
                                         <div
                                             key={event.id}
-                                            className="p-4 rounded-lg bg-primary/5 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
+                                            className="p-4 rounded-xl bg-primary/5 border border-primary/10 hover:border-primary/30 transition-all duration-300 hover:scale-[1.02] hover:shadow-md"
                                         >
                                             <div className="flex items-start justify-between gap-2">
                                                 <div className="flex-1">
@@ -798,7 +798,7 @@ function ServiceScaleView({ events, onToggleConfirmation }: { events: Event[], o
                     <CardContent>
                         <div className="space-y-3">
                             {event.serviceScale?.map(person => (
-                                <div key={person.id} className="flex items-center justify-between p-3 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors">
+                                <div key={person.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-2 h-2 rounded-full ${person.confirmed ? 'bg-green-500' : person.declined ? 'bg-red-500' : 'bg-yellow-500'}`} />
                                         <div>
@@ -878,7 +878,7 @@ function ChecklistView({ events, onToggleTask }: { events: Event[], onToggleTask
                             {event.checklist?.map(item => (
                                 <div
                                     key={item.id}
-                                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 transition-colors cursor-pointer"
+                                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/5 transition-colors cursor-pointer"
                                     onClick={() => onToggleTask(item.id, item.completed, event.id)}
                                 >
                                     <input
@@ -1093,7 +1093,7 @@ function CreateEventForm({ onClose, onSuccess, initialData }: { onClose: () => v
                                     <p className="text-xs text-muted-foreground text-center py-4 col-span-2">Nenhum membro encontrado.</p>
                                 ) : (
                                     filteredMembers.map((m: any) => (
-                                        <div key={m.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary/5 border border-transparent hover:border-primary/10 transition-all">
+                                        <div key={m.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 border border-transparent hover:border-primary/10 transition-all">
                                             <input
                                                 type="checkbox"
                                                 id={`guest-${m.id}`}
@@ -1618,7 +1618,7 @@ function EventDetailsDialog({ event, onClose, getEventTypeColor, getStatusBadge 
 
     return (
         <Dialog open={!!event} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
+            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-xl">
                 <DialogHeader>
                     <div className="flex items-center gap-2 mb-2">
                         <Badge variant="outline" className={getStatusBadge(event.status)}>
@@ -1698,7 +1698,7 @@ function EventDetailsDialog({ event, onClose, getEventTypeColor, getStatusBadge 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {event.serviceScale && event.serviceScale.length > 0 ? (
                             event.serviceScale.map(person => (
-                                <div key={person.id} className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
+                                <div key={person.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/10">
                                     <div>
                                         <p className="font-semibold text-sm">{person.name}</p>
                                         <p className="text-[10px] text-muted-foreground">{person.role}</p>

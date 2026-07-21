@@ -62,7 +62,7 @@ export default function Chat() {
 
   return (
     <div 
-      className={`w-full flex bg-white shadow-sm md:rounded-lg overflow-hidden border border-gray-200 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900 border-gray-800' : ''}`} 
+      className={`w-full flex bg-white shadow-sm md:rounded-xl overflow-hidden border border-gray-200 transition-colors duration-300 ${darkMode ? 'dark bg-gray-900 border-gray-800' : ''}`} 
       style={{ height: 'calc(100vh - 120px)' }}
     >
       {/* Sidebar: hidden on mobile if a chat is active */}
@@ -138,7 +138,7 @@ export default function Chat() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Adicionar Participantes ({selectedUserIds.length})</label>
-              <div className="max-h-[300px] overflow-y-auto space-y-1 border rounded-md p-1">
+              <div className="max-h-[300px] overflow-y-auto space-y-1 border rounded-xl p-1">
                 {searchUsers.length === 0 ? (
                   <p className="text-sm text-gray-500 p-4 text-center">Nenhum contato encontrado</p>
                 ) : (
@@ -148,7 +148,7 @@ export default function Chat() {
                       <div 
                         key={user.id}
                         onClick={() => toggleUserSelection(user.id)}
-                        className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${
+                        className={`flex items-center justify-between p-2 rounded-xl cursor-pointer transition-colors ${
                           isSelected ? 'bg-primary/5 border-primary/20' : 'hover:bg-gray-50'
                         }`}
                       >
@@ -196,7 +196,7 @@ export default function Chat() {
               <p className="text-center text-gray-500 py-8">Nenhuma mensagem favoritada ainda.</p>
             ) : (
               starredMessages.map(msg => (
-                <div key={msg.id} className="p-3 bg-gray-50 rounded-lg border border-gray-100 relative group">
+                <div key={msg.id} className="p-3 bg-gray-50 rounded-xl border border-gray-100 relative group">
                   <p className="text-[14px] text-gray-800 pr-6">{msg.content}</p>
                   <p className="text-[10px] text-gray-400 mt-2">Enviada em {new Date(msg.created_at).toLocaleString('pt-BR')}</p>
                   <button 

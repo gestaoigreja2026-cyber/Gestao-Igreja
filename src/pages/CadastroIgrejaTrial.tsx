@@ -373,7 +373,7 @@ export default function CadastroIgrejaTrial() {
                 </div>
                 <div className="flex flex-row flex-wrap gap-2">
                   <label>
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
                       {uploadingBanner
                         ? <><div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" /><span>Enviando...</span></>
                         : <><ImageIcon className="h-4 w-4" /><span>Selecionar imagem</span></>}

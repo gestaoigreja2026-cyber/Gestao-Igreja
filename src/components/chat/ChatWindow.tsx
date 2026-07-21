@@ -213,11 +213,11 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
               <p className="text-gray-500">{otherParticipant?.email || 'Sem email'}</p>
             </div>
             <div className="w-full space-y-3 pt-4">
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                 <p className="text-[10px] uppercase font-bold text-gray-400">Cargo / Função</p>
                 <p className="text-sm font-medium text-gray-700 capitalize">{otherParticipant?.name || 'Membro'}</p>
               </div>
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+              <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                 <p className="text-[10px] uppercase font-bold text-gray-400">Tipo de Chat</p>
                 <p className="text-sm font-medium text-gray-700 capitalize">{conversation.type === 'private' ? 'Privado' : 'Grupo'}</p>
               </div>

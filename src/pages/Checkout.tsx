@@ -281,7 +281,7 @@ export default function Checkout() {
                                             Popular
                                         </span>
                                      )}
-                                    <div className={cn('p-2 rounded-lg w-fit mb-2 bg-gradient-to-br text-white', plan.color)}>
+                                    <div className={cn('p-2 rounded-xl w-fit mb-2 bg-gradient-to-br text-white', plan.color)}>
                                         <Icon className="h-4 w-4" />
                                     </div>
                                     <p className={cn('text-xs font-black uppercase tracking-wide', isSelected ? plan.textColor : 'text-muted-foreground')}>

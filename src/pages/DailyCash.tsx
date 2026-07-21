@@ -1363,7 +1363,7 @@ const DailyCash = () => {
                   <span>Novo Lançamento</span>
                 </Button>
               </DialogTrigger>
-              <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-lg sm:h-auto sm:max-h-[90vh] overflow-visible p-5 sm:p-6 rounded-none sm:rounded-lg">
+              <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-lg sm:h-auto sm:max-h-[90vh] overflow-visible p-5 sm:p-6 rounded-xl">
                 <DialogHeader>
                   <DialogTitle><span>{editingTransaction ? 'Editar Lançamento' : 'Novo Lançamento'}</span></DialogTitle>
                   <DialogDescription>
@@ -1807,7 +1807,7 @@ const DailyCash = () => {
 
       {/* Upload Modal - Preview imported transactions */}
       <Dialog open={isUploadModalOpen} onOpenChange={setIsUploadModalOpen}>
-        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-4xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-4xl sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -1954,7 +1954,7 @@ const DailyCash = () => {
 
       {/* Monthly Closing Modal */}
       <Dialog open={isClosingModalOpen} onOpenChange={setIsClosingModalOpen}>
-        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-lg sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-lg sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <CalendarCheck className="h-5 w-5 text-primary" />
@@ -1982,7 +1982,7 @@ const DailyCash = () => {
               </p>
             </div>
 
-            <div className="bg-muted p-4 rounded-lg space-y-2">
+            <div className="bg-muted p-4 rounded-xl space-y-2">
               <p className="text-sm font-medium flex items-center gap-2">
                 <Lock className="h-4 w-4" />
                 O que está incluso no relatório:

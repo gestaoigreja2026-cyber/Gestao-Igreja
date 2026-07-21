@@ -118,7 +118,7 @@ export function SuperAdminNetwork() {
         <Card className="border-none shadow-md">
             <CardHeader>
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-primary/10 rounded-lg">
+                    <div className="p-2 bg-primary/10 rounded-xl">
                         <Network className="h-6 w-6 text-primary" />
                     </div>
                     <div>
@@ -174,9 +174,9 @@ export function SuperAdminNetwork() {
                                 <Button type="button" variant="ghost" size="sm" onClick={clearChurches}>Limpar</Button>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-4 border rounded-lg bg-muted/20">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-4 border rounded-xl bg-muted/20">
                             {churches.map(c => (
-                                <label key={c.id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-muted/50 rounded-md">
+                                <label key={c.id} className="flex items-center gap-2 cursor-pointer p-2 hover:bg-muted/50 rounded-xl">
                                     <input 
                                         type="checkbox" 
                                         className="rounded border-gray-300 text-primary focus:ring-primary"

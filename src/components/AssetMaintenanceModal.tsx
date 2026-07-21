@@ -182,7 +182,7 @@ export function AssetMaintenanceModal({ isOpen, onClose, asset }: AssetMaintenan
                                     <select
                                         value={status}
                                         onChange={(e) => setStatus(e.target.value as MaintenanceStatus)}
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                         <option value="agendada">Agendada</option>
                                         <option value="em_andamento">Em Andamento</option>
@@ -207,11 +207,11 @@ export function AssetMaintenanceModal({ isOpen, onClose, asset }: AssetMaintenan
                     {isLoading ? (
                         <div className="text-center py-6 text-muted-foreground text-sm">Carregando histórico...</div>
                     ) : history.length === 0 ? (
-                        <div className="text-center py-8 bg-muted/10 rounded-lg border border-dashed border-border">
+                        <div className="text-center py-8 bg-muted/10 rounded-xl border border-dashed border-border">
                             <p className="text-muted-foreground text-sm">Nenhuma manutenção registrada para este item.</p>
                         </div>
                     ) : (
-                        <div className="border border-border rounded-lg overflow-hidden">
+                        <div className="border border-border rounded-xl overflow-hidden">
                             <Table>
                                 <TableHeader className="bg-muted/30">
                                     <TableRow>

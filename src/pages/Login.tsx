@@ -146,7 +146,7 @@ function RoleButton({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition w-full
+      className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm transition w-full
         ${active
           ? 'border-primary bg-primary/10 text-primary'
           : 'border-muted hover:bg-muted'

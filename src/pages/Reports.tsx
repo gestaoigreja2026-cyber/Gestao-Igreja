@@ -174,7 +174,7 @@ function MonthlyDistributionReport({ financialData, transactions }: { financialD
             <select 
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              className="flex h-10 w-full sm:w-64 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-10 w-full sm:w-64 rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               {availableMonths.map(m => (
                 <option key={m.rawMonth} value={m.rawMonth}>
@@ -1137,7 +1137,7 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
                   Configurar
                 </Button>
               </DialogTrigger>
-              <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
+              <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto overflow-y-auto p-4 sm:p-6 rounded-xl">
                 <DialogHeader>
                   <DialogTitle>{editBudget ? 'Editar Orçamento' : 'Configurar Meta de Gasto'}</DialogTitle>
                 </DialogHeader>
@@ -1147,7 +1147,7 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
                     <select
                       id="category"
                       name="category"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       required
                       defaultValue={editBudget?.category || ''}
                       disabled={!!editBudget}
@@ -1185,7 +1185,7 @@ function BudgetSummary({ budgets, expenseCategories, onRefresh, currentMonth }: 
               const isOver = actual > budget.amount;
 
               return (
-                <div key={budget.id} className="space-y-2 p-3 rounded-lg border border-primary/5 bg-background/50">
+                <div key={budget.id} className="space-y-2 p-3 rounded-xl border border-primary/5 bg-background/50">
                   <div className="flex justify-between items-start">
                     <div>
                       <span className="text-sm font-semibold">{budget.category}</span>

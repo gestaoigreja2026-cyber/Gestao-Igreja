@@ -319,7 +319,7 @@ export default function ReadingPlans() {
               >
                 <CardHeader className="pb-2">
                   <div className="flex items-start justify-between">
-                    <div className="rounded-lg bg-primary/10 p-2">
+                    <div className="rounded-xl bg-primary/10 p-2">
                       <BookOpen className="h-6 w-6 text-primary" />
                     </div>
                     <span className="text-xs text-muted-foreground">
@@ -398,7 +398,7 @@ export default function ReadingPlans() {
                         Nenhum membro iniciou este plano ainda.
                       </p>
                     ) : (
-                      <div className="overflow-x-auto rounded-md border">
+                      <div className="overflow-x-auto rounded-xl border">
                         <table className="w-full text-sm">
                           <thead>
                             <tr className="border-b bg-muted/50">
@@ -460,7 +460,7 @@ export default function ReadingPlans() {
                           {completions.slice(0, 10).map((c) => (
                             <span
                               key={`${c.plan_id}-${c.day_number}`}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-primary text-xs"
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded-xl bg-primary/10 text-primary text-xs"
                             >
                               <CheckCircle2 className="h-3 w-3" />
                               Dia {c.day_number} • {format(new Date(c.completed_at), "dd/MM", { locale: ptBR })}

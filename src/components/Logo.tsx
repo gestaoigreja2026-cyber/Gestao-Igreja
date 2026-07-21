@@ -80,7 +80,7 @@ export function Logo({ size = 'md', showText = true, overrideSrc, editable = fal
                 if (onFile) onFile(file);
               }}
             />
-            <div className="flex flex-col items-center gap-2 bg-white/90 rounded-lg p-3 shadow-md">
+            <div className="flex flex-col items-center gap-2 bg-white/90 rounded-xl p-3 shadow-md">
               <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M17 8l-5-5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />

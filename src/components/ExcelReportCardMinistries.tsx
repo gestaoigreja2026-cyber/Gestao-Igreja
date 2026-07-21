@@ -572,7 +572,7 @@ export function MinisteriosReportCard({ disabled }: { disabled?: boolean }) {
     <Card className="hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-cyan-500">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-cyan-100 rounded-lg">
+          <div className="p-2 bg-cyan-100 rounded-xl">
             <FileSpreadsheet className="h-6 w-6 text-cyan-600" />
           </div>
           <div>

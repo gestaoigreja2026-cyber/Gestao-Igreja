@@ -153,7 +153,7 @@ export function MessageInput({ conversationId, onSendMessage, isLoading }: Messa
                 <button 
                   key={emoji} 
                   onClick={() => addEmoji(emoji)}
-                  className="text-2xl p-2 hover:bg-gray-100 rounded-md transition-colors"
+                  className="text-2xl p-2 hover:bg-gray-100 rounded-xl transition-colors"
                 >
                   {emoji}
                 </button>
@@ -168,7 +168,7 @@ export function MessageInput({ conversationId, onSendMessage, isLoading }: Messa
             <Paperclip className="w-6 h-6" />
           </button>
           
-          <div className="flex-1 bg-white rounded-lg shadow-sm border border-transparent focus-within:border-primary/30 transition-colors">
+          <div className="flex-1 bg-white rounded-xl shadow-sm border border-transparent focus-within:border-primary/30 transition-colors">
             <textarea
               ref={inputRef}
               value={content}

@@ -396,7 +396,7 @@ export default function PrayerRequests() {
                 </div>
 
                 {/* Checkbox Anônimo */}
-                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-2 p-3 bg-muted/30 rounded-xl">
                   <Checkbox
                     id="anonymous"
                     checked={isAnonymous}

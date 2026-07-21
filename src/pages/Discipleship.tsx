@@ -267,7 +267,7 @@ export default function Discipleship() {
                                     Novo Discipulado
                                 </Button>
                             </DialogTrigger>
-                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
+                            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-xl">
                                 <form onSubmit={handleCreateDiscipleship}>
                                     <DialogHeader>
                                         <DialogTitle>Iniciar Novo Discipulado</DialogTitle>

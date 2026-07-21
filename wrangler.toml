@@ -1,0 +1,7 @@
+name = "gestao-igreja"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+[env.production]
+vars = { VITE_SUPABASE_URL = "https://amgpwwdhqtoaxkrvakzg.supabase.co", VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtZ3B3d2RocXRvYXhrcnZha3pnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyNTYzODMsImV4cCI6MjA4NTgzMjM4M30.36DWRC6AEL_KkGlV9Em8XHVVrO4R-eCEPbdN15MPzRo" }
+

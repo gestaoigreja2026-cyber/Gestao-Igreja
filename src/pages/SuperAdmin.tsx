@@ -366,7 +366,7 @@ export default function SuperAdmin() {
             </div>
 
             {atLimit && (
-                <div className="flex items-center gap-3 p-4 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
                     <AlertCircle className="h-5 w-5 text-amber-600 shrink-0" />
                     <p className="text-sm text-amber-800 dark:text-amber-200">
                         Limite de {MAX_CHURCHES} igrejas atingido. Novas igrejas podem se cadastrar pela página de vendas após assinatura.
@@ -483,7 +483,7 @@ export default function SuperAdmin() {
                                                 <TableRow key={church.id} className="group transition-colors">
                                                     <TableCell>
                                                         <div className="flex items-center gap-3">
-                                                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                                                            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
                                                                 <Building2 className="h-5 w-5 text-primary" />
                                                             </div>
                                                             <span className="font-semibold">{church.name}</span>
@@ -805,7 +805,7 @@ export default function SuperAdmin() {
             </Tabs>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-[425px] sm:h-auto overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
+                <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-[425px] sm:h-auto overflow-y-auto p-4 sm:p-6 rounded-xl">
                     <form onSubmit={handleSubmit}>
                         <DialogHeader>
                             <DialogTitle>{editingChurch ? 'Editar Igreja' : 'Cadastrar Nova Igreja'}</DialogTitle>
@@ -848,7 +848,7 @@ export default function SuperAdmin() {
                                             <img
                                                 src={formData.logo_url}
                                                 alt="Logo da igreja"
-                                                className="h-16 w-16 object-contain rounded-lg bg-white border shadow-sm"
+                                                className="h-16 w-16 object-contain rounded-xl bg-white border shadow-sm"
                                                 onError={(e) => { (e.target as HTMLImageElement).src = '/logo-app.png'; }}
                                             />
                                             <div className="flex-1 min-w-0">
@@ -933,7 +933,7 @@ export default function SuperAdmin() {
                                                     link.click();
                                                     document.body.removeChild(link);
                                                 }}
-                                                className="p-2 border rounded-md hover:bg-muted transition-colors"
+                                                className="p-2 border rounded-xl hover:bg-muted transition-colors"
                                             >
                                                 <Download className="h-4 w-4 text-primary" />
                                             </button>
@@ -965,7 +965,7 @@ export default function SuperAdmin() {
                                             <img
                                                 src={formData.banner_url}
                                                 alt="Banner de culto"
-                                                className="h-14 w-20 object-cover rounded-lg bg-white border shadow-sm"
+                                                className="h-14 w-20 object-cover rounded-xl bg-white border shadow-sm"
                                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                                             />
                                             <div className="flex-1 min-w-0">
@@ -1050,7 +1050,7 @@ export default function SuperAdmin() {
                                                     link.click();
                                                     document.body.removeChild(link);
                                                 }}
-                                                className="p-2 border rounded-md hover:bg-muted transition-colors"
+                                                className="p-2 border rounded-xl hover:bg-muted transition-colors"
                                             >
                                                 <Download className="h-4 w-4 text-primary" />
                                             </button>
@@ -1066,7 +1066,7 @@ export default function SuperAdmin() {
                                     <p className="text-[10px] text-muted-foreground">Se existir, será vinculado como Admin.</p>
                                 </div>
                             )}
-                            <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg flex gap-3 border border-amber-200 dark:border-amber-900">
+                            <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-xl flex gap-3 border border-amber-200 dark:border-amber-900">
                                 <ShieldCheck className="h-5 w-5 text-amber-600 shrink-0" />
                                 <p className="text-xs text-amber-800 dark:text-amber-400">
                                     Plataforma para até {MAX_CHURCHES} igrejas. Novas igrejas podem se cadastrar pela página de vendas e pagamento (R$ 150/mês).
@@ -1166,7 +1166,7 @@ export default function SuperAdmin() {
                         <DialogTitle>Detalhes do Webhook</DialogTitle>
                         <DialogDescription>Dados brutos recebidos do Asaas.</DialogDescription>
                     </DialogHeader>
-                    <div className="bg-muted p-4 rounded-lg overflow-auto max-h-[500px]">
+                    <div className="bg-muted p-4 rounded-xl overflow-auto max-h-[500px]">
                         <pre className="text-[10px] font-mono leading-relaxed">
                             {JSON.stringify(selectedLog?.payload, null, 2)}
                         </pre>

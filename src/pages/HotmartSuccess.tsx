@@ -82,14 +82,14 @@ export default function HotmartSuccess() {
         </CardHeader>
         <CardContent className="space-y-4">
           {email && (
-            <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+            <div className="p-4 bg-primary/10 rounded-xl border border-primary/20">
               <p className="text-sm text-muted-foreground mb-1">E-mail cadastrado:</p>
               <p className="font-semibold">{email}</p>
             </div>
           )}
           
           {transaction && (
-            <div className="p-4 bg-muted rounded-lg">
+            <div className="p-4 bg-muted rounded-xl">
               <p className="text-sm text-muted-foreground mb-1">Número da transação:</p>
               <p className="font-mono text-sm">{transaction}</p>
             </div>

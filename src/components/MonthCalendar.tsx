@@ -98,7 +98,7 @@ export function MonthCalendar({ year, month, events = [], onDayClick }: MonthCal
                         onClick={() => handleDayClick(day)}
                         disabled={day.month !== 'current'}
                         className={`
-              relative aspect-square p-2 rounded-lg text-sm font-medium transition-all duration-200
+              relative aspect-square p-2 rounded-xl text-sm font-medium transition-all duration-200
               ${day.month === 'current'
                                 ? 'hover:bg-primary/10 hover:scale-105 cursor-pointer'
                                 : 'text-muted-foreground/40 cursor-not-allowed'

@@ -160,7 +160,7 @@ const Ministerios: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
           <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white text-2xl">
+              <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center text-white text-2xl">
                 ⛪
               </div>
               <div>
@@ -172,7 +172,7 @@ const Ministerios: React.FC = () => {
 
           <div className="bg-green-50 rounded-xl p-6 border border-green-100">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white text-2xl">
+              <div className="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center text-white text-2xl">
                 👥
               </div>
               <div>
@@ -184,7 +184,7 @@ const Ministerios: React.FC = () => {
 
           <div className="bg-amber-50 rounded-xl p-6 border border-amber-100">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-500 rounded-lg flex items-center justify-center text-white text-2xl">
+              <div className="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center text-white text-2xl">
                 📅
               </div>
               <div>

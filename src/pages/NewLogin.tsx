@@ -463,7 +463,7 @@ export default function NewLogin() {
 
 function StatusItem({ label, ok, error }: { label: string; ok: boolean; error?: string }) {
     return (
-        <div className="flex items-center justify-between p-2 rounded-md bg-muted/50 border">
+        <div className="flex items-center justify-between p-2 rounded-xl bg-muted/50 border">
             <span className="text-xs font-medium">{label}</span>
             {ok ? (
                 <span className="text-[10px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded border border-green-200">OK</span>

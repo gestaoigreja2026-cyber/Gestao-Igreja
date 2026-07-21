@@ -341,12 +341,12 @@ export default function PixDonations() {
           </div>
 
           {!qrEnabled && (
-            <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted-foreground">
+            <div className="rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground">
               Preencha acima: <strong>Chave PIX</strong>, <strong>Nome do beneficiário</strong> e <strong>Cidade (UF)</strong> para gerar o QR.
             </div>
           )}
           {!!qrError && qrEnabled && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
               {qrError}
             </div>
           )}
@@ -386,7 +386,7 @@ export default function PixDonations() {
                 value={pixCopyPaste}
                 readOnly
                 placeholder="O código PIX (copia e cola) vai aparecer aqui."
-                className="w-full min-h-[240px] rounded-lg border border-input bg-background px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="w-full min-h-[240px] rounded-xl border border-input bg-background px-3 py-2 text-xs font-mono text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               />
               <p className="text-xs text-muted-foreground">
                 Dica: você pode colar esse código em geradores/checkout e também enviar por WhatsApp.

@@ -331,7 +331,7 @@ export default function Assets() {
             {isLoading ? (
                 <div className="text-center py-10 text-muted-foreground">Carregando patrimônios...</div>
             ) : filteredAssets.length === 0 ? (
-                <div className="text-center py-10 bg-card rounded-lg border border-border">
+                <div className="text-center py-10 bg-card rounded-xl border border-border">
                     <Package className="w-12 h-12 text-muted-foreground mx-auto mb-3 opacity-20" />
                     <h3 className="text-lg font-medium text-foreground">Nenhum bem patrimonial encontrado</h3>
                     <p className="text-muted-foreground mt-1">Clique em "Novo Bem" para cadastrar o primeiro.</p>
@@ -482,7 +482,7 @@ export default function Assets() {
                                                 <select
                                                     value={status}
                                                     onChange={(e) => setStatus(e.target.value as AssetStatus)}
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                                    className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                                 >
                                                     <option value="ativo">Ativo</option>
                                                     <option value="inativo">Inativo</option>
@@ -594,7 +594,7 @@ export default function Assets() {
                                                 </div>
 
                                                 {computeDepreciationPreview() && (
-                                                    <div className="text-xs bg-background border border-border rounded-lg p-3">
+                                                    <div className="text-xs bg-background border border-border rounded-xl p-3">
                                                         <span className="font-medium">Valor estimado hoje:</span> {computeDepreciationPreview()}
                                                     </div>
                                                 )}
@@ -653,7 +653,7 @@ export default function Assets() {
                                                 <select
                                                     value={source}
                                                     onChange={(e) => setSource(e.target.value as AssetSource)}
-                                                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                                    className="flex h-10 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                                 >
                                                     <option value="compra">Compra</option>
                                                     <option value="doacao">Doação</option>

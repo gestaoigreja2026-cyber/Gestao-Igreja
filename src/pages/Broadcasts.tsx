@@ -218,7 +218,7 @@ export default function Broadcasts() {
             <div className="flex items-center gap-2">
               <label
                 htmlFor="pdf-upload"
-                className="flex items-center gap-2 px-4 py-2 rounded-md border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 cursor-pointer transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-dashed border-primary/30 bg-primary/5 hover:bg-primary/10 cursor-pointer transition-colors"
               >
                 <FileUp className="h-4 w-4 text-primary" />
                 <span className="text-sm text-primary">
@@ -233,7 +233,7 @@ export default function Broadcasts() {
                 />
               </label>
               {pdfFile && (
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-secondary/50">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-secondary/50">
                   <FileText className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground truncate max-w-[200px]">
                     {pdfFile.name}

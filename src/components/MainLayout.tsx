@@ -82,7 +82,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                             <button
                                 type="button"
                                 onClick={() => { exitChurchView(); navigate('/superadmin'); }}
-                                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-200/80 dark:bg-amber-900/50 hover:bg-amber-300/80 dark:hover:bg-amber-800/50 font-medium text-sm transition-colors"
+                                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-200/80 dark:bg-amber-900/50 hover:bg-amber-300/80 dark:hover:bg-amber-800/50 font-medium text-sm transition-colors"
                             >
                                 <ArrowLeft className="h-4 w-4" />
                                 Voltar ao Painel Root
@@ -97,7 +97,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                             <button
                                 type="button"
                                 onClick={() => { exitChurchView(); navigate('/rede'); }}
-                                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-200/80 dark:bg-purple-900/50 hover:bg-purple-300/80 dark:hover:bg-purple-800/50 font-medium text-sm transition-colors"
+                                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-200/80 dark:bg-purple-900/50 hover:bg-purple-300/80 dark:hover:bg-purple-800/50 font-medium text-sm transition-colors"
                             >
                                 <ArrowLeft className="h-4 w-4" />
                                 Voltar à Rede

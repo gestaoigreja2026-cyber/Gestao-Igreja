@@ -188,7 +188,7 @@ export default function Institutional() {
               <div className="flex flex-row flex-wrap gap-2 w-full max-w-[180px]">
                 {canEdit && (
                   <label className="flex-1">
-                    <div className="flex items-center justify-center gap-1 w-full px-3 py-2 rounded-lg border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
+                    <div className="flex items-center justify-center gap-1 w-full px-3 py-2 rounded-xl border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
                       {uploadingLogo
                         ? <Loader2 className="h-4 w-4 animate-spin" />
                         : <Upload className="h-4 w-4" />}
@@ -346,7 +346,7 @@ export default function Institutional() {
               <Label className="text-sm font-medium block mb-3">Banner de Culto (Página de Login)</Label>
               {/* Preview do banner atual */}
               {churchData.bannerUrl && (
-                <div className="mb-3 rounded-lg overflow-hidden border relative group">
+                <div className="mb-3 rounded-xl overflow-hidden border relative group">
                   <img
                     src={churchData.bannerUrl}
                     alt="Banner de culto"
@@ -358,7 +358,7 @@ export default function Institutional() {
               {/* Botões lado a lado */}
               <div className="flex flex-row gap-2">
                 <label className="flex-1">
-                  <div className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-lg border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
+                  <div className="flex items-center justify-center gap-2 w-full px-3 py-2 rounded-xl border border-primary text-primary text-sm font-medium cursor-pointer hover:bg-primary/10 transition-all">
                     {uploadingBanner
                       ? <><div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" /><span>Enviando...</span></>
                       : <><ImageIcon className="h-4 w-4" /><span>Trocar Banner</span></>}

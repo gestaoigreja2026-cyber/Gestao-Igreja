@@ -119,14 +119,14 @@ export function SubscriptionBlock({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <div className="space-y-2 text-left text-sm text-muted-foreground bg-muted/50 rounded-lg p-4">
+        <div className="space-y-2 text-left text-sm text-muted-foreground bg-muted/50 rounded-xl p-4">
           <p>• Vencimento: <strong>30 dias</strong> após o pagamento (ou fim do teste)</p>
           <p>• Tolerância: <strong>5 dias</strong> após o vencimento</p>
           <p>• Após essa data: <strong>suspensão automática</strong> até regularização</p>
           <p>• Após o pagamento, o sistema retorna automaticamente</p>
         </div>
 
-        <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20 text-left">
+        <div className="mt-6 p-4 bg-primary/10 rounded-xl border border-primary/20 text-left">
           <p className="font-semibold text-foreground mb-2 flex items-center justify-between">
             Pagamento via PIX Direto
             {!status.asaas_customer_id && <Badge variant="outline" className="text-[10px]">Recomendado</Badge>}

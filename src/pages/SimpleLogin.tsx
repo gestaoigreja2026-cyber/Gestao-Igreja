@@ -67,7 +67,7 @@ export default function SimpleLogin() {
                                                 }}
                                             />
 
-                                            <div className="bg-primary text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 hover:opacity-90 transition">
+                                            <div className="bg-primary text-white px-4 py-2 rounded-xl shadow-lg flex items-center gap-2 hover:opacity-90 transition">
                                                 <UploadCloud className="w-5 h-5" />
                                                 Alterar Banner
                                             </div>
@@ -142,7 +142,7 @@ function RoleCard({
             onClick={onClick}
             className="flex flex-col items-center justify-center p-6 gap-3 rounded-xl border-2 border-muted/50 hover:border-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105 hover:shadow-lg group"
         >
-            <div className="p-3 rounded-lg bg-gradient-to-br from-primary to-secondary group-hover:scale-110 transition-transform">
+            <div className="p-3 rounded-xl bg-gradient-to-br from-primary to-secondary group-hover:scale-110 transition-transform">
                 <div className="text-white">{icon}</div>
             </div>
             <span className="text-sm font-bold uppercase tracking-wider text-center">{label}</span>

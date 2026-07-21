@@ -183,7 +183,7 @@ export default function Secretariat() {
                     }
                 `}} />
 
-                <div className="bg-white dark:bg-card p-8 rounded-lg shadow-sm print:shadow-none min-h-[600px] print:p-0 text-foreground print-content">
+                <div className="bg-white dark:bg-card p-8 rounded-xl shadow-sm print:shadow-none min-h-[600px] print:p-0 text-foreground print-content">
                     <TabsContent value="minutes" className="mt-0 space-y-6">
                         <MinutesTemplate canEdit={canEdit} />
                     </TabsContent>
@@ -415,7 +415,7 @@ function TransferLetter({ members, canEdit }: { members: Member[], canEdit: bool
                 </div>
             </div>
 
-            <div className="flex flex-col max-w-2xl mx-auto font-serif leading-relaxed text-justify space-y-6 mt-12 text-black bg-white p-12 shadow-xl rounded-lg print:shadow-none print:p-0">
+            <div className="flex flex-col max-w-2xl mx-auto font-serif leading-relaxed text-justify space-y-6 mt-12 text-black bg-white p-12 shadow-xl rounded-xl print:shadow-none print:p-0">
                 <div className="flex justify-center mb-6">
                     <img src="/logo-app.png?v=2" alt="Logo" className="w-60 h-60 object-contain brightness-0" style={{ filter: 'brightness(0)' }} />
                 </div>
@@ -469,21 +469,21 @@ function MembersRoll({ members }: { members: Member[] }) {
 
                 {/* Estatísticas */}
                 <div className="flex justify-center gap-6 mt-4">
-                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl">
                         <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
                         <div className="text-left">
                             <p className="text-xs text-muted-foreground">Membros</p>
                             <p className="text-2xl font-bold text-green-700 dark:text-green-400">{membrosCount}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
                         <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <div className="text-left">
                             <p className="text-xs text-muted-foreground">Congregados</p>
                             <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">{congregadosCount}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-lg">
+                    <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-xl">
                         <Users className="h-5 w-5 text-primary" />
                         <div className="text-left">
                             <p className="text-xs text-muted-foreground">Total</p>
@@ -862,7 +862,7 @@ function MemberIdCardTemplate({ members, canEdit }: { members: Member[], canEdit
                 <div className="w-[400px] h-[250px] bg-white border-2 border-primary/20 rounded-xl overflow-hidden shadow-xl print:shadow-none flex relative text-black text-left id-card-print-piece">
                     <div className="w-1/3 bg-primary/5 border-r p-4 flex flex-col items-center justify-center gap-3">
                         <img src="/logo-app.png?v=2" alt="Logo" className="w-[120px] h-[120px] object-contain flex-shrink-0 text-primary" style={{ filter: 'brightness(0) opacity(0.9)' }} />
-                        <div className="w-24 h-24 rounded-lg bg-muted flex items-center justify-center border-2 border-primary/10 overflow-hidden">
+                        <div className="w-24 h-24 rounded-xl bg-muted flex items-center justify-center border-2 border-primary/10 overflow-hidden">
                             {(photoDataUrl || selectedMember?.photoUrl) ? (
                                 <img src={photoDataUrl || selectedMember?.photoUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" crossOrigin="anonymous" />
                             ) : (
@@ -1043,14 +1043,14 @@ function SavedDocumentsList({ canEdit }: { canEdit: boolean }) {
             )}
 
             <Dialog open={!!viewingDoc} onOpenChange={() => setViewingDoc(null)}>
-                <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-3xl sm:h-auto sm:max-h-[80vh] overflow-y-auto p-4 sm:p-6 rounded-none sm:rounded-lg">
+                <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-3xl sm:h-auto sm:max-h-[80vh] overflow-y-auto p-4 sm:p-6 rounded-xl">
                     <DialogHeader>
                         <DialogTitle>{viewingDoc?.title}</DialogTitle>
                         <DialogDescription>
                             Documento gerado em {viewingDoc && format(new Date(viewingDoc.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                         </DialogDescription>
                     </DialogHeader>
-                    <div className="mt-4 p-6 bg-muted/30 rounded-lg whitespace-pre-wrap font-serif text-lg leading-relaxed">
+                    <div className="mt-4 p-6 bg-muted/30 rounded-xl whitespace-pre-wrap font-serif text-lg leading-relaxed">
                         {viewingDoc?.description}
                     </div>
                     <div className="flex justify-end gap-2 mt-4 print:hidden">

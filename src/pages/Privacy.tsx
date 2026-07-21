@@ -62,7 +62,7 @@ export default function Privacy() {
 
           <div className="space-y-4 pt-2">
             <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Suas Preferências</p>
-            <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
+            <div className="flex items-start space-x-3 p-3 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
               <Checkbox
                 id="shareData"
                 checked={privacySettings.shareData}
@@ -77,7 +77,7 @@ export default function Privacy() {
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
+            <div className="flex items-start space-x-3 p-3 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
               <Checkbox
                 id="receiveCommunications"
                 checked={privacySettings.receiveCommunications}
@@ -92,7 +92,7 @@ export default function Privacy() {
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
+            <div className="flex items-start space-x-3 p-3 rounded-xl hover:bg-muted/50 transition-colors border border-transparent hover:border-border">
               <Checkbox
                 id="showInDirectory"
                 checked={privacySettings.showInDirectory}

@@ -128,7 +128,7 @@ export function ChatSidebar({ conversations, activeConversationId, onSelectConve
 
       {/* Search */}
       <div className={`p-3 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-100'}`}>
-        <div className={`relative flex items-center rounded-lg px-3 py-1.5 ${isDarkMode ? 'bg-gray-800' : 'bg-[#f0f2f5]'}`}>
+        <div className={`relative flex items-center rounded-xl px-3 py-1.5 ${isDarkMode ? 'bg-gray-800' : 'bg-[#f0f2f5]'}`}>
           <Search className={`w-4 h-4 mr-2 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`} />
           <input 
             type="text" 

@@ -83,7 +83,7 @@ export function MinistryCard({ ministry, onDelete, onAddMember }: MinistryCardPr
               <User className="h-4 w-4 text-primary/60" />
               <span className="font-medium truncate max-w-[120px]">{ministry.leader}</span>
             </div>
-            <div className="flex items-center gap-1 font-bold text-primary bg-primary/5 px-2 py-1 rounded-md">
+            <div className="flex items-center gap-1 font-bold text-primary bg-primary/5 px-2 py-1 rounded-xl">
               <Users className="h-3.5 w-3.5" />
               {ministry.memberCount}
             </div>

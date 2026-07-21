@@ -189,7 +189,7 @@ export function AddMemberDialog({
             variant="destructive"
         />
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-hidden gap-0 p-0 rounded-none sm:rounded-lg sm:p-0">
+            <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-hidden gap-0 p-0 rounded-xl sm:p-0">
                 <DialogHeader className="p-6 pb-0">
                     <DialogTitle>Gerenciar Membros</DialogTitle>
                     <DialogDescription>
@@ -228,7 +228,7 @@ export function AddMemberDialog({
                                 ) : (
                                     <div className="space-y-2">
                                         {filteredMembers.map((member) => (
-                                            <div key={member.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted group transition-colors">
+                                            <div key={member.id} className="flex items-center justify-between p-2 rounded-xl hover:bg-muted group transition-colors">
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-9 w-9 border">
                                                         <AvatarImage src={member.photo_url} />
@@ -267,7 +267,7 @@ export function AddMemberDialog({
                                 ) : (
                                     <div className="space-y-2">
                                         {currentMembers.map((item) => (
-                                            <div key={item.id} className="flex items-center justify-between p-2 rounded-lg border bg-card hover:bg-muted/50 transition-colors">
+                                            <div key={item.id} className="flex items-center justify-between p-2 rounded-xl border bg-card hover:bg-muted/50 transition-colors">
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-9 w-9 border">
                                                         <AvatarImage src={item.member?.photo_url} />

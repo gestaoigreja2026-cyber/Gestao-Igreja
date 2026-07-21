@@ -297,7 +297,7 @@ export default function Cells() {
       <div className="flex flex-col gap-4 px-2">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-white border border-primary/20 p-2 rounded-lg shadow-sm">
+            <div className="bg-white border border-primary/20 p-2 rounded-xl shadow-sm">
               <Home className="h-5 w-5 text-primary" />
             </div>
             <p className="font-semibold text-lg">{cells.length} Células Ativas</p>
@@ -312,7 +312,7 @@ export default function Cells() {
                     <span className="hidden sm:inline">Nova Célula</span>
                   </Button>
                 </DialogTrigger>
-              <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-none sm:rounded-lg">
+              <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto p-5 sm:p-6 rounded-xl">
                 <form onSubmit={handleCreateCell}>
                   <DialogHeader>
                     <DialogTitle>Cadastrar Nova Célula</DialogTitle>
@@ -548,7 +548,7 @@ export default function Cells() {
       {/* Relatório de Reunião Dialog */}
       {selectedCell && reportOpen && (
         <Dialog open={reportOpen} onOpenChange={setReportOpen}>
-          <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto px-4 py-5 pt-[max(1.5rem,env(safe-area-inset-top))] sm:p-6 rounded-none sm:rounded-lg">
+          <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-md sm:h-auto sm:max-h-[90vh] overflow-y-auto px-4 py-5 pt-[max(1.5rem,env(safe-area-inset-top))] sm:p-6 rounded-xl">
             <form onSubmit={handleSubmitReport}>
               <DialogHeader className="pb-2">
                 <DialogTitle className="break-words pr-8">Relatório de Reunião - {selectedCell.name}</DialogTitle>
@@ -572,7 +572,7 @@ export default function Cells() {
                       <p className="text-xs text-muted-foreground text-center py-4">Nenhum membro vinculado a esta célula.</p>
                     ) : (
                       membersInCell.map((m: any) => (
-                        <div key={m.member?.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10">
+                        <div key={m.member?.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-primary/5 transition-colors border border-transparent hover:border-primary/10">
                           <input
                             type="checkbox"
                             id={`m-${m.member?.id}`}
@@ -728,10 +728,10 @@ function CellDetailsDialog({ open, onOpenChange, cell, onSuccess }: {
         variant="destructive"
       />
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col p-4 sm:p-6 rounded-none sm:rounded-lg">
+        <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-2xl sm:h-auto sm:max-h-[90vh] overflow-hidden flex flex-col p-4 sm:p-6 rounded-xl">
           <DialogHeader>
             <div className="flex items-center gap-3">
-              <div className="bg-primary/10 p-2 rounded-lg">
+              <div className="bg-primary/10 p-2 rounded-xl">
                 <Home className="h-6 w-6 text-primary" />
               </div>
               <div>

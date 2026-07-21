@@ -112,7 +112,7 @@ export function OnboardingTour() {
           <button
             type="button"
             onClick={finish}
-            className="shrink-0 p-1 rounded-lg hover:bg-muted text-muted-foreground"
+            className="shrink-0 p-1 rounded-xl hover:bg-muted text-muted-foreground"
             aria-label="Fechar"
           >
             <X className="h-5 w-5" />

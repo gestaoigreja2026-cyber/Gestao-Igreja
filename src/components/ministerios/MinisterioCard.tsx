@@ -64,7 +64,7 @@ const MinisterioCard: React.FC<MinisterioCardProps> = ({
       {/* Header com ícone e botão deletar */}
       <div className="flex justify-between items-start mb-4">
         <div 
-          className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+          className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
           style={{ backgroundColor: `${ministerio.cor}20`, color: ministerio.cor }}
         >
           <Building2 className="w-6 h-6" style={{ color: ministerio.cor }} />

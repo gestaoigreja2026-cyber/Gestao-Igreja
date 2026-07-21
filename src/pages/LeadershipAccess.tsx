@@ -209,7 +209,7 @@ export default function LeadershipAccess() {
                         : 'Crie contas de acesso (logins) para a sua equipe de liderança. Cada cargo possui permissões específicas no sistema.'}
                 </p>
                 {!isPastorAdmin && currentChurchName && (
-                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-lg border border-primary/20">
+                    <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 rounded-xl border border-primary/20">
                         <Building2 className="h-4 w-4 text-primary" />
                         <span className="text-sm font-medium text-primary">
                             Criando acessos para: {currentChurchName}

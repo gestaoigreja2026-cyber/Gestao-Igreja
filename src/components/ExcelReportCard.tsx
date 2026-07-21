@@ -494,7 +494,7 @@ export function ExcelReportCard({
     <Card className="hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-green-500">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-green-100 rounded-lg">
+          <div className="p-2 bg-green-100 rounded-xl">
             {icon || <FileSpreadsheet className="h-6 w-6 text-green-600" />}
           </div>
           <div>
@@ -612,7 +612,7 @@ export function CelulasReportCard({ disabled }: { disabled?: boolean }) {
     <Card className="hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-green-500">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-green-100 rounded-lg">
+          <div className="p-2 bg-green-100 rounded-xl">
             <FileSpreadsheet className="h-6 w-6 text-green-600" />
           </div>
           <div>
@@ -729,7 +729,7 @@ export function SecretariaReportCard({ disabled }: { disabled?: boolean }) {
     <Card className="hover:shadow-lg transition-shadow duration-300 border-l-4 border-l-blue-500">
       <CardHeader className="pb-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
+          <div className="p-2 bg-blue-100 rounded-xl">
             <FileSpreadsheet className="h-6 w-6 text-blue-600" />
           </div>
           <div>
