@@ -428,25 +428,23 @@ export default function SuperAdmin() {
             )}
 
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
-                <div className="w-full overflow-x-auto pb-2 -mb-2">
-                    <TabsList className="flex w-max min-w-full sm:grid sm:grid-cols-5 max-w-4xl h-auto p-1">
-                    <TabsTrigger value="gestao" className="gap-2">
+                <TabsList className="flex w-full justify-start overflow-x-auto overflow-y-hidden h-auto p-1 scrollbar-hide snap-x">
+                    <TabsTrigger value="gestao" className="gap-2 shrink-0 snap-start">
                         <Building2 className="h-4 w-4" /> Gestão
                     </TabsTrigger>
-                    <TabsTrigger value="relatorios" className="gap-2">
+                    <TabsTrigger value="relatorios" className="gap-2 shrink-0 snap-start">
                         <BarChart3 className="h-4 w-4" /> Relatórios
                     </TabsTrigger>
-                    <TabsTrigger value="rede" className="gap-2">
+                    <TabsTrigger value="rede" className="gap-2 shrink-0 snap-start">
                         <Network className="h-4 w-4" /> PastorAdmin
                     </TabsTrigger>
-                    <TabsTrigger value="mensalidades" className="gap-2">
+                    <TabsTrigger value="mensalidades" className="gap-2 shrink-0 snap-start">
                         <DollarSign className="h-4 w-4" /> Mensalidades
                     </TabsTrigger>
-                    <TabsTrigger value="logs_asaas" className="gap-2">
+                    <TabsTrigger value="logs_asaas" className="gap-2 shrink-0 snap-start">
                         <History className="h-4 w-4" /> Logs Asaas
                     </TabsTrigger>
                     </TabsList>
-                </div>
 
                 <TabsContent value="gestao" className="mt-6">
                     <Card className="border-none shadow-md">
