@@ -428,7 +428,8 @@ export default function SuperAdmin() {
             )}
 
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabValue)}>
-                <TabsList className="grid w-full grid-cols-5 max-w-4xl">
+                <div className="w-full overflow-x-auto pb-2 -mb-2">
+                    <TabsList className="flex w-max min-w-full sm:grid sm:grid-cols-5 max-w-4xl h-auto p-1">
                     <TabsTrigger value="gestao" className="gap-2">
                         <Building2 className="h-4 w-4" /> Gestão
                     </TabsTrigger>
@@ -444,7 +445,8 @@ export default function SuperAdmin() {
                     <TabsTrigger value="logs_asaas" className="gap-2">
                         <History className="h-4 w-4" /> Logs Asaas
                     </TabsTrigger>
-                </TabsList>
+                    </TabsList>
+                </div>
 
                 <TabsContent value="gestao" className="mt-6">
                     <Card className="border-none shadow-md">
