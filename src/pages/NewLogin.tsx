@@ -232,10 +232,11 @@ export default function NewLogin() {
                                 <div className="relative w-full h-48 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 group flex items-center justify-center">
                                     {/* Imagem do Banner */}
                                     <img 
-                                        src={tenant?.banner_url || '/banner-culto.jpg'} 
+                                        src={!tenant ? '/banner-superadmin.jpg' : (tenant.banner_url || '/banner-culto.jpg')} 
                                         alt="Banner de Culto" 
                                         className="absolute inset-0 w-full h-full object-cover"
                                         onError={(e) => {
+                                            // Se falhar o carregamento, tenta fallback
                                             (e.target as HTMLImageElement).src = '/banner-culto.jpg';
                                         }}
                                     />
