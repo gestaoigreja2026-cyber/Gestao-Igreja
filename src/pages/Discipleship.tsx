@@ -255,9 +255,9 @@ export default function Discipleship() {
                 </Card>
             </div>
 
-            <div className="flex justify-between items-center px-2">
-                <h2 className="text-xl font-bold">Acompanhamento Ativo</h2>
-                <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-2 gap-4">
+                <h2 className="text-xl font-bold shrink-0">Acompanhamento Ativo</h2>
+                <div className="flex w-full sm:w-auto overflow-x-auto gap-2 pb-2 sm:pb-0 scrollbar-hide snap-x [&>*]:shrink-0 [&>*]:snap-start">
                     <ExcelDiscipleshipMonthlyReportButton />
                     {canEdit && (
                         <Dialog open={isNewDialogOpen} onOpenChange={(open) => { setIsNewDialogOpen(open); if (!open) { setNewMentorId(''); setNewDiscipleId(''); } }}>
@@ -380,7 +380,7 @@ export default function Discipleship() {
                                 {/* Growth Track Section */}
                                 <div className="px-6 py-4 bg-white border-t border-b">
                                     <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-3">Trilha de Crescimento</p>
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-hide snap-x">
                                         {GROWTH_STAGES.map((stage) => {
                                             const isCompleted = getGrowthTrack(ds.notes).includes(stage.id);
                                             return (
@@ -388,7 +388,7 @@ export default function Discipleship() {
                                                     key={stage.id}
                                                     disabled={!canEdit || ds.status !== 'em_andamento'}
                                                     onClick={() => canEdit && handleToggleStage(ds, stage.id)}
-                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border ${isCompleted
+                                                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold transition-all border shrink-0 snap-start ${isCompleted
                                                             ? 'bg-green-500 text-white border-green-600 shadow-md scale-105'
                                                             : 'bg-muted/50 text-muted-foreground border-transparent hover:border-primary/20 hover:bg-muted'
                                                         }`}
