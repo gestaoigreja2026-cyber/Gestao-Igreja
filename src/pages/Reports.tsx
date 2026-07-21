@@ -650,27 +650,27 @@ export default function Reports() {
 
       {/* Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 print:flex print:flex-wrap">
-          <TabsTrigger value="evolucao" className="gap-2 text-sm">
+        <TabsList className="flex w-full justify-start overflow-x-auto overflow-y-hidden h-auto p-1 scrollbar-hide snap-x print:flex print:flex-wrap">
+          <TabsTrigger value="evolucao" className="gap-2 text-sm shrink-0 snap-start">
             <BarChart3 className="h-[20px] w-[20px]" />
             <span className="hidden sm:inline">Evolução</span>
             <span className="sm:hidden">Evol.</span>
           </TabsTrigger>
-          <TabsTrigger value="saude" className="gap-2 text-sm">
+          <TabsTrigger value="saude" className="gap-2 text-sm shrink-0 snap-start">
             <Heart className="h-[20px] w-[20px]" />
             <span className="hidden sm:inline">Saúde</span>
           </TabsTrigger>
-          <TabsTrigger value="financeiro" className="gap-2 text-sm">
+          <TabsTrigger value="financeiro" className="gap-2 text-sm shrink-0 snap-start">
             <DollarSign className="h-[20px] w-[20px]" />
             <span className="hidden sm:inline">Financeiro</span>
             <span className="sm:hidden">$</span>
           </TabsTrigger>
-          <TabsTrigger value="crescimento" className="gap-2 text-sm">
+          <TabsTrigger value="crescimento" className="gap-2 text-sm shrink-0 snap-start">
             <TrendingUp className="h-[20px] w-[20px]" />
             <span className="hidden sm:inline">Crescimento</span>
             <span className="sm:hidden">Cresc.</span>
           </TabsTrigger>
-          <TabsTrigger value="distribuicao" className="gap-2 text-sm">
+          <TabsTrigger value="distribuicao" className="gap-2 text-sm shrink-0 snap-start">
             <PieChartIcon className="h-[20px] w-[20px]" />
             <span className="hidden sm:inline">Mensal</span>
           </TabsTrigger>

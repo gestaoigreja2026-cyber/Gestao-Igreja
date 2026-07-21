@@ -260,11 +260,11 @@ export default function Schools() {
               </Button>
               {expandedSchool === school.id && (
                 <Tabs defaultValue="alunos" className="mt-4">
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="alunos" className="gap-1">
+                  <TabsList className="flex w-full justify-start overflow-x-auto overflow-y-hidden h-auto p-1 scrollbar-hide snap-x">
+                    <TabsTrigger value="alunos" className="gap-1 shrink-0 snap-start">
                       <Users className="h-3 w-3" /> Alunos
                     </TabsTrigger>
-                    <TabsTrigger value="relatorios" className="gap-1">
+                    <TabsTrigger value="relatorios" className="gap-1 shrink-0 snap-start">
                       <ClipboardList className="h-3 w-3" /> Relatórios
                     </TabsTrigger>
                   </TabsList>

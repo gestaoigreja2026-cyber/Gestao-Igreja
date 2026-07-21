@@ -231,20 +231,20 @@ export default function Uploads() {
       </div>
 
       <Tabs defaultValue="study" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto p-1 md:p-1.5 gap-1 md:gap-2">
-          <TabsTrigger value="study" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight">
+        <TabsList className="flex w-full justify-start overflow-x-auto overflow-y-hidden h-auto p-1 scrollbar-hide snap-x">
+          <TabsTrigger value="study" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
             <FileText className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
             Estudos
           </TabsTrigger>
-          <TabsTrigger value="financial" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight">
+          <TabsTrigger value="financial" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
             <FileText className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
             Financeiro
           </TabsTrigger>
-          <TabsTrigger value="minutes" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight">
+          <TabsTrigger value="minutes" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
             <File className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
             Atas
           </TabsTrigger>
-          <TabsTrigger value="media" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight">
+          <TabsTrigger value="media" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
             <Image className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
             Fotos
           </TabsTrigger>

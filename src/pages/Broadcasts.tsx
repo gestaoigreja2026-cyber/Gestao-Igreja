@@ -164,11 +164,11 @@ export default function Broadcasts() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Tabs value={broadcastType} onValueChange={(v) => setBroadcastType(v as BroadcastType)}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="flex w-full justify-start overflow-x-auto overflow-y-hidden h-auto p-1 scrollbar-hide snap-x">
               {BROADCAST_TYPES.map((t) => {
                 const Icon = t.icon;
                 return (
-                  <TabsTrigger key={t.value} value={t.value} className="flex items-center gap-2">
+                  <TabsTrigger key={t.value} value={t.value} className="flex items-center gap-2 shrink-0 snap-start">
                     <Icon className="h-4 w-4" />
                     {t.label}
                   </TabsTrigger>

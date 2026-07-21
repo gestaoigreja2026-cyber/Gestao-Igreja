@@ -427,11 +427,11 @@ export default function Assets() {
 
                     <div className="px-6 pb-4">
                         <Tabs defaultValue="basico" className="w-full">
-                            <TabsList className="w-full flex flex-wrap justify-start gap-1 h-auto">
-                                <TabsTrigger value="basico">Básico</TabsTrigger>
-                                <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
-                                <TabsTrigger value="manutencao">Manutenção</TabsTrigger>
-                                <TabsTrigger value="avancado">Avançado</TabsTrigger>
+                            <TabsList className="flex w-full justify-start overflow-x-auto overflow-y-hidden h-auto gap-1 p-1 scrollbar-hide snap-x">
+                                <TabsTrigger value="basico" className="shrink-0 snap-start">Básico</TabsTrigger>
+                                <TabsTrigger value="financeiro" className="shrink-0 snap-start">Financeiro</TabsTrigger>
+                                <TabsTrigger value="manutencao" className="shrink-0 snap-start">Manutenção</TabsTrigger>
+                                <TabsTrigger value="avancado" className="shrink-0 snap-start">Avançado</TabsTrigger>
                             </TabsList>
                             <Separator className="mt-4" />
 

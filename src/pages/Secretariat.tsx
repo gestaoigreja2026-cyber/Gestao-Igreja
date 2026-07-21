@@ -147,20 +147,20 @@ export default function Secretariat() {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-                <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 h-auto gap-2 print:hidden" translate="no">
-                    <TabsTrigger value="minutes" className="gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-sm">
+                <TabsList className="flex w-full justify-start overflow-x-auto overflow-y-hidden h-auto gap-2 p-1 scrollbar-hide snap-x print:hidden" translate="no">
+                    <TabsTrigger value="minutes" className="gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-sm shrink-0 snap-start">
                         <FileText className="h-5 w-5 shrink-0 md:h-5 md:w-5" />
                         <span className="truncate min-w-0">Atas</span>
                     </TabsTrigger>
-                    <TabsTrigger value="transfer" className="gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-sm">
+                    <TabsTrigger value="transfer" className="gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-sm shrink-0 snap-start">
                         <Send className="h-5 w-5 shrink-0 md:h-5 md:w-5" />
                         <span className="truncate min-w-0">Transferência</span>
                     </TabsTrigger>
-                    <TabsTrigger value="roll" className="gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-sm">
+                    <TabsTrigger value="roll" className="gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-sm shrink-0 snap-start">
                         <Users className="h-5 w-5 shrink-0 md:h-5 md:w-5" />
                         <span className="truncate min-w-0">Rol</span>
                     </TabsTrigger>
-                    <TabsTrigger value="idcard" className="gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-sm">
+                    <TabsTrigger value="idcard" className="gap-1.5 sm:gap-2 py-2.5 sm:py-3 text-sm shrink-0 snap-start">
                         <CreditCard className="h-5 w-5 shrink-0 md:h-5 md:w-5" />
                         <span className="truncate min-w-0">Carteirinha</span>
                     </TabsTrigger>
