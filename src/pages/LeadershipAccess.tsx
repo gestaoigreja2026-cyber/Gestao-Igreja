@@ -20,6 +20,7 @@ const authAdminClient = createClient(supabaseAdminUrl, supabaseAdminKey, {
 });
 
 const ROLES_OPTIONS: { value: UserRole; label: string }[] = [
+    { value: 'pastor', label: 'Pastor' },
     { value: 'secretario', label: 'Secretário' },
     { value: 'tesoureiro', label: 'Tesoureiro' },
     { value: 'lider_celula', label: 'Líder de Célula' },

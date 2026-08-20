@@ -29,8 +29,9 @@ function envCheck(mode: string) {
 
 export default defineConfig(({ mode }) => ({
   server: {
-    port: 3001,
-    strictPort: true,
+    port: 3000,
+    strictPort: false,
+    open: true,
   },
   base: '/',
   plugins: [
