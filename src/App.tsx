@@ -181,6 +181,12 @@ function AppRoutes() {
         <Route path="/blog" element={<Suspense fallback={<PageFallback />}><Blog /></Suspense>} />
         <Route path="/blog/:slug" element={<Suspense fallback={<PageFallback />}><Artigo /></Suspense>} />
         <Route path="/login" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
+        <Route path="/login/:slug" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
+        <Route path="/igreja/:slug" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
+        <Route path="/entrar" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
+        <Route path="/entrar/:slug" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
+        <Route path="/app" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
+        <Route path="/app/:slug" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/membros" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'superadmin']}><Members /></RoleProtectedRoute>} />
         <Route path="/consolidacao" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'lider_celula', 'superadmin']}><Consolidacao /></RoleProtectedRoute>} />

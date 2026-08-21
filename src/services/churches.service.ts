@@ -34,16 +34,29 @@ export const churchesService = {
     },
 
     /**
-     * Obtém detalhes de uma igreja pelo slug (usado para Multi-tenant via URL)
+     * Obtém detalhes de uma igreja pelo slug ou id (usado para Multi-tenant e links diretos)
      */
     async getBySlug(slug: string) {
+        const decoded = decodeURIComponent(slug).trim();
         const { data, error } = await supabase
             .from('churches')
             .select('*')
-            .eq('slug', slug)
+            .eq('slug', decoded)
             .maybeSingle();
 
-        if (error) throw error;
+        if (!data) {
+            // Tenta também por ID se for UUID ou ID único
+            try {
+                const { data: byId } = await supabase
+                    .from('churches')
+                    .select('*')
+                    .eq('id', decoded)
+                    .maybeSingle();
+                if (byId) return byId;
+            } catch {}
+        }
+
+        if (error && !data) throw error;
         return data;
     },
 

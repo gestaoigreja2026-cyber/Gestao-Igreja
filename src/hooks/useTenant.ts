@@ -30,36 +30,50 @@ const TenantContext = createContext<TenantContextValue>({
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function extractSlug(): string | null {
   const host = window.location.hostname;
+  const path = window.location.pathname;
 
-  // 1. Parâmetro de URL: ?slug=ibma ou ?church=ibma (funciona em produção e local)
+  // 1. Parâmetro de URL: ?slug=ibma ou ?church=ibma ou ?igreja=ibma ou ?c=ibma
   const urlParams = new URLSearchParams(window.location.search);
-  const slugParam = urlParams.get('slug') || urlParams.get('church');
+  const slugParam = urlParams.get('slug') || urlParams.get('church') || urlParams.get('igreja') || urlParams.get('c');
   if (slugParam) {
-    // Persiste no sessionStorage para sobreviver à navegação interna (ex: após login)
-    try { sessionStorage.setItem(SESSION_KEY, slugParam); } catch {}
-    return slugParam;
+    const cleanParam = decodeURIComponent(slugParam).trim();
+    // Persiste no sessionStorage para sobreviver à navegação interna
+    try { sessionStorage.setItem(SESSION_KEY, cleanParam); } catch {}
+    return cleanParam;
   }
 
-  // 2. Recupera do sessionStorage caso o usuário tenha navegado (perdeu o ?church= da URL)
+  // 2. Parâmetro na rota (Path): /igreja/slug, /login/slug, /entrar/slug, /app/slug, /i/slug, /acesso/slug
+  const pathParts = path.split('/').filter(Boolean);
+  if (pathParts.length >= 2) {
+    const [prefix, slugFromPath] = pathParts;
+    const directLoginPrefixes = ['igreja', 'login', 'entrar', 'app', 'i', 'acesso'];
+    if (directLoginPrefixes.includes(prefix.toLowerCase()) && slugFromPath) {
+      const cleanPathSlug = decodeURIComponent(slugFromPath).trim();
+      try { sessionStorage.setItem(SESSION_KEY, cleanPathSlug); } catch {}
+      return cleanPathSlug;
+    }
+  }
+
+  // 3. Recupera do sessionStorage caso o usuário tenha navegado
   try {
     const saved = sessionStorage.getItem(SESSION_KEY);
     if (saved) return saved;
   } catch {}
 
-  // 3. localhost / 127.0.0.1 sem parâmetro → fallback via banco (dev local)
+  // 4. localhost / 127.0.0.1 sem parâmetro → fallback via banco (dev local)
   const isLocal = host === 'localhost' || host === '127.0.0.1' || host.startsWith('192.168.');
   if (isLocal) return null;
 
-  // 4. Domínio principal sem subdomínio
+  // 5. Domínio principal sem subdomínio
   if (host === MAIN_DOMAIN || host === `www.${MAIN_DOMAIN}`) return null;
 
-  // 5. Subdomínio do domínio principal: batista.church-gest-oficial.com.br
+  // 6. Subdomínio do domínio principal: batista.church-gest-oficial.com.br
   if (host.endsWith(MAIN_DOMAIN)) {
     const slug = host.replace(`.${MAIN_DOMAIN}`, '').split('.').pop() || '';
     return slug && slug !== 'www' ? slug : null;
   }
 
-  // 6. Domínio customizado: o primeiro segmento pode ser www → ignorar
+  // 7. Domínio customizado: o primeiro segmento pode ser www → ignorar
   const first = host.split('.')[0];
   return first && first !== 'www' ? first : null;
 }
@@ -144,13 +158,17 @@ async function resolveTenant(): Promise<TenantContextValue> {
   _cachedSlug = slug;
 
   if (!slug) {
-    // Fallback para desenvolvimento local: carrega a primeira igreja do banco
+    // Fallback para desenvolvimento local: prioriza Igreja Viva Global ou a primeira do banco
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     if (isLocal) {
       try {
-        const { data: churches } = await supabase.from('churches').select('*').limit(1);
-        if (churches && churches.length > 0) {
-          const church = churches[0];
+        const { data: vivaGlobal } = await supabase.from('churches').select('*').eq('slug', 'igreja-viva-global').maybeSingle();
+        let church = vivaGlobal;
+        if (!church) {
+          const { data: list } = await supabase.from('churches').select('*').limit(1);
+          church = list?.[0] || null;
+        }
+        if (church) {
           _cachedTenant = church;
           _cachedSlug = church.slug;
           applyBranding(church);

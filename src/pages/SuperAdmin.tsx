@@ -26,6 +26,8 @@ import {
     CheckCircle2,
     Download,
     Network,
+    Globe,
+    Link2,
 } from 'lucide-react';
 import {
     Card,
@@ -511,6 +513,13 @@ export default function SuperAdmin() {
                                                                 <DropdownMenuItem onClick={() => handleOpenDialog(church)}>
                                                                     <Edit className="mr-2 h-4 w-4" /> Editar
                                                                 </DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => {
+                                                                    const url = `${window.location.origin}/login?church=${church.slug}`;
+                                                                    navigator.clipboard.writeText(url);
+                                                                    toast({ title: 'Link de Login copiado!', description: `Link exclusivo da ${church.name} copiado.` });
+                                                                }}>
+                                                                    <Copy className="mr-2 h-4 w-4" /> Copiar Link de Login
+                                                                </DropdownMenuItem>
                                                                 <DropdownMenuItem onClick={() => { switchChurch(church.id, church.name); navigate('/dashboard'); }}>
                                                                     <ExternalLink className="mr-2 h-4 w-4" /> Acessar Painel
                                                                 </DropdownMenuItem>
@@ -805,281 +814,306 @@ export default function SuperAdmin() {
             </Tabs>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="w-screen h-screen sm:w-[95vw] sm:max-w-[425px] sm:h-auto overflow-y-auto p-4 sm:p-6 rounded-xl">
-                    <form onSubmit={handleSubmit}>
-                        <DialogHeader>
-                            <DialogTitle>{editingChurch ? 'Editar Igreja' : 'Cadastrar Nova Igreja'}</DialogTitle>
-                            <DialogDescription>
-                                Configure os dados básicos da igreja. Igrejas também podem se cadastrar automaticamente pela página de vendas.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Nome da Igreja</label>
-                                <Input required placeholder="Ex: Igreja Central" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                <DialogContent className="w-[95vw] sm:max-w-2xl max-h-[92vh] flex flex-col p-0 gap-0 rounded-2xl overflow-hidden shadow-2xl border bg-background">
+                    <form onSubmit={handleSubmit} className="flex flex-col h-full overflow-hidden">
+                        {/* Header Elegante */}
+                        <div className="px-6 py-4 border-b bg-muted/30 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                    <Building2 className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <DialogTitle className="text-lg font-bold">
+                                        {editingChurch ? 'Editar Igreja' : 'Cadastrar Nova Igreja'}
+                                    </DialogTitle>
+                                    <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                                        {editingChurch 
+                                            ? 'Atualize o nome, slug/identificador e identidade visual da igreja.'
+                                            : 'Configure os dados essenciais da nova igreja na plataforma.'}
+                                    </DialogDescription>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Slug / URL Amigável</label>
-                                <Input required placeholder="Ex: igreja-central" value={formData.slug}
-                                    onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })} />
-                                <p className="text-[10px] text-muted-foreground">Identificador único. Não pode repetir.</p>
+                        </div>
+
+                        {/* Corpo com scroll suave e seções organizadas */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            {/* Bloco 1: Dados Gerais */}
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                                    <Building2 className="h-3.5 w-3.5 text-primary" /> Informações Básicas
+                                </h3>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-medium text-foreground">Nome da Igreja <span className="text-destructive">*</span></label>
+                                        <Input
+                                            required
+                                            placeholder="Ex: Igreja Viva Global"
+                                            value={formData.name}
+                                            onChange={(e) => {
+                                                const name = e.target.value;
+                                                if (!editingChurch && (!formData.slug || formData.slug === formData.name.toLowerCase().replace(/[^a-z0-9]/g, '-'))) {
+                                                    const autoSlug = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+                                                    setFormData({ ...formData, name, slug: autoSlug });
+                                                } else {
+                                                    setFormData({ ...formData, name });
+                                                }
+                                            }}
+                                            className="h-9 rounded-xl text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-medium text-foreground">Slug / URL Amigável <span className="text-destructive">*</span></label>
+                                        <Input
+                                            required
+                                            placeholder="ex: igreja-viva-global"
+                                            value={formData.slug}
+                                            onChange={(e) => setFormData({ ...formData, slug: e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') })}
+                                            className="h-9 rounded-xl text-sm font-mono"
+                                        />
+                                        <p className="text-[11px] text-muted-foreground flex items-center gap-1">
+                                            <Globe className="h-3 w-3 text-primary shrink-0" />
+                                            Link: <span className="text-foreground font-mono truncate">/igreja/{formData.slug || 'slug'}</span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {!editingChurch && (
+                                    <div className="space-y-1.5 pt-1">
+                                        <label className="text-xs font-medium text-foreground">E-mail do Administrador Inicial</label>
+                                        <Input
+                                            type="email"
+                                            placeholder="Ex: pastor@igreja.com"
+                                            value={formData.adminEmail}
+                                            onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
+                                            className="h-9 rounded-xl text-sm"
+                                        />
+                                        <p className="text-[11px] text-muted-foreground">Caso já exista uma conta com este e-mail, ela será vinculada automaticamente como administradora desta igreja.</p>
+                                    </div>
+                                )}
                             </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Logo da Igreja</label>
 
-                                {/* Área de upload */}
-                                <div
-                                    className="relative border-2 border-dashed border-primary/20 rounded-xl p-4 flex flex-col items-center gap-3 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer group"
-                                    onClick={() => !uploadingLogo && logoFileInputRef.current?.click()}
-                                >
-                                    <input
-                                        ref={logoFileInputRef}
-                                        type="file"
-                                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                                        className="hidden"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) handleLogoUpload(file);
-                                        }}
-                                    />
+                            <hr className="border-border/60" />
 
-                                    {formData.logo_url ? (
-                                        <div className="flex items-center gap-4 w-full">
-                                            <img
-                                                src={formData.logo_url}
-                                                alt="Logo da igreja"
-                                                className="h-16 w-16 object-contain rounded-xl bg-white border shadow-sm"
-                                                onError={(e) => { (e.target as HTMLImageElement).src = '/logo-app.png'; }}
-                                            />
-                                            <div className="flex-1 min-w-0">
-                                                {uploadSuccess && (
-                                                    <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-medium mb-1">
-                                                        <CheckCircle2 className="h-3.5 w-3.5" />
-                                                        Logo enviada com sucesso!
+                            {/* Bloco 2: Identidade Visual */}
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                                    <ImageIcon className="h-3.5 w-3.5 text-primary" /> Identidade Visual (Logo & Banner)
+                                </h3>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Upload Logo */}
+                                    <div className="p-4 rounded-2xl border bg-card/50 flex flex-col justify-between gap-3">
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <label className="text-xs font-semibold text-foreground">Logo da Igreja</label>
+                                                <span className="text-[10px] text-muted-foreground">512x512 (Quadrado)</span>
+                                            </div>
+                                            <p className="text-[11px] text-muted-foreground mb-2">Exibida no cabeçalho do app e documentos.</p>
+                                        </div>
+
+                                        <input
+                                            ref={logoFileInputRef}
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) handleLogoUpload(file);
+                                            }}
+                                        />
+
+                                        {formData.logo_url ? (
+                                            <div className="relative rounded-xl border bg-muted/20 p-3 flex items-center gap-3 group">
+                                                <div className="h-14 w-14 rounded-xl bg-white border shadow-sm p-1 flex items-center justify-center shrink-0 overflow-hidden">
+                                                    <img
+                                                        src={formData.logo_url}
+                                                        alt="Logo da igreja"
+                                                        className="h-full w-full object-contain"
+                                                        onError={(e) => { (e.target as HTMLImageElement).src = '/logo-app.png'; }}
+                                                    />
+                                                </div>
+                                                <div className="flex-1 min-w-0 space-y-1">
+                                                    <div className="flex items-center gap-1 text-emerald-600 text-[11px] font-medium">
+                                                        <CheckCircle2 className="h-3.5 w-3.5" /> Logo enviada
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2 pt-0.5">
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-7 text-xs px-2.5 rounded-lg gap-1"
+                                                            onClick={() => !uploadingLogo && logoFileInputRef.current?.click()}
+                                                            disabled={uploadingLogo}
+                                                        >
+                                                            {uploadingLogo ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                                                            Trocar
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-7 text-xs px-2 rounded-lg text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                            onClick={() => setFormData({ ...formData, logo_url: '' })}
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="border-2 border-dashed border-primary/20 hover:border-primary/50 hover:bg-primary/5 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all min-h-[95px]"
+                                                onClick={() => !uploadingLogo && logoFileInputRef.current?.click()}
+                                            >
+                                                {uploadingLogo ? (
+                                                    <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                                                ) : (
+                                                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                        <Upload className="h-4 w-4" />
                                                     </div>
                                                 )}
-                                                <p className="text-xs text-muted-foreground truncate">{formData.logo_url}</p>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <p className="text-[10px] text-primary group-hover:underline cursor-pointer">Clique para trocar a imagem</p>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const link = document.createElement('a');
-                                                            link.href = formData.logo_url;
-                                                            link.download = `logo-${formData.slug || 'church'}.png`;
-                                                            link.target = '_blank';
-                                                            link.rel = 'noopener noreferrer';
-                                                            document.body.appendChild(link);
-                                                            link.click();
-                                                            document.body.removeChild(link);
-                                                        }}
-                                                        className="text-[10px] text-primary hover:underline flex items-center gap-1"
-                                                    >
-                                                        <Download className="h-3 w-3" />
-                                                        Baixar
-                                                    </button>
+                                                <div className="text-center">
+                                                    <p className="text-xs font-medium text-foreground">
+                                                        {uploadingLogo ? 'Enviando logo...' : 'Clique para enviar Logo'}
+                                                    </p>
+                                                    <p className="text-[10px] text-muted-foreground mt-0.5">PNG, JPG, SVG ou WEBP</p>
                                                 </div>
-                                                <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: Quadrado (ex: 512x512) • Fundo transparente</p>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-2 py-2">
-                                            {uploadingLogo ? (
-                                                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                                            ) : (
-                                                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                                    <ImageIcon className="h-6 w-6 text-primary" />
-                                                </div>
-                                            )}
-                                            <div className="text-center">
-                                                <p className="text-sm font-medium text-foreground">
-                                                    {uploadingLogo ? 'Enviando...' : 'Clique para enviar a logo'}
-                                                </p>
-                                                <p className="text-[10px] text-muted-foreground mt-0.5">PNG, JPG, WEBP ou SVG</p>
-                                                <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: Quadrado (ex: 512x512) • Fundo transparente</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {uploadingLogo && (
-                                        <div className="absolute inset-0 rounded-xl bg-background/60 flex items-center justify-center">
-                                            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Campo URL manual como fallback */}
-                                <details className="mt-1">
-                                    <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-primary transition-colors">Ou cole uma URL manualmente</summary>
-                                    <div className="mt-2 flex items-center gap-2">
-                                        <Input
-                                            type="url"
-                                            placeholder="https://... (URL pública da imagem)"
-                                            value={formData.logo_url}
-                                            onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
-                                            className="flex-1"
-                                        />
-                                        {formData.logo_url && (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const link = document.createElement('a');
-                                                    link.href = formData.logo_url;
-                                                    link.download = `logo-${formData.slug || 'church'}.png`;
-                                                    link.target = '_blank';
-                                                    link.rel = 'noopener noreferrer';
-                                                    document.body.appendChild(link);
-                                                    link.click();
-                                                    document.body.removeChild(link);
-                                                }}
-                                                className="p-2 border rounded-xl hover:bg-muted transition-colors"
-                                            >
-                                                <Download className="h-4 w-4 text-primary" />
-                                            </button>
                                         )}
+
+                                        <details className="mt-1 group/det">
+                                            <summary className="text-[10px] text-muted-foreground/80 hover:text-primary cursor-pointer transition-colors list-none flex items-center gap-1">
+                                                <Link2 className="h-3 w-3" /> Ou inserir link direto da URL
+                                            </summary>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <Input
+                                                    type="url"
+                                                    placeholder="https://... (URL pública)"
+                                                    value={formData.logo_url}
+                                                    onChange={(e) => setFormData({ ...formData, logo_url: e.target.value })}
+                                                    className="h-7 text-xs rounded-lg"
+                                                />
+                                            </div>
+                                        </details>
                                     </div>
-                                </details>
-                            </div>
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Banner de Culto</label>
 
-                                {/* Área de upload do banner */}
-                                <div
-                                    className="relative border-2 border-dashed border-primary/20 rounded-xl p-4 flex flex-col items-center gap-3 bg-muted/20 hover:bg-muted/40 transition-colors cursor-pointer group"
-                                    onClick={() => !uploadingBanner && bannerFileInputRef.current?.click()}
-                                >
-                                    <input
-                                        ref={bannerFileInputRef}
-                                        type="file"
-                                        accept="image/png,image/jpeg,image/webp"
-                                        className="hidden"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) handleBannerUpload(file);
-                                        }}
-                                    />
+                                    {/* Upload Banner */}
+                                    <div className="p-4 rounded-2xl border bg-card/50 flex flex-col justify-between gap-3">
+                                        <div>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <label className="text-xs font-semibold text-foreground">Banner de Culto</label>
+                                                <span className="text-[10px] text-muted-foreground">1200x320 px (Horizontal)</span>
+                                            </div>
+                                            <p className="text-[11px] text-muted-foreground mb-2">Exibido na tela de login exclusiva da igreja.</p>
+                                        </div>
 
-                                    {formData.banner_url ? (
-                                        <div className="flex items-center gap-4 w-full">
-                                            <img
-                                                src={formData.banner_url}
-                                                alt="Banner de culto"
-                                                className="h-14 w-20 object-cover rounded-xl bg-white border shadow-sm"
-                                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                                            />
-                                            <div className="flex-1 min-w-0">
-                                                {uploadSuccess && (
-                                                    <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-medium mb-1">
-                                                        <CheckCircle2 className="h-3.5 w-3.5" />
-                                                        Banner enviado com sucesso!
+                                        <input
+                                            ref={bannerFileInputRef}
+                                            type="file"
+                                            accept="image/png,image/jpeg,image/webp"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) handleBannerUpload(file);
+                                            }}
+                                        />
+
+                                        {formData.banner_url ? (
+                                            <div className="relative rounded-xl border bg-muted/20 p-2.5 space-y-2 group">
+                                                <div className="w-full h-14 rounded-lg overflow-hidden bg-muted border relative">
+                                                    <img
+                                                        src={formData.banner_url}
+                                                        alt="Banner de culto"
+                                                        className="w-full h-full object-cover"
+                                                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="text-emerald-600 text-[11px] font-medium flex items-center gap-1">
+                                                        <CheckCircle2 className="h-3.5 w-3.5" /> Banner ativo
+                                                    </span>
+                                                    <div className="flex items-center gap-1">
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-7 text-xs px-2.5 rounded-lg gap-1"
+                                                            onClick={() => !uploadingBanner && bannerFileInputRef.current?.click()}
+                                                            disabled={uploadingBanner}
+                                                        >
+                                                            {uploadingBanner ? <Loader2 className="h-3 w-3 animate-spin" /> : <Upload className="h-3 w-3" />}
+                                                            Trocar
+                                                        </Button>
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-7 text-xs px-2 rounded-lg text-destructive hover:text-destructive hover:bg-destructive/10"
+                                                            onClick={() => setFormData({ ...formData, banner_url: '' })}
+                                                        >
+                                                            <Trash2 className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div
+                                                className="border-2 border-dashed border-primary/20 hover:border-primary/50 hover:bg-primary/5 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all min-h-[95px]"
+                                                onClick={() => !uploadingBanner && bannerFileInputRef.current?.click()}
+                                            >
+                                                {uploadingBanner ? (
+                                                    <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                                                ) : (
+                                                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                                        <ImageIcon className="h-4 w-4" />
                                                     </div>
                                                 )}
-                                                <p className="text-xs text-muted-foreground truncate">{formData.banner_url}</p>
-                                                <div className="flex items-center gap-2 mt-1">
-                                                    <p className="text-[10px] text-primary group-hover:underline cursor-pointer">Clique para trocar a imagem</p>
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            const link = document.createElement('a');
-                                                            link.href = formData.banner_url;
-                                                            link.download = `banner-${formData.slug || 'church'}.png`;
-                                                            link.target = '_blank';
-                                                            link.rel = 'noopener noreferrer';
-                                                            document.body.appendChild(link);
-                                                            link.click();
-                                                            document.body.removeChild(link);
-                                                        }}
-                                                        className="text-[10px] text-primary hover:underline flex items-center gap-1"
-                                                    >
-                                                        <Download className="h-3 w-3" />
-                                                        Baixar
-                                                    </button>
+                                                <div className="text-center">
+                                                    <p className="text-xs font-medium text-foreground">
+                                                        {uploadingBanner ? 'Enviando banner...' : 'Clique para enviar Banner'}
+                                                    </p>
+                                                    <p className="text-[10px] text-muted-foreground mt-0.5">Horizontal (ex: 1200x320)</p>
                                                 </div>
-                                                <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: 1200x320px (horizontal)</p>
                                             </div>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-2 py-2">
-                                            {uploadingBanner ? (
-                                                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                                            ) : (
-                                                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                                    <ImageIcon className="h-6 w-6 text-primary" />
-                                                </div>
-                                            )}
-                                            <div className="text-center">
-                                                <p className="text-sm font-medium text-foreground">
-                                                    {uploadingBanner ? 'Enviando...' : 'Clique para enviar o banner'}
-                                                </p>
-                                                <p className="text-[10px] text-muted-foreground mt-0.5">PNG, JPG ou WEBP</p>
-                                                <p className="text-[10px] text-muted-foreground mt-0.5">Tamanho ideal: 1200x320px (horizontal)</p>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {uploadingBanner && (
-                                        <div className="absolute inset-0 rounded-xl bg-background/60 flex items-center justify-center">
-                                            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Campo URL manual como fallback */}
-                                <details className="mt-1">
-                                    <summary className="text-[10px] text-muted-foreground cursor-pointer hover:text-primary transition-colors">Ou cole uma URL manualmente</summary>
-                                    <div className="mt-2 flex items-center gap-2">
-                                        <Input
-                                            type="url"
-                                            placeholder="https://... (URL pública da imagem)"
-                                            value={formData.banner_url}
-                                            onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
-                                            className="flex-1"
-                                        />
-                                        {formData.banner_url && (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const link = document.createElement('a');
-                                                    link.href = formData.banner_url;
-                                                    link.download = `banner-${formData.slug || 'church'}.png`;
-                                                    link.target = '_blank';
-                                                    link.rel = 'noopener noreferrer';
-                                                    document.body.appendChild(link);
-                                                    link.click();
-                                                    document.body.removeChild(link);
-                                                }}
-                                                className="p-2 border rounded-xl hover:bg-muted transition-colors"
-                                            >
-                                                <Download className="h-4 w-4 text-primary" />
-                                            </button>
                                         )}
+
+                                        <details className="mt-1 group/det">
+                                            <summary className="text-[10px] text-muted-foreground/80 hover:text-primary cursor-pointer transition-colors list-none flex items-center gap-1">
+                                                <Link2 className="h-3 w-3" /> Ou inserir link direto da URL
+                                            </summary>
+                                            <div className="mt-2 flex items-center gap-2">
+                                                <Input
+                                                    type="url"
+                                                    placeholder="https://... (URL pública)"
+                                                    value={formData.banner_url}
+                                                    onChange={(e) => setFormData({ ...formData, banner_url: e.target.value })}
+                                                    className="h-7 text-xs rounded-lg"
+                                                />
+                                            </div>
+                                        </details>
                                     </div>
-                                </details>
-                            </div>
-                            {!editingChurch && (
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">E-mail do Administrador Inicial</label>
-                                    <Input type="email" placeholder="Ex: pastor@igreja.com" value={formData.adminEmail}
-                                        onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })} />
-                                    <p className="text-[10px] text-muted-foreground">Se existir, será vinculado como Admin.</p>
                                 </div>
-                            )}
-                            <div className="p-4 bg-amber-50 dark:bg-amber-950/30 rounded-xl flex gap-3 border border-amber-200 dark:border-amber-900">
-                                <ShieldCheck className="h-5 w-5 text-amber-600 shrink-0" />
-                                <p className="text-xs text-amber-800 dark:text-amber-400">
-                                    Plataforma para até {MAX_CHURCHES} igrejas. Novas igrejas podem se cadastrar pela página de vendas e pagamento (R$ 150/mês).
+                            </div>
+
+                            {/* Informação */}
+                            <div className="p-3.5 bg-primary/5 rounded-xl flex items-start gap-3 border border-primary/15">
+                                <ShieldCheck className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                    Os dados da igreja, logotipo e banner serão exibidos automaticamente na tela de login exclusiva e em todos os relatórios da plataforma.
                                 </p>
                             </div>
                         </div>
-                        <DialogFooter>
-                            <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-                            <Button type="submit" disabled={submitting}>
-                                {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                {editingChurch ? 'Salvar' : 'Criar Igreja'}
+
+                        {/* Footer Elegante */}
+                        <div className="px-6 py-4 border-t bg-muted/20 flex items-center justify-end gap-3">
+                            <Button variant="outline" type="button" onClick={() => setIsDialogOpen(false)} className="rounded-xl h-9 px-4 text-xs font-medium">
+                                Cancelar
                             </Button>
-                        </DialogFooter>
+                            <Button type="submit" disabled={submitting} className="rounded-xl h-9 px-5 text-xs font-semibold shadow-md shadow-primary/20">
+                                {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                {editingChurch ? 'Salvar Alterações' : 'Cadastrar Igreja'}
+                            </Button>
+                        </div>
                     </form>
                 </DialogContent>
             </Dialog>

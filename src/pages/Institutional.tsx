@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Building2, Upload, Save, Download, Landmark, User, Phone, Mail, MapPin, ImageIcon, Loader2 } from 'lucide-react';
+import { Building2, Upload, Save, Download, Landmark, User, Phone, Mail, MapPin, ImageIcon, Loader2, Copy, ExternalLink, Link2, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,7 @@ export default function Institutional() {
 
   const [churchData, setChurchData] = useState({
     name: DEFAULT_CHURCH_NAME,
+    slug: '',
     address: '',
     phone: '',
     email: '',
@@ -52,6 +53,7 @@ export default function Institutional() {
       const church = await churchesService.getById(effectiveChurchId) as any;
       setChurchData({
         name: church?.name || DEFAULT_CHURCH_NAME,
+        slug: church?.slug || '',
         address: church?.address || '',
         phone: church?.phone || '',
         email: church?.email || '',
@@ -62,7 +64,7 @@ export default function Institutional() {
       });
     } catch (e: any) {
       toast({ title: 'Erro ao carregar', description: e?.message, variant: 'destructive' });
-      setChurchData((p) => ({ ...p, name: DEFAULT_CHURCH_NAME }));
+      setChurchData((p) => ({ ...p, name: DEFAULT_CHURCH_NAME, slug: '' }));
     } finally {
       setLoading(false);
     }
@@ -161,6 +163,62 @@ export default function Institutional() {
           </Button>
         )}
       </div>
+
+      {/* Card: Link Exclusivo de Login da Igreja */}
+      {churchData.slug && (
+        <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 via-background to-primary/10 shadow-lg overflow-hidden">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg text-primary">
+              <Link2 className="h-5 w-5" />
+              Link Exclusivo de Login para Membros
+            </CardTitle>
+            <CardDescription>
+              Compartilhe este link com seus membros e líderes. Quem acessar por ele vai direto para a tela de login personalizada da sua igreja, sem passar pela página de apresentação do sistema.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <Input
+                readOnly
+                value={`${window.location.origin}/login?church=${churchData.slug}`}
+                className="bg-background font-mono text-xs sm:text-sm select-all"
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="default"
+                  className="gap-2 shadow-sm"
+                  onClick={() => {
+                    const url = `${window.location.origin}/login?church=${churchData.slug}`;
+                    navigator.clipboard.writeText(url);
+                    toast({
+                      title: 'Link copiado!',
+                      description: 'O link exclusivo de login da sua igreja foi copiado para a área de transferência.',
+                    });
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                  Copiar Link
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  title="Testar link em nova aba"
+                  onClick={() => {
+                    window.open(`${window.location.origin}/login?church=${churchData.slug}`, '_blank');
+                  }}
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <span>💡 <strong>Link alternativo amigável:</strong> <code className="bg-muted px-1.5 py-0.5 rounded text-[11px]">{`${window.location.origin}/igreja/${churchData.slug}`}</code></span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Card: Dados da Igreja + Logo + Presidente + Download */}
       <Card className="border-none shadow-lg overflow-hidden">
