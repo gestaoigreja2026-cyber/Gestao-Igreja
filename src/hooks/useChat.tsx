@@ -142,7 +142,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   const conversationsQuery = useQuery({
-    queryKey: ['chat-conversations', effectiveChurchId],
+    queryKey: ['chat-conversations', effectiveChurchId, currentUser?.id],
     queryFn: async (): Promise<ChatConversation[]> => {
       if (!currentUser || !effectiveChurchId) return [];
       try {
@@ -162,6 +162,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             messages:chat_messages(*)
           `)
           .in('id', ids)
+          .eq('church_id', effectiveChurchId)
           .order('updated_at', { ascending: false });
 
         if (error) throw error;
@@ -186,22 +187,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         return [];
       }
     },
-    enabled: !!currentUser,
+    enabled: !!currentUser && !!effectiveChurchId,
   });
 
   const useMessages = (conversationId: string | null) => useQuery({
-    queryKey: ['chat-messages', conversationId],
+    queryKey: ['chat-messages', effectiveChurchId, conversationId],
     queryFn: async () => {
-      if (!conversationId) return [];
+      if (!conversationId || !effectiveChurchId) return [];
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*')
         .eq('conversation_id', conversationId)
+        .eq('church_id', effectiveChurchId)
         .order('created_at', { ascending: true });
       if (error) throw error;
       return data;
     },
-    enabled: !!conversationId,
+    enabled: !!conversationId && !!effectiveChurchId,
   });
 
   const sendMessageMutation = useMutation({
@@ -210,6 +212,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         .from('chat_messages')
         .insert({ 
           conversation_id: conversationId, 
+          church_id: effectiveChurchId,
           content, 
           sender_id: currentUser!.id,
           type,
@@ -217,12 +220,12 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         })
         .select().single();
       if (error) throw error;
-      await supabase.from('chat_conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId);
+      await supabase.from('chat_conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId).eq('church_id', effectiveChurchId);
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
-      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations', effectiveChurchId] });
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', effectiveChurchId] });
     }
   });
 
@@ -235,14 +238,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       try {
         const { data, error } = await supabase.rpc('get_or_create_chat', { 
           other_user_id: otherUserId, 
-          p_church_id: effectiveChurchId || '00000000-0000-0000-0000-000000000000' 
+          p_church_id: effectiveChurchId 
         });
         if (!error && data) return data;
       } catch (rpcErr) {
         console.warn('RPC get_or_create_chat falhou, usando fallback direto:', rpcErr);
       }
 
-      // 2. Fallback direto: verificar se já existe conversa privada entre os dois
+      // 2. Fallback direto: verificar se já existe conversa privada entre os dois nesta igreja
       try {
         const { data: myConvs } = await supabase
           .from('chat_participants')
@@ -259,13 +262,26 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             .eq('profile_id', otherUserId);
 
           if (existing && existing.length > 0) {
-            return existing[0].conversation_id;
+            // Verifica se a conversa pertence à igreja atual
+            const { data: matchingConv } = await supabase
+              .from('chat_conversations')
+              .select('id')
+              .eq('id', existing[0].conversation_id)
+              .eq('church_id', effectiveChurchId)
+              .maybeSingle();
+
+            if (matchingConv) {
+              return matchingConv.id;
+            }
           }
         }
 
-        // 3. Criar nova conversa privada diretamente
+        // 3. Criar nova conversa privada com a igreja isolada
         const { data: newConv, error: convErr } = await (supabase.from('chat_conversations') as any)
-          .insert({ type: 'private' })
+          .insert({ 
+            type: 'private',
+            church_id: effectiveChurchId 
+          })
           .select()
           .single();
 
@@ -285,31 +301,32 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         throw err;
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations', effectiveChurchId] })
   });
 
   const pinMessageMutation = useMutation({
     mutationFn: async ({ messageId, pin }: { messageId: string; pin: boolean }) => {
-      await supabase.from('chat_messages').update({ pinned_at: pin ? new Date().toISOString() : null }).eq('id', messageId);
+      await supabase.from('chat_messages').update({ pinned_at: pin ? new Date().toISOString() : null }).eq('id', messageId).eq('church_id', effectiveChurchId);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-messages'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-messages', effectiveChurchId] })
   });
 
   const starMessageMutation = useMutation({
     mutationFn: async ({ messageId, star }: { messageId: string, star: boolean }) => {
-      if (star) await supabase.from('chat_starred_messages').insert({ message_id: messageId, profile_id: currentUser!.id });
-      else await supabase.from('chat_starred_messages').delete().eq('message_id', messageId).eq('profile_id', currentUser!.id);
+      if (star) await supabase.from('chat_starred_messages').insert({ message_id: messageId, profile_id: currentUser!.id, church_id: effectiveChurchId });
+      else await supabase.from('chat_starred_messages').delete().eq('message_id', messageId).eq('profile_id', currentUser!.id).eq('church_id', effectiveChurchId);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['starred-messages'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['starred-messages', effectiveChurchId] })
   });
 
   const starredMessagesQuery = useQuery({
-    queryKey: ['starred-messages'],
+    queryKey: ['starred-messages', effectiveChurchId],
     queryFn: async () => {
-      const { data } = await supabase.from('chat_starred_messages').select('chat_messages(*)').eq('profile_id', currentUser!.id);
+      if (!effectiveChurchId) return [];
+      const { data } = await supabase.from('chat_starred_messages').select('chat_messages(*)').eq('profile_id', currentUser!.id).eq('church_id', effectiveChurchId);
       return (data || []).map((item: any) => item.chat_messages).filter(Boolean) as ChatMessage[];
     },
-    enabled: !!currentUser,
+    enabled: !!currentUser && !!effectiveChurchId,
   });
 
   const createGroupMutation = useMutation({
@@ -317,9 +334,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       const myId = currentUser?.id || user?.id || (await supabase.auth.getUser()).data.user?.id;
       if (!myId) throw new Error('Usuário não autenticado.');
 
-      // Inserção da conversa do grupo
+      // Inserção da conversa do grupo com church_id garantido
       const { data: conv, error: convErr } = await (supabase.from('chat_conversations') as any)
-        .insert({ name: name.trim(), type: 'group' })
+        .insert({ 
+          name: name.trim(), 
+          type: 'group',
+          church_id: effectiveChurchId 
+        })
         .select()
         .single();
 
@@ -362,8 +383,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       return convId;
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
-      await queryClient.refetchQueries({ queryKey: ['chat-conversations'] });
+      await queryClient.invalidateQueries({ queryKey: ['chat-conversations', effectiveChurchId] });
+      await queryClient.refetchQueries({ queryKey: ['chat-conversations', effectiveChurchId] });
     }
   });
 
