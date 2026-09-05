@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient, UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabaseClient';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface ChatProfile {
   id: string;
@@ -62,21 +63,38 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
-  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(null);
+  const { churchId, viewingChurch, user } = useAuth();
+  const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
+  const [currentUser, setCurrentUser] = useState<{ id: string } | null>(user?.id ? { id: user.id } : null);
 
   useEffect(() => {
+    if (user?.id) {
+      setCurrentUser({ id: user.id });
+    }
     supabase.auth.getSession().then(({ data }) => {
       if (data.session?.user) {
         setCurrentUser({ id: data.session.user.id });
+      } else if (user?.id) {
+        setCurrentUser({ id: user.id });
       }
     });
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser || !effectiveChurchId) return;
 
-    const channel = supabase.channel('chat_global')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, (payload) => {
+    const channel = supabase.channel(`chat-church-${effectiveChurchId}`, {
+      config: {
+        broadcast: { self: true },
+        presence: { key: currentUser.id },
+      }
+    })
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `church_id=eq.${effectiveChurchId}`
+      }, (payload) => {
         const newMessage = payload.new as ChatMessage;
         
         // Show notification if app is in background or not looking at this chat
@@ -87,18 +105,23 @@ export function ChatProvider({ children }: { children: ReactNode }) {
           });
         }
 
-        queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
-        queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+        queryClient.invalidateQueries({ queryKey: ['chat-messages', effectiveChurchId] });
+        queryClient.invalidateQueries({ queryKey: ['chat-conversations', effectiveChurchId] });
       })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'chat_messages' }, () => {
-        queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'chat_messages',
+        filter: `church_id=eq.${effectiveChurchId}`
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['chat-messages', effectiveChurchId] });
       })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [currentUser, queryClient]);
+  }, [currentUser, queryClient, effectiveChurchId]);
 
   const uploadFile = async (file: File | Blob, path: string): Promise<string> => {
     const fileExt = path.split('.').pop();
@@ -119,9 +142,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
   };
 
   const conversationsQuery = useQuery({
-    queryKey: ['chat-conversations'],
+    queryKey: ['chat-conversations', effectiveChurchId],
     queryFn: async (): Promise<ChatConversation[]> => {
-      if (!currentUser) return [];
+      if (!currentUser || !effectiveChurchId) return [];
       try {
         const { data: participants } = await supabase
           .from('chat_participants')
@@ -145,7 +168,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
         return convs.map(c => ({
           ...c,
-          participants: (c.participants || []).map((p: any) => p.profile).filter(Boolean),
+          participants: (c.participants || [])
+            .map((p: any) => p.profile ? ({
+              id: p.profile.id,
+              name: p.profile.full_name || p.profile.name || 'Membro',
+              avatar_url: p.profile.avatar_url,
+              email: p.profile.email
+            }) : null)
+            .filter(Boolean),
           last_message: c.messages?.sort((a: any, b: any) => 
             new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           )[0],
@@ -190,14 +220,70 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       await supabase.from('chat_conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId);
       return data;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations'] })
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+    }
   });
 
   const startChatMutation = useMutation({
     mutationFn: async (otherUserId: string) => {
-      const { data, error } = await supabase.rpc('get_or_create_chat', { other_user_id: otherUserId });
-      if (error) throw error;
-      return data;
+      const myId = currentUser?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (!myId) throw new Error('Usuário não autenticado.');
+
+      // 1. Tentar RPC primeiro
+      try {
+        const { data, error } = await supabase.rpc('get_or_create_chat', { 
+          other_user_id: otherUserId, 
+          p_church_id: effectiveChurchId || '00000000-0000-0000-0000-000000000000' 
+        });
+        if (!error && data) return data;
+      } catch (rpcErr) {
+        console.warn('RPC get_or_create_chat falhou, usando fallback direto:', rpcErr);
+      }
+
+      // 2. Fallback direto: verificar se já existe conversa privada entre os dois
+      try {
+        const { data: myConvs } = await supabase
+          .from('chat_participants')
+          .select('conversation_id')
+          .eq('profile_id', myId);
+
+        const myConvIds = (myConvs || []).map((c: any) => c.conversation_id);
+
+        if (myConvIds.length > 0) {
+          const { data: existing } = await supabase
+            .from('chat_participants')
+            .select('conversation_id')
+            .in('conversation_id', myConvIds)
+            .eq('profile_id', otherUserId);
+
+          if (existing && existing.length > 0) {
+            return existing[0].conversation_id;
+          }
+        }
+
+        // 3. Criar nova conversa privada diretamente
+        const { data: newConv, error: convErr } = await (supabase.from('chat_conversations') as any)
+          .insert({ type: 'private' })
+          .select()
+          .single();
+
+        if (convErr || !newConv) throw convErr || new Error('Não foi possível criar conversa.');
+
+        // 4. Inserir participantes
+        const participants = [
+          { conversation_id: newConv.id, profile_id: myId, role: 'member' },
+          { conversation_id: newConv.id, profile_id: otherUserId, role: 'member' }
+        ];
+
+        await (supabase.from('chat_participants') as any).insert(participants);
+
+        return newConv.id;
+      } catch (err: any) {
+        console.error('Erro ao criar conversa privada:', err);
+        throw err;
+      }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations'] })
   });
@@ -228,27 +314,62 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
   const createGroupMutation = useMutation({
     mutationFn: async ({ name, userIds }: { name: string, userIds: string[] }) => {
-      const { data: conv, error } = await supabase.from('chat_conversations').insert({ name, type: 'group' }).select().single();
-      if (error) throw error;
-      if (!conv) throw new Error('Não foi possível criar o grupo.');
+      const myId = currentUser?.id || user?.id || (await supabase.auth.getUser()).data.user?.id;
+      if (!myId) throw new Error('Usuário não autenticado.');
 
-      const participants = [...new Set([currentUser!.id, ...userIds])].map(id => ({ 
-        conversation_id: conv.id, 
-        profile_id: id, 
-        role: id === currentUser!.id ? 'admin' : 'member' 
-      }));
-      
-      const { error: partError } = await supabase.from('chat_participants').insert(participants);
-      if (partError) throw partError;
-      
-      return conv.id;
+      // Inserção da conversa do grupo
+      const { data: conv, error: convErr } = await (supabase.from('chat_conversations') as any)
+        .insert({ name: name.trim(), type: 'group' })
+        .select()
+        .single();
+
+      if (convErr || !conv) {
+        console.error('Erro ao criar grupo:', convErr);
+        throw convErr || new Error('Não foi possível criar o grupo.');
+      }
+
+      const convId = conv.id;
+
+      // Inserir criador como admin
+      await (supabase.from('chat_participants') as any).insert({
+        conversation_id: convId,
+        profile_id: myId,
+        role: 'admin'
+      }).catch((e: any) => console.warn('Aviso ao registrar criador:', e));
+
+      // Inserir os outros participantes
+      const otherUserIds = userIds.filter(id => id !== myId);
+      if (otherUserIds.length > 0) {
+        const otherParticipants = otherUserIds.map(id => ({
+          conversation_id: convId,
+          profile_id: id,
+          role: 'member'
+        }));
+
+        const { error: batchErr } = await (supabase.from('chat_participants') as any).insert(otherParticipants);
+        if (batchErr) {
+          console.warn('Inserção em lote falhou, inserindo participantes individualmente:', batchErr);
+          for (const uid of otherUserIds) {
+            await (supabase.from('chat_participants') as any).insert({
+              conversation_id: convId,
+              profile_id: uid,
+              role: 'member'
+            }).catch(() => {});
+          }
+        }
+      }
+
+      return convId;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations'] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+      await queryClient.refetchQueries({ queryKey: ['chat-conversations'] });
+    }
   });
 
   const clearMessagesMutation = useMutation({
     mutationFn: async (conversationId: string) => {
-      const { data, error } = await supabase.from('chat_messages').delete().eq('conversation_id', conversationId).select();
+      const { data, error } = await supabase.from('chat_messages').delete().eq('conversation_id', conversationId).eq('church_id', effectiveChurchId).select();
       if (error) throw error;
       if (!data || data.length === 0) {
         // Pode ser que não houvesse mensagens, o que não é um erro fatal, mas logamos
@@ -256,13 +377,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       }
       return conversationId;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-messages'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-messages', effectiveChurchId] })
   });
 
   const deleteConversationMutation = useMutation({
     mutationFn: async (conversationId: string) => {
       // 1. Delete all messages first
-      const { error: msgError } = await supabase.from('chat_messages').delete().eq('conversation_id', conversationId);
+      const { error: msgError } = await supabase.from('chat_messages').delete().eq('conversation_id', conversationId).eq('church_id', effectiveChurchId);
       if (msgError) console.error("Erro ao apagar mensagens:", msgError);
 
       // 2. Tentar apagar a conversa ANTES dos participantes (para não perder o RLS de admin)
@@ -270,6 +391,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         .from('chat_conversations')
         .delete()
         .eq('id', conversationId)
+        .eq('church_id', effectiveChurchId)
         .select();
         
       if (convError) throw convError;
@@ -293,19 +415,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       return conversationId;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
-      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations', effectiveChurchId] });
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', effectiveChurchId] });
     }
   });
 
   const deleteMessageMutation = useMutation({
     mutationFn: async (messageId: string) => {
-      const { error } = await supabase.from('chat_messages').delete().eq('id', messageId);
+      const { error } = await supabase.from('chat_messages').delete().eq('id', messageId).eq('church_id', effectiveChurchId);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['chat-messages'] });
-      queryClient.invalidateQueries({ queryKey: ['chat-conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', effectiveChurchId] });
+      queryClient.invalidateQueries({ queryKey: ['chat-conversations', effectiveChurchId] });
     }
   });
 
@@ -320,7 +442,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       ];
 
       for (const room of rooms) {
-        const { data: conv, error } = await supabase.from('chat_conversations').insert(room).select().single();
+        const { data: conv, error } = await supabase.from('chat_conversations').insert({ ...room, church_id: effectiveChurchId }).select().single();
         if (error || !conv) continue;
         
         await supabase.from('chat_participants').insert({
@@ -330,16 +452,33 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         });
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations'] })
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat-conversations', effectiveChurchId] })
   });
 
   const searchUsersQuery = useQuery({
-    queryKey: ['chat-users-search'],
+    queryKey: ['chat-users-search', effectiveChurchId, currentUser?.id, user?.id],
     queryFn: async () => {
-      const { data } = await supabase.from('profiles').select('*').limit(20);
-      return (data || []).filter(u => u.id !== currentUser?.id);
+      if (!effectiveChurchId) return [];
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('church_id', effectiveChurchId)
+        .order('full_name', { ascending: true });
+      if (error) {
+        console.error('Erro ao buscar usuários do chat:', error);
+        return [];
+      }
+      const myId = currentUser?.id || user?.id;
+      return (data || [])
+        .filter(u => u.id !== myId)
+        .map(u => ({
+          id: u.id,
+          name: u.full_name || u.name || 'Membro',
+          avatar_url: u.avatar_url,
+          email: u.email
+        }));
     },
-    enabled: !!currentUser,
+    enabled: !!effectiveChurchId,
   });
 
   const requestNotificationPermission = async () => {

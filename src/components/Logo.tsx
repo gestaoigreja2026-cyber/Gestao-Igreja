@@ -15,13 +15,13 @@ interface LogoProps {
   onFile?: (file: File) => void;
 }
 
-// Tamanhos da logo (+30% em relação ao original)
+// Tamanhos da logo reduzidos em 15% proporcionalmente
 const sizeStyles: Record<string, { width: string; height: string }> = {
-  xs: { width: '2.4rem',  height: '2.4rem' },
-  sm: { width: '5.5rem',  height: '5.5rem' },
-  md: { width: '9.6rem',  height: '9.6rem' },
-  lg: { width: '24rem',   height: '24rem' },
-  xl: { width: '38rem',   height: '38rem' },
+  xs: { width: '2.04rem',  height: '2.04rem' },
+  sm: { width: '4.675rem',  height: '4.675rem' },
+  md: { width: '8.16rem',  height: '8.16rem' },
+  lg: { width: '20.4rem',   height: '20.4rem' },
+  xl: { width: '32.3rem',   height: '32.3rem' },
 };
 
 export function Logo({ size = 'md', showText = true, overrideSrc, editable = false, onFile }: LogoProps) {

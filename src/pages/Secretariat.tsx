@@ -933,6 +933,8 @@ function MemberIdCardTemplate({ members, canEdit }: { members: Member[], canEdit
 }
 
 function SavedDocumentsList({ canEdit }: { canEdit: boolean }) {
+    const { churchId, viewingChurch, user } = useAuth();
+    const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
     const [docs, setDocs] = useState<ChurchDocument[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewingDoc, setViewingDoc] = useState<ChurchDocument | null>(null);
@@ -941,12 +943,12 @@ function SavedDocumentsList({ canEdit }: { canEdit: boolean }) {
 
     useEffect(() => {
         loadDocs();
-    }, []);
+    }, [effectiveChurchId]);
 
     async function loadDocs() {
         try {
             setLoading(true);
-            const data = await documentsService.getAll();
+            const data = await documentsService.getAll(effectiveChurchId);
             setDocs(data || []);
         } catch (error) {
             console.error('Error loading docs:', error);

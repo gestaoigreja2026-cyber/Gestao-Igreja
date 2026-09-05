@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useChat } from '@/hooks/useChat';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { ChatWindow } from '@/components/chat/ChatWindow';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Check, Users, Star, Settings, Bell, Moon, Sun } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
 
 export default function Chat() {
   const { 
@@ -39,18 +40,36 @@ export default function Chat() {
     }
   }, [requestNotificationPermission]);
 
-  const activeConversation = conversations.find(c => c.id === activeConversationId);
+  const activeConversation = useMemo(() => {
+    if (!activeConversationId) return null;
+    const found = conversations.find(c => c.id === activeConversationId);
+    if (found) return found;
+    return {
+      id: activeConversationId,
+      name: 'Grupo',
+      type: 'group' as const,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      participants: [],
+      unread_count: 0
+    };
+  }, [conversations, activeConversationId]);
 
   const handleCreateGroup = async () => {
     if (!newGroupName.trim() || selectedUserIds.length === 0) return;
     try {
-      const convId = await createGroup({ name: newGroupName, userIds: selectedUserIds });
-      setActiveConversationId(convId);
-      setShowNewGroupModal(false);
-      setNewGroupName('');
-      setSelectedUserIds([]);
-    } catch (error) {
+      const convId = await createGroup({ name: newGroupName.trim(), userIds: selectedUserIds });
+      if (convId) {
+        setActiveConversationId(convId);
+        setIsSearchingNew(false);
+        setShowNewGroupModal(false);
+        setNewGroupName('');
+        setSelectedUserIds([]);
+        toast.success('Grupo criado com sucesso!');
+      }
+    } catch (error: any) {
       console.error('Error creating group:', error);
+      toast.error('Erro ao criar grupo: ' + (error?.message || 'Tente novamente'));
     }
   };
 

@@ -9,59 +9,83 @@ export const eventsService = {
     /**
      * Get all events
      */
-    async getAll() {
-        const { data, error } = await supabase
+    async getAll(churchId?: string | null) {
+        let query = supabase
             .from('events')
             .select('*')
             .order('date', { ascending: false });
 
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        return data;
+        return data || [];
     },
 
     /**
      * Get upcoming events
      */
-    async getUpcoming() {
+    async getUpcoming(churchId?: string | null) {
         const today = new Date().toISOString().split('T')[0];
 
-        const { data, error } = await supabase
+        let query = supabase
             .from('events')
             .select('*')
             .gte('date', today)
             .order('date', { ascending: true });
 
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        return data;
+        return data || [];
     },
 
     /**
      * Get events by type
      */
-    async getByType(type: Event['type']) {
-        const { data, error } = await supabase
+    async getByType(type: Event['type'], churchId?: string | null) {
+        let query = supabase
             .from('events')
             .select('*')
             .eq('type', type)
             .order('date', { ascending: false });
 
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        return data;
+        return data || [];
     },
 
     /**
      * Get events by date range
      */
-    async getByDateRange(startDate: string, endDate: string) {
-        const { data, error } = await supabase
+    async getByDateRange(startDate: string, endDate: string, churchId?: string | null) {
+        let query = supabase
             .from('events')
             .select('*')
             .gte('date', startDate)
             .lte('date', endDate)
             .order('date', { ascending: true });
 
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        return data;
+        return data || [];
     },
 
     /**

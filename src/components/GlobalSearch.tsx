@@ -51,7 +51,7 @@ export function GlobalSearch() {
     try {
       const [membersRes, eventsRes, cellsRes] = await Promise.all([
         effectiveChurchId ? membersService.getAll(effectiveChurchId) : Promise.resolve([]),
-        eventsService.getAll().catch(() => []),
+        effectiveChurchId ? eventsService.getAll(effectiveChurchId).catch(() => []) : Promise.resolve([]),
         effectiveChurchId ? cellsService.getActive(effectiveChurchId) : Promise.resolve([]),
       ]);
 

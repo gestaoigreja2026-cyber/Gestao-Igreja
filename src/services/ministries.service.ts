@@ -31,8 +31,8 @@ export const ministriesService = {
     /**
      * Get active ministries only
      */
-    async getActive() {
-        const { data, error } = await supabase
+    async getActive(churchId?: string | null) {
+        let query = supabase
             .from('ministries')
             .select(`
         *,
@@ -41,8 +41,14 @@ export const ministriesService = {
             .eq('active', true)
             .order('name');
 
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        return data;
+        return data || [];
     },
 
     /**

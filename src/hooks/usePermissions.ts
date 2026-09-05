@@ -133,6 +133,21 @@ export function usePermissions() {
     return editingRoles.includes(user.role) || user.role === 'lider_ministerio';
   }, [user]);
 
+  const canDownloadReports = useMemo(() => {
+    if (!user) return false;
+    return !['membro', 'congregado', 'aluno'].includes(user.role);
+  }, [user]);
+
+  const canViewFinancialDocs = useMemo(() => {
+    if (!user) return false;
+    return ['superadmin', 'admin', 'pastor', 'pastor_admin', 'secretario', 'tesoureiro'].includes(user.role);
+  }, [user]);
+
+  const canViewMinutesDocs = useMemo(() => {
+    if (!user) return false;
+    return ['superadmin', 'admin', 'pastor', 'pastor_admin', 'secretario'].includes(user.role);
+  }, [user]);
+
   return {
     canEdit,
     canEditSpecific,
@@ -156,5 +171,8 @@ export function usePermissions() {
     canEditAssets,
     canEditSecretariat,
     canEditReports,
+    canDownloadReports,
+    canViewFinancialDocs,
+    canViewMinutesDocs,
   };
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Upload, FileText, Image, File, Trash2, Loader2, Youtube, Plus, Link, type LucideIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,17 +47,26 @@ export default function Uploads() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [youtubeTitle, setYoutubeTitle] = useState('');
   const [isYoutubeDialogOpen, setIsYoutubeDialogOpen] = useState(false);
-  const { user, churchId } = useAuth();
+  const { user, churchId, viewingChurch } = useAuth();
+  const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
   const { toast } = useToast();
-  const { canEditUploads } = usePermissions();
+  const { canEditUploads, canViewFinancialDocs, canViewMinutesDocs } = usePermissions();
   const canManage = canEditUploads;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeCategory, setActiveCategory] = useState('study');
   const [deleteConfirm, setDeleteConfirm] = useState<ChurchDocument | null>(null);
 
+  const availableCategories = useMemo(() => {
+    const list: ('study' | 'financial' | 'minutes' | 'media' | 'videos')[] = ['study'];
+    if (canViewFinancialDocs) list.push('financial');
+    if (canViewMinutesDocs) list.push('minutes');
+    list.push('media', 'videos');
+    return list;
+  }, [canViewFinancialDocs, canViewMinutesDocs]);
+
   useEffect(() => {
     loadFiles();
-  }, []);
+  }, [effectiveChurchId]);
 
   const getYoutubeId = (url: string) => {
     const regExp = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -131,7 +140,7 @@ export default function Uploads() {
   const loadFiles = async () => {
     try {
       setLoading(true);
-      const data = await documentsService.getAll();
+      const data = await documentsService.getAll(effectiveChurchId);
       setFiles(data);
     } catch (error: any) {
       toast({
@@ -236,14 +245,18 @@ export default function Uploads() {
             <FileText className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
             Estudos
           </TabsTrigger>
-          <TabsTrigger value="financial" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
-            <FileText className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
-            Financeiro
-          </TabsTrigger>
-          <TabsTrigger value="minutes" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
-            <File className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
-            Atas
-          </TabsTrigger>
+          {canViewFinancialDocs && (
+            <TabsTrigger value="financial" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
+              <FileText className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
+              Financeiro
+            </TabsTrigger>
+          )}
+          {canViewMinutesDocs && (
+            <TabsTrigger value="minutes" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
+              <File className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
+              Atas
+            </TabsTrigger>
+          )}
           <TabsTrigger value="media" className="py-2 md:py-2.5 gap-1.5 md:gap-2 text-xs md:text-sm md:leading-tight shrink-0 snap-start">
             <Image className="h-4 w-4 md:h-4 md:w-4 shrink-0" />
             Fotos
@@ -254,7 +267,7 @@ export default function Uploads() {
           </TabsTrigger>
         </TabsList>
 
-        {(['study', 'financial', 'minutes', 'media', 'videos'] as const).map((type) => {
+        {availableCategories.map((type) => {
           const Icon = typeIcons[type];
           return (
             <TabsContent key={type} value={type}>

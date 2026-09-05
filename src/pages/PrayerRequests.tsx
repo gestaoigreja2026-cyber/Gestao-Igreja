@@ -33,7 +33,7 @@ export default function PrayerRequests() {
   useDocumentTitle('Solicitações de Oração');
   const { user, churchId, viewingChurch, switchChurch } = useAuth();
   const { toast } = useToast();
-  const { canDeletePrayerRequests } = usePermissions();
+  const { canDeletePrayerRequests, canDownloadReports } = usePermissions();
   const effectiveChurchId = viewingChurch?.id ?? churchId ?? user?.churchId;
   const canEdit = canDeletePrayerRequests;
   const isSuperAdmin = user?.role === 'superadmin';
@@ -238,7 +238,7 @@ export default function PrayerRequests() {
               </p>
             </div>
           </div>
-          <ExcelPrayerMonthlyReportButton requests={requests} />
+          {canDownloadReports && <ExcelPrayerMonthlyReportButton requests={requests} />}
         </div>
       </div>
 

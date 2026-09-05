@@ -44,8 +44,9 @@ create table if not exists public.chat_messages (
 create table if not exists public.chat_starred_messages (
   message_id uuid references public.chat_messages(id) on delete cascade,
   profile_id uuid references public.profiles(id) on delete cascade,
+  church_id uuid references public.churches(id) on delete cascade,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  primary key (message_id, profile_id)
+  primary key (message_id, profile_id, church_id)
 );
 
 -- Enable RLS
@@ -124,19 +125,19 @@ create policy "Participants can delete messages"
 -- POLICIES FOR STARRED MESSAGES
 -- ---------------------------------------------------------
 drop policy if exists "Users can view their stars" on public.chat_starred_messages;
-create policy "Users can view their stars" 
-  on public.chat_starred_messages for select 
-  using (profile_id = auth.uid());
+create policy "Users can view their stars in their church"
+  on public.chat_starred_messages for select
+  using (profile_id = auth.uid() AND church_id = public.get_my_church_id());
 
 drop policy if exists "Users can star messages" on public.chat_starred_messages;
-create policy "Users can star messages" 
-  on public.chat_starred_messages for insert 
-  with check (profile_id = auth.uid());
+create policy "Users can star messages in their church"
+  on public.chat_starred_messages for insert
+  with check (profile_id = auth.uid() AND church_id = public.get_my_church_id());
 
 drop policy if exists "Users can unstar messages" on public.chat_starred_messages;
-create policy "Users can unstar messages" 
-  on public.chat_starred_messages for delete 
-  using (profile_id = auth.uid());
+create policy "Users can unstar messages in their church"
+  on public.chat_starred_messages for delete
+  using (profile_id = auth.uid() AND church_id = public.get_my_church_id());
 
 -- ---------------------------------------------------------
 -- FUNCTIONS & AUTOMATION

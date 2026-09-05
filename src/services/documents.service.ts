@@ -15,25 +15,37 @@ export interface ChurchDocument {
 }
 
 export const documentsService = {
-    async getAll() {
-        const { data, error } = await supabase
+    async getAll(churchId?: string | null) {
+        let query = supabase
             .from('documents')
             .select('*')
             .order('created_at', { ascending: false });
 
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        return data as ChurchDocument[];
+        return (data || []) as ChurchDocument[];
     },
 
-    async getByCategory(category: string) {
-        const { data, error } = await supabase
+    async getByCategory(category: string, churchId?: string | null) {
+        let query = supabase
             .from('documents')
             .select('*')
             .eq('category', category)
             .order('created_at', { ascending: false });
 
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        return data as ChurchDocument[];
+        return (data || []) as ChurchDocument[];
     },
 
     async uploadFile(file: File, category: string, churchId?: string | null, title?: string) {

@@ -38,7 +38,7 @@ export default function Login() {
       {/* Background Image */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/10" />
 
-      <div className="w-full max-w-md relative z-10">
+      <div className="w-full max-w-[493px] relative z-10 scale-[0.85] origin-center">
 
         {/* Card */}
         <Card className="shadow-sm">

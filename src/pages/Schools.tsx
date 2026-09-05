@@ -48,7 +48,7 @@ export default function Schools() {
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string } | null>(null);
   const { toast } = useToast();
   const { user, churchId } = useAuth();
-  const { canEditSchools } = usePermissions();
+  const { canEditSchools, canDownloadReports } = usePermissions();
   const effectiveChurchId = churchId ?? user?.churchId;
 
   const canCreate = canEditSchools;
@@ -215,7 +215,7 @@ export default function Schools() {
           <p className="text-muted-foreground mt-1">Gerencie escolas (Bíblica, Líderes, etc.) e seus alunos.</p>
         </div>
         <div className="flex gap-2">
-          <ExcelSchoolMonthlyReportButton schools={schools} />
+          {canDownloadReports && <ExcelSchoolMonthlyReportButton schools={schools} />}
           {canCreate && (
             <Button onClick={() => setDialogOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />

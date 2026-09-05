@@ -55,8 +55,8 @@ export function ChatWindow({ conversation, onBack, isDarkMode }: ChatWindowProps
     }
   };
 
-  const otherParticipant = conversation.participants[0];
-  const chatName = conversation.name || otherParticipant?.name || 'Chat';
+  const otherParticipant = conversation.participants?.find(p => p.id !== currentUser?.id) || conversation.participants?.[0];
+  const chatName = conversation.name || otherParticipant?.name || 'Conversa';
   const chatAvatar = otherParticipant?.avatar_url || '';
   const initials = chatName.substring(0, 2).toUpperCase();
 

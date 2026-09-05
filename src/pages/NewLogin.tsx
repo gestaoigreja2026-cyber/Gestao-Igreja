@@ -217,7 +217,7 @@ export default function NewLogin() {
                     <rect width="100%" height="100%" fill="url(#brilho)" />
                 </svg>
             </div>
-            <div className="w-full max-w-[360px] relative z-10">
+            <div className="w-full max-w-[396px] relative z-10 scale-[0.85] origin-center">
                 {/* TELA 1: BOAS-VINDAS */}
                 {step === 1 && (
                     <Card className="shadow-[0_0_50px_-12px_rgba(59,130,246,0.15)] border-white/60 bg-white/90 backdrop-blur-2xl rounded-[2rem] overflow-hidden">

@@ -22,7 +22,7 @@ export default function SimpleLogin() {
         <div className="min-h-screen flex items-center justify-center relative px-4 py-12 bg-background">
             {/* Background (removed banner) */}
 
-            <div className="w-full max-w-2xl relative z-10">
+            <div className="w-full max-w-[739px] relative z-10 scale-[0.85] origin-center">
                 <Card className="shadow-2xl border-primary/10 overflow-hidden">
                     <CardContent className="p-8">
                         <div className="text-center mb-10">

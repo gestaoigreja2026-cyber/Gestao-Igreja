@@ -33,10 +33,16 @@ export function ChatSidebar({ conversations, activeConversationId, onSelectConve
   });
 
   const handleStartNewChat = async (userId: string) => {
-    const convId = await startChat(userId);
-    onSelectConversation(convId);
-    setIsSearchingNew(false);
-    setSearchTerm('');
+    try {
+      const convId = await startChat(userId);
+      if (convId) {
+        onSelectConversation(convId);
+        setIsSearchingNew(false);
+        setSearchTerm('');
+      }
+    } catch (err) {
+      console.error('Erro ao iniciar conversa:', err);
+    }
   };
 
   const getConversationDetails = (conv: ChatConversation) => {

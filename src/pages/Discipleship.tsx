@@ -52,7 +52,7 @@ export default function Discipleship() {
     const { user, churchId } = useAuth();
     const effectiveChurchId = churchId ?? user?.churchId;
     const { toast } = useToast();
-    const { canEditDiscipleship } = usePermissions();
+    const { canEditDiscipleship, canDownloadReports } = usePermissions();
     const canEdit = canEditDiscipleship;
 
     useEffect(() => {
@@ -258,7 +258,7 @@ export default function Discipleship() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-2 gap-4">
                 <h2 className="text-xl font-bold shrink-0">Acompanhamento Ativo</h2>
                 <div className="flex w-full sm:w-auto overflow-x-auto gap-2 pb-2 sm:pb-0 scrollbar-hide snap-x [&>*]:shrink-0 [&>*]:snap-start">
-                    <ExcelDiscipleshipMonthlyReportButton />
+                    {canDownloadReports && <ExcelDiscipleshipMonthlyReportButton />}
                     {canEdit && (
                         <Dialog open={isNewDialogOpen} onOpenChange={(open) => { setIsNewDialogOpen(open); if (!open) { setNewMentorId(''); setNewDiscipleId(''); } }}>
                             <DialogTrigger asChild>

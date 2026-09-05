@@ -46,7 +46,7 @@ export default function Ministries() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const { user, churchId } = useAuth();
-  const { canEditMinistries } = usePermissions();
+  const { canEditMinistries, canDownloadReports } = usePermissions();
   const effectiveChurchId = churchId ?? user?.churchId;
   const canCreate = canEditMinistries;
 
@@ -253,7 +253,7 @@ export default function Ministries() {
             </DialogContent>
           </Dialog>
         )}
-          <MinistryMonthlyReportExcel disabled={loading} />
+          {canDownloadReports && <MinistryMonthlyReportExcel disabled={loading} />}
         </div>
       </div>
 

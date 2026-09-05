@@ -74,7 +74,7 @@ export default function Cells() {
 
   const { toast } = useToast();
   const { user, churchId } = useAuth();
-  const { canEditCells } = usePermissions();
+  const { canEditCells, canDownloadReports } = usePermissions();
   const effectiveChurchId = churchId ?? user?.churchId;
 
   const canReport = canEditCells;
@@ -303,7 +303,7 @@ export default function Cells() {
             <p className="font-semibold text-lg">{cells.length} Células Ativas</p>
           </div>
           <div className="flex gap-2">
-            <ExcelCellMonthlyReportButton />
+            {canDownloadReports && <ExcelCellMonthlyReportButton />}
             {isAdmin && (
               <Dialog open={createOpen} onOpenChange={setCreateOpen}>
                 <DialogTrigger asChild>

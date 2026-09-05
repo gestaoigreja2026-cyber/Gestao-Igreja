@@ -32,8 +32,8 @@ export const discipleshipService = {
     /**
      * Get discipleships by status
      */
-    async getByStatus(status: 'em_andamento' | 'concluido' | 'cancelado') {
-        const { data, error } = await supabase
+    async getByStatus(status: 'em_andamento' | 'concluido' | 'cancelado', churchId?: string | null) {
+        let query = supabase
             .from('discipleships')
             .select(`
                 *,
@@ -43,17 +43,29 @@ export const discipleshipService = {
             .eq('status', status)
             .order('created_at', { ascending: false });
 
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
-        return data;
+        return data || [];
     },
 
     /**
      * Get statistics
      */
-    async getStatistics() {
-        const { data, error } = await supabase
+    async getStatistics(churchId?: string | null) {
+        let query = supabase
             .from('discipleships')
             .select('status');
+
+        if (churchId) {
+            query = query.eq('church_id', churchId);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 

@@ -117,12 +117,18 @@ async function update(id: string, data: Partial<CreateFinancialTransactionDTO>) 
   }
 }
 
-async function getSummary(): Promise<FinancialSummary[]> {
-  const { data, error } = await supabase
+async function getSummary(churchId?: string | null): Promise<FinancialSummary[]> {
+  let query = supabase
     .from('financial_summary')
     .select('*')
     .order('month', { ascending: false })
     .limit(12);
+
+  if (churchId) {
+    query = query.eq('church_id', churchId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Erro ao carregar resumo financeiro:', error);
@@ -133,15 +139,21 @@ async function getSummary(): Promise<FinancialSummary[]> {
 }
 
 // Function to get transactions for detailed reporting (e.g. breakdown by category for a period)
-async function getTransactionsForPeriod(monthsBack: number = 6): Promise<Transaction[]> {
+async function getTransactionsForPeriod(monthsBack: number = 6, churchId?: string | null): Promise<Transaction[]> {
   const today = new Date();
   const startDate = new Date(today.getFullYear(), today.getMonth() - monthsBack, 1);
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('financial_transactions')
     .select('*')
     .gte('date', startDate.toISOString().split('T')[0])
     .order('date', { ascending: true });
+
+  if (churchId) {
+    query = query.eq('church_id', churchId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error('Erro ao carregar transações para relatório:', error);
