@@ -197,21 +197,19 @@ export default function NewLogin() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center relative px-4 bg-slate-50 overflow-hidden">
-            {/* EFEITOS DE BRILHO MÁXIMO (Backend Developer Creativity) */}
+        <div className="min-h-screen flex items-center justify-center relative px-4 bg-gradient-to-br from-slate-100 via-blue-50/60 to-indigo-50/50 overflow-hidden">
+            {/* EFEITOS DE BRILHO E TRANSPARÊNCIA GLASSMORPHISM */}
             <div className="absolute inset-0 pointer-events-none overflow-hidden flex items-center justify-center">
-                {/* 1. Glow Central Forte (Brilho no branco) */}
-                <div className="absolute w-[600px] h-[600px] bg-white rounded-full blur-[100px] opacity-100 z-0" />
-                
-                {/* 2. Orbs coloridos sutis para dar vida */}
-                <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-200/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse" />
-                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-200/40 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDelay: '2s' }} />
+                {/* Orbs coloridos para dar profundidade visível à transparência do vidro */}
+                <div className="absolute top-[-5%] left-[-5%] w-[550px] h-[550px] bg-blue-300/30 rounded-full blur-[110px] mix-blend-multiply animate-pulse" />
+                <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-cyan-300/30 rounded-full blur-[120px] mix-blend-multiply animate-pulse" style={{ animationDelay: '2s' }} />
+                <div className="absolute w-[450px] h-[450px] bg-indigo-200/25 rounded-full blur-[90px] mix-blend-multiply" />
 
-                {/* 3. SVG Pattern de pontinhos de brilho */}
-                <svg className="absolute inset-0 w-full h-full opacity-30 z-0" xmlns="http://www.w3.org/2000/svg">
+                {/* SVG Pattern de pontinhos visível através do vidro */}
+                <svg className="absolute inset-0 w-full h-full opacity-35 z-0" xmlns="http://www.w3.org/2000/svg">
                     <defs>
-                        <pattern id="brilho" width="60" height="60" patternUnits="userSpaceOnUse">
-                            <circle cx="3" cy="3" r="1.5" fill="#3b82f6" />
+                        <pattern id="brilho" width="48" height="48" patternUnits="userSpaceOnUse">
+                            <circle cx="2" cy="2" r="1.5" fill="#3b82f6" />
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#brilho)" />
@@ -220,51 +218,52 @@ export default function NewLogin() {
             <div className="w-full max-w-[396px] relative z-10 scale-[0.85] origin-center">
                 {/* TELA 1: BOAS-VINDAS */}
                 {step === 1 && (
-                    <Card className="shadow-[0_0_50px_-12px_rgba(59,130,246,0.15)] border-white/60 bg-white/90 backdrop-blur-2xl rounded-[2rem] overflow-hidden">
-                        <CardContent className="p-4">
-                            <div className="text-center space-y-4">
-                                {/* Logo */}
-                                <div className="flex flex-col items-center justify-center group">
-                                    <Logo size="md" showText={false} />
-                                </div>
-
-                                {/* Banner de Culto - Espaço para imagem dinâmica */}
-                                <div className="relative w-full h-48 bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 group flex items-center justify-center">
-                                    {/* Imagem do Banner */}
-                                    <img 
-                                        src={!tenant ? '/banner-superadmin.jpg' : (tenant.banner_url || '/banner-culto.jpg')} 
-                                        alt="Banner de Culto" 
-                                        className="absolute inset-0 w-full h-full object-cover"
-                                        onError={(e) => {
-                                            // Se falhar o carregamento, tenta fallback
-                                            (e.target as HTMLImageElement).src = '/banner-culto.jpg';
-                                        }}
-                                    />
-                                </div>
-
-                                {/* Nome da igreja */}
-                                {tenant?.name && (
-                                    <h1 className="text-xl font-bold">
-                                        <span className="text-slate-900">{tenant.name}</span>
-                                    </h1>
-                                )}
-
-                                {/* Mensagens de boas-vindas */}
-                                <div className="space-y-0.5">
-                                    <p className="text-lg font-bold text-primary">Seja bem Vindo</p>
-                                    <h2 className="text-sm font-semibold">Acessar sistema</h2>
-                                    <p className="text-[10px] text-muted-foreground mt-1">Entre com seus dados para continuar</p>
-                                </div>
+                    <Card className="shadow-[0_20px_50px_rgba(30,58,138,0.08),0_0_0_1px_rgba(255,255,255,0.7)] border-white/70 bg-white/40 backdrop-blur-2xl rounded-[2rem] overflow-hidden transition-all">
+                        {/* PARTE SUPERIOR (TRANSLÚCIDA / VIDRO) */}
+                        <div className="p-4 pb-3 text-center space-y-4">
+                            {/* Logo */}
+                            <div className="flex flex-col items-center justify-center group">
+                                <Logo size="md" showText={false} />
                             </div>
 
-                            <form onSubmit={handleWelcomeSubmit} className="space-y-2 mt-3">
+                            {/* Banner de Culto - Espaço para imagem dinâmica */}
+                            <div className="relative w-full h-48 bg-slate-100/40 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/60 group flex items-center justify-center">
+                                {/* Imagem do Banner */}
+                                <img 
+                                    src={tenant?.banner_url || '/banner-superadmin.jpg'} 
+                                    alt="Banner de Culto" 
+                                    className="absolute inset-0 w-full h-full object-cover"
+                                    onError={(e) => {
+                                        (e.target as HTMLImageElement).src = '/banner-superadmin.jpg';
+                                    }}
+                                />
+                            </div>
+
+                            {/* Nome da igreja */}
+                            {tenant?.name && (
+                                <h1 className="text-xl font-bold">
+                                    <span className="text-slate-900">{tenant.name}</span>
+                                </h1>
+                            )}
+
+                            {/* Mensagens de boas-vindas */}
+                            <div className="space-y-0.5">
+                                <p className="text-lg font-bold text-primary">Seja bem Vindo</p>
+                                <h2 className="text-sm font-semibold">Acessar sistema</h2>
+                                <p className="text-[10px] text-muted-foreground mt-1">Entre com seus dados para continuar</p>
+                            </div>
+                        </div>
+
+                        {/* PARTE DE BAIXO (BRANCO MAIS SÓLIDO COM CONTRASTE) */}
+                        <div className="bg-white/85 backdrop-blur-xl border-t border-slate-100/90 p-4 pt-3.5 shadow-sm">
+                            <form onSubmit={handleWelcomeSubmit} className="space-y-3">
                                 <div>
                                     <Input
                                         type="text"
                                         placeholder="Seu Nome"
                                         value={formData.fullName}
                                         onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                                        className="h-8 text-xs rounded-full"
+                                        className="h-11 text-sm rounded-2xl bg-[#EEF5FC]/80 backdrop-blur-md border border-[#C8DCF2] focus:border-sky-500 focus:ring-2 focus:ring-sky-400/30 shadow-[0_2px_8px_rgba(59,130,246,0.06)] text-slate-800 transition-all placeholder:text-slate-400 px-4"
                                         required
                                     />
                                 </div>
@@ -274,18 +273,18 @@ export default function NewLogin() {
                                         placeholder="E-mail"
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="h-8 text-xs rounded-full"
+                                        className="h-11 text-sm rounded-2xl bg-[#EEF5FC]/80 backdrop-blur-md border border-[#C8DCF2] focus:border-sky-500 focus:ring-2 focus:ring-sky-400/30 shadow-[0_2px_8px_rgba(59,130,246,0.06)] text-slate-800 transition-all placeholder:text-slate-400 px-4"
                                         required
                                     />
                                 </div>
 
                                 {error && (
-                                    <div className="text-[10px] text-destructive text-center">
+                                    <div className="text-xs text-destructive text-center">
                                         {error}
                                     </div>
                                 )}
 
-                                <Button type="submit" className="w-full h-8 text-xs rounded-full" size="sm">
+                                <Button type="submit" className="w-full h-11 text-sm font-semibold rounded-2xl shadow-md shadow-primary/25 hover:shadow-lg transition-all" size="default">
                                     Próximo
                                 </Button>
                                 
@@ -307,22 +306,24 @@ export default function NewLogin() {
                                     </button>
                                 </div>
                             </form>
-                        </CardContent>
+                        </div>
                     </Card>
                 )}
 
                 {step === 2 && (
-                    <Card className="shadow-[0_0_50px_-12px_rgba(59,130,246,0.15)] border-white/60 bg-white/90 backdrop-blur-2xl rounded-[2rem] overflow-hidden">
-                        <CardContent className="p-4">
-                            <div className="text-center mb-4">
-                                <div className="flex justify-center mb-4">
-                                    <Logo size="md" showText={false} />
-                                </div>
-                                <p className="text-xl font-bold text-primary">Quase lá!</p>
-                                <h2 className="text-base font-semibold">Como você participa?</h2>
-                                <p className="text-xs text-muted-foreground">Escolha seu perfil e informe sua senha</p>
+                    <Card className="shadow-[0_20px_50px_rgba(30,58,138,0.08),0_0_0_1px_rgba(255,255,255,0.7)] border-white/70 bg-white/40 backdrop-blur-2xl rounded-[2rem] overflow-hidden transition-all">
+                        {/* PARTE SUPERIOR (TRANSLÚCIDA / VIDRO) */}
+                        <div className="p-4 pb-3 text-center">
+                            <div className="flex justify-center mb-3">
+                                <Logo size="md" showText={false} />
                             </div>
+                            <p className="text-xl font-bold text-primary">Quase lá!</p>
+                            <h2 className="text-base font-semibold">Como você participa?</h2>
+                            <p className="text-xs text-muted-foreground">Escolha seu perfil e informe sua senha</p>
+                        </div>
 
+                        {/* PARTE DE BAIXO (BRANCO MAIS SÓLIDO COM CONTRASTE) */}
+                        <div className="bg-white/85 backdrop-blur-xl border-t border-slate-100/90 p-4 pt-3.5 shadow-sm">
                             <form onSubmit={handleFinalSubmit} className="space-y-4">
                                 {/* Membro ou Congregado podem se auto-cadastrar */}
                                 <div className="space-y-2">
@@ -337,7 +338,7 @@ export default function NewLogin() {
                                             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold text-sm transition-all border-2 ${
                                                 formData.role === 'membro'
                                                     ? 'bg-primary text-primary-foreground border-primary shadow-md scale-105'
-                                                    : 'bg-white text-muted-foreground border-border hover:border-primary/50'
+                                                    : 'bg-[#EDF3FA]/80 text-muted-foreground border-[#D6E3F2] hover:border-primary/50 hover:bg-white'
                                             }`}
                                         >
                                             <Users size={16} />
@@ -349,7 +350,7 @@ export default function NewLogin() {
                                             className={`flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-semibold text-sm transition-all border-2 ${
                                                 formData.role === 'congregado'
                                                     ? 'bg-primary text-primary-foreground border-primary shadow-md scale-105'
-                                                    : 'bg-white text-muted-foreground border-border hover:border-primary/50'
+                                                    : 'bg-[#EDF3FA]/80 text-muted-foreground border-[#D6E3F2] hover:border-primary/50 hover:bg-white'
                                             }`}
                                         >
                                             <User size={16} />
@@ -371,7 +372,7 @@ export default function NewLogin() {
                                                 onChange={(e) => handlePinChange(index, e.target.value)}
                                                 onKeyDown={(e) => handleKeyDown(index, e)}
                                                 ref={(el) => (pinRefs.current[index] = el)}
-                                                className="h-12 rounded-2xl text-center text-lg font-semibold"
+                                                className="h-12 rounded-2xl text-center text-lg font-semibold bg-[#EDF3FA]/80 border-[#D6E3F2] focus:bg-white focus:border-primary shadow-inner text-slate-800 transition-all"
                                                 required
                                             />
                                         ))}
@@ -387,8 +388,8 @@ export default function NewLogin() {
                                 <div className="flex flex-col gap-3">
                                     <Button
                                         type="submit"
-                                        className="w-full rounded-full"
-                                        size="lg"
+                                        className="w-full h-11 text-sm font-semibold rounded-2xl shadow-md shadow-primary/25 hover:shadow-lg transition-all"
+                                        size="default"
                                         disabled={formData.pin.some(digit => !digit)}
                                     >
                                         Entrar
@@ -402,7 +403,7 @@ export default function NewLogin() {
                                     </button>
                                 </div>
                             </form>
-                        </CardContent>
+                        </div>
                     </Card>
                 )}
             </div>
