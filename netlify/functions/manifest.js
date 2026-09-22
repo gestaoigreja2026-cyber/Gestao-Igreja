@@ -5,7 +5,7 @@
  * Detecta o subdomínio da requisição, busca a igreja no Supabase
  * e retorna um manifest.json personalizado com nome, logo e theme_color.
  */
-exports.handler = async (event) => {
+export const handler = async (event) => {
   try {
     const host = event.headers['host'] || event.headers['x-forwarded-host'] || '';
     const mainDomain = 'church-gest-oficial.com.br';
