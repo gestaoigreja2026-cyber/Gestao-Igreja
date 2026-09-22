@@ -5,21 +5,69 @@ type Member = Database['public']['Tables']['members']['Row'];
 type MemberInsert = Database['public']['Tables']['members']['Insert'];
 type MemberUpdate = Database['public']['Tables']['members']['Update'];
 
+interface CacheEntry<T> {
+    data: T;
+    timestamp: number;
+}
+
+const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+const CACHE_TTL_MS = isTestEnv ? 0 : 60 * 1000; // 60s em produção/dev, 0 em testes
+const allMembersCache = new Map<string, CacheEntry<Member[]>>();
+const inFlightRequests = new Map<string, Promise<Member[]>>();
+
+export function clearMembersCache(churchId?: string) {
+    if (churchId) {
+        allMembersCache.delete(churchId);
+        inFlightRequests.delete(churchId);
+    } else {
+        allMembersCache.clear();
+        inFlightRequests.clear();
+    }
+}
+
 export const membersService = {
     /**
-     * Get all members (filtrado por igreja para multi-tenant)
+     * Get all members (filtrado por igreja para multi-tenant, com cache e deduplicação)
      */
-    async getAll(churchId?: string | null) {
+    async getAll(churchId?: string | null, options?: { forceRefresh?: boolean }) {
         if (!churchId) return [];
-        const { data, error } = await supabase
-            .from('members')
-            .select('*')
-            .eq('church_id', churchId)
-            .not('church_id', 'is', null)
-            .order('name');
 
-        if (error) throw error;
-        return data || [];
+        if (!options?.forceRefresh && CACHE_TTL_MS > 0) {
+            const cached = allMembersCache.get(churchId);
+            if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+                return cached.data;
+            }
+
+            const inFlight = inFlightRequests.get(churchId);
+            if (inFlight) {
+                return inFlight;
+            }
+        }
+
+        const fetchPromise = (async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('members')
+                    .select('*')
+                    .eq('church_id', churchId)
+                    .not('church_id', 'is', null)
+                    .order('name');
+
+                if (error) throw error;
+                const members = data || [];
+                if (CACHE_TTL_MS > 0) {
+                    allMembersCache.set(churchId, { data: members, timestamp: Date.now() });
+                }
+                return members;
+            } finally {
+                inFlightRequests.delete(churchId);
+            }
+        })();
+
+        if (CACHE_TTL_MS > 0) {
+            inFlightRequests.set(churchId, fetchPromise);
+        }
+        return fetchPromise;
     },
 
     /**
@@ -70,6 +118,7 @@ export const membersService = {
             .single();
 
         if (error) throw error;
+        clearMembersCache(churchId);
         return data as Member;
     },
 
@@ -85,6 +134,7 @@ export const membersService = {
             .single();
 
         if (error) throw error;
+        clearMembersCache();
         return data as Member;
     },
 
@@ -98,6 +148,7 @@ export const membersService = {
             .eq('id', id);
 
         if (error) throw error;
+        clearMembersCache();
     },
 
     /**

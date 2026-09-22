@@ -5,24 +5,72 @@ type Event = Database['public']['Tables']['events']['Row'];
 type EventInsert = Database['public']['Tables']['events']['Insert'];
 type EventUpdate = Database['public']['Tables']['events']['Update'];
 
+interface CacheEntry<T> {
+    data: T;
+    timestamp: number;
+}
+
+const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+const CACHE_TTL_MS = isTestEnv ? 0 : 60 * 1000;
+const allEventsCache = new Map<string, CacheEntry<Event[]>>();
+const inFlightEvents = new Map<string, Promise<Event[]>>();
+
+export function clearEventsCache(churchId?: string) {
+    if (churchId) {
+        allEventsCache.delete(churchId);
+        inFlightEvents.delete(churchId);
+    } else {
+        allEventsCache.clear();
+        inFlightEvents.clear();
+    }
+}
+
 export const eventsService = {
     /**
-     * Get all events
+     * Get all events (com cache e deduplicação)
      */
-    async getAll(churchId?: string | null) {
-        let query = supabase
-            .from('events')
-            .select('*')
-            .order('date', { ascending: false });
+    async getAll(churchId?: string | null, options?: { forceRefresh?: boolean }) {
+        const cacheKey = churchId || '__all__';
 
-        if (churchId) {
-            query = query.eq('church_id', churchId);
+        if (!options?.forceRefresh && CACHE_TTL_MS > 0) {
+            const cached = allEventsCache.get(cacheKey);
+            if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+                return cached.data;
+            }
+            const inFlight = inFlightEvents.get(cacheKey);
+            if (inFlight) {
+                return inFlight;
+            }
         }
 
-        const { data, error } = await query;
+        const fetchPromise = (async () => {
+            try {
+                let query = supabase
+                    .from('events')
+                    .select('*')
+                    .order('date', { ascending: false });
 
-        if (error) throw error;
-        return data || [];
+                if (churchId) {
+                    query = query.eq('church_id', churchId);
+                }
+
+                const { data, error } = await query;
+
+                if (error) throw error;
+                const result = (data || []) as Event[];
+                if (CACHE_TTL_MS > 0) {
+                    allEventsCache.set(cacheKey, { data: result, timestamp: Date.now() });
+                }
+                return result;
+            } finally {
+                inFlightEvents.delete(cacheKey);
+            }
+        })();
+
+        if (CACHE_TTL_MS > 0) {
+            inFlightEvents.set(cacheKey, fetchPromise);
+        }
+        return fetchPromise;
     },
 
     /**
@@ -115,6 +163,7 @@ export const eventsService = {
             .single();
 
         if (error) throw error;
+        clearEventsCache(churchId);
         return data;
     },
 
@@ -129,6 +178,7 @@ export const eventsService = {
             .single();
 
         if (error) throw error;
+        clearEventsCache();
         return data;
     },
 
@@ -162,6 +212,7 @@ export const eventsService = {
             .eq('id', id);
 
         if (error) throw error;
+        clearEventsCache();
     },
 
     /**

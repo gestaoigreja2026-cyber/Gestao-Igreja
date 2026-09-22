@@ -5,28 +5,76 @@ type Cell = Database['public']['Tables']['cells']['Row'];
 type CellInsert = Database['public']['Tables']['cells']['Insert'];
 type CellUpdate = Database['public']['Tables']['cells']['Update'];
 
+interface CacheEntry<T> {
+    data: T;
+    timestamp: number;
+}
+
+const isTestEnv = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+const CACHE_TTL_MS = isTestEnv ? 0 : 60 * 1000;
+const allCellsCache = new Map<string, CacheEntry<any[]>>();
+const inFlightCells = new Map<string, Promise<any[]>>();
+
+export function clearCellsCache(churchId?: string) {
+    if (churchId) {
+        allCellsCache.delete(churchId);
+        inFlightCells.delete(churchId);
+    } else {
+        allCellsCache.clear();
+        inFlightCells.clear();
+    }
+}
+
 export const cellsService = {
     /**
-     * Get all cells
+     * Get all cells (com cache e deduplicação)
      */
-    async getAll(churchId?: string | null) {
-        let query = supabase
-            .from('cells')
-            .select(`
-        *,
-        leader:members!cells_leader_id_fkey(id, name, phone, email),
-        host:members!cells_host_id_fkey(id, name, phone, email)
-      `)
-            .order('name');
-        
-        if (churchId) {
-            query = query.eq('church_id', churchId);
+    async getAll(churchId?: string | null, options?: { forceRefresh?: boolean }) {
+        const cacheKey = churchId || '__all__';
+
+        if (!options?.forceRefresh && CACHE_TTL_MS > 0) {
+            const cached = allCellsCache.get(cacheKey);
+            if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+                return cached.data;
+            }
+            const inFlight = inFlightCells.get(cacheKey);
+            if (inFlight) {
+                return inFlight;
+            }
         }
 
-        const { data, error } = await query;
+        const fetchPromise = (async () => {
+            try {
+                let query = supabase
+                    .from('cells')
+                    .select(`
+                *,
+                leader:members!cells_leader_id_fkey(id, name, phone, email),
+                host:members!cells_host_id_fkey(id, name, phone, email)
+              `)
+                    .order('name');
+                
+                if (churchId) {
+                    query = query.eq('church_id', churchId);
+                }
 
-        if (error) throw error;
-        return data;
+                const { data, error } = await query;
+
+                if (error) throw error;
+                const result = data || [];
+                if (CACHE_TTL_MS > 0) {
+                    allCellsCache.set(cacheKey, { data: result, timestamp: Date.now() });
+                }
+                return result;
+            } finally {
+                inFlightCells.delete(cacheKey);
+            }
+        })();
+
+        if (CACHE_TTL_MS > 0) {
+            inFlightCells.set(cacheKey, fetchPromise);
+        }
+        return fetchPromise;
     },
 
     /**
@@ -77,6 +125,7 @@ export const cellsService = {
             .single();
 
         if (error) throw error;
+        clearCellsCache(churchId);
         return data;
     },
 
@@ -91,6 +140,7 @@ export const cellsService = {
             .single();
 
         if (error) throw error;
+        clearCellsCache();
         return data;
     },
 
@@ -104,6 +154,7 @@ export const cellsService = {
             .eq('id', id);
 
         if (error) throw error;
+        clearCellsCache();
     },
 
     /**

@@ -61,7 +61,18 @@ function PageFallback() {
   );
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutos de cache
+      gcTime: 1000 * 60 * 30, // 30 minutos em memória
+      refetchOnWindowFocus: false, // Não refazer fetch ao trocar de aba
+      refetchOnMount: false, // Reutiliza cache se ainda válido
+      refetchOnReconnect: false, // Evita rajada ao reconectar
+      retry: 1, // Limita tentativas em caso de erro
+    },
+  },
+});
 
 import { hasProfileCompleted } from '@/lib/profileCompletion';
 
@@ -188,8 +199,8 @@ function AppRoutes() {
         <Route path="/app" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
         <Route path="/app/:slug" element={isAuthenticated ? <Navigate to={postLoginPath} replace /> : <NewLogin />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/membros" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'superadmin']}><Members /></RoleProtectedRoute>} />
-        <Route path="/consolidacao" element={<RoleProtectedRoute roles={['pastor', 'secretario', 'lider_celula', 'superadmin']}><Consolidacao /></RoleProtectedRoute>} />
+        <Route path="/membros" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'lider_celula', 'lider_ministerio', 'superadmin']}><Members /></RoleProtectedRoute>} />
+        <Route path="/consolidacao" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'lider_celula', 'lider_ministerio', 'superadmin']}><Consolidacao /></RoleProtectedRoute>} />
         <Route path="/celulas" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Cells /></RoleProtectedRoute>} />
         <Route path="/ministerios" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><Ministries /></RoleProtectedRoute>} />
         <Route path="/eventos" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_ministerio', 'aluno', 'congregado', 'superadmin']}><Events /></RoleProtectedRoute>} />

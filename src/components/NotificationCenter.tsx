@@ -57,7 +57,7 @@ export function NotificationCenter() {
             let channel: ReturnType<typeof supabase.channel> | null = null;
             try {
                 channel = supabase
-                    .channel('public:notifications')
+                    .channel(`user-notifications-${user.id}`)
                     .on('postgres_changes', {
                         event: 'INSERT',
                         schema: 'public',

@@ -12,14 +12,30 @@ interface SystemStatus {
 export function SystemStatusBanner() {
   const [status, setStatus] = useState<SystemStatus>({ supabase: true, websocket: true });
   const [dismissed, setDismissed] = useState(false);
-  const [checking, setChecking] = useState(true);
+  const [checking, setChecking] = useState(false);
 
   useEffect(() => {
-    checkSystemStatus();
-    
-    // Verificar a cada 30 segundos
-    const interval = setInterval(checkSystemStatus, 30000);
-    return () => clearInterval(interval);
+    // Se o navegador já estiver offline nativamente, alerta imediatamente
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
+      setStatus({ supabase: false, websocket: false });
+    }
+
+    const handleOnline = () => {
+      // Quando a internet volta, valida conexão uma única vez
+      checkSystemStatus();
+    };
+
+    const handleOffline = () => {
+      setStatus({ supabase: false, websocket: false });
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   async function checkSystemStatus() {
