@@ -15,7 +15,7 @@ import { trialService } from '@/services/trial.service';
 import { DEFAULT_CHURCH_NAME } from '@/lib/constants';
 import { compressImageFile, STORAGE_CACHE_CONTROL } from '@/utils/imageCompression';
 
-const DEFAULT_LOGO = '/logo-app.png?v=2';
+const DEFAULT_LOGO = '/logo-app.png?v=212';
 
 export default function Institutional() {
   useDocumentTitle('Página Institucional');

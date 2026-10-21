@@ -70,6 +70,17 @@
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
 }
 
+/*
+  🌙 Adaptação de Logos em Temas Escuros (Multitenant):
+  Logos escuras e a logo padrão são convertidas em branco suave para visibilidade máxima
+*/
+.dark .church-logo:not(.keep-colors),
+.dark img[src*="logo-app"]:not(.keep-colors) {
+  filter: brightness(0) invert(1);
+  opacity: 0.95;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
 
 /*
   🎨 Sistema de Temas Premium - Gestão Igreja

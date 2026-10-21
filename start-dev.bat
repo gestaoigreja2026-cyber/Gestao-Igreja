@@ -15,9 +15,6 @@ if errorlevel 1 (
   exit /b 1
 )
 
-echo Copiando logo para public (se existir no Cursor)...
-node copy-logo.js 2>nul
-echo.
 echo Iniciando servidor...
 echo Abra no navegador: http://localhost:5173
 echo.
