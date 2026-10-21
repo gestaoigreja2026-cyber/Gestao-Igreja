@@ -7,7 +7,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { ChatProvider } from "@/hooks/useChat";
 import NewLogin from "./pages/NewLogin";
 import CadastroIgrejaTrial from "./pages/CadastroIgrejaTrial";
 import Landing from "./pages/Landing";
@@ -51,7 +50,6 @@ const Discipleship = lazy(() => import("./pages/Discipleship"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Artigo = lazy(() => import("./pages/Artigo"));
 const Consolidacao = lazy(() => import("./pages/Consolidacao"));
-const Chat = lazy(() => import("./pages/Chat"));
 const PublicMemberRegistration = lazy(() => import("./pages/PublicMemberRegistration"));
 
 function PageFallback() {
@@ -218,7 +216,6 @@ function AppRoutes() {
         <Route path="/superadmin" element={<RoleProtectedRoute roles={['superadmin']}><SuperAdmin /></RoleProtectedRoute>} />
         <Route path="/rede" element={<RoleProtectedRoute roles={['pastor_admin', 'superadmin']}><ChurchNetwork /></RoleProtectedRoute>} />
         <Route path="/acessos" element={<RoleProtectedRoute roles={['admin', 'pastor', 'superadmin', 'pastor_admin']}><LeadershipAccess /></RoleProtectedRoute>} />
-        <Route path="/chat" element={<RoleProtectedRoute roles={['admin', 'pastor', 'pastor_admin', 'secretario', 'membro', 'lider_celula', 'lider_ministerio', 'aluno', 'congregado', 'tesoureiro', 'superadmin', 'diretor_patrimonio']}><ChatProvider><Chat /></ChatProvider></RoleProtectedRoute>} />
         <Route path="/confirmar/:id" element={<ConfirmScale />} />
         <Route path="/cadastro-membro/:slug" element={<Suspense fallback={<PageFallback />}><PublicMemberRegistration /></Suspense>} />
         <Route path="/ficha-membro/:slug" element={<Suspense fallback={<PageFallback />}><PublicMemberRegistration /></Suspense>} />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Church, User, Mail, CreditCard, ArrowRight, Loader2, CheckCircle2, ShieldCheck, Globe, AlertCircle, Zap, Star, Crown, Building2, Check, Lock, Eye, EyeOff } from 'lucide-react';
+import { Church, User, Mail, CreditCard, ArrowRight, Loader2, CheckCircle2, ShieldCheck, Globe, AlertCircle, Zap, Star, Crown, Building2, Check, Lock, Eye, EyeOff, Gift } from 'lucide-react';
 import { 
     Dialog, 
     DialogContent, 
@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/Logo';
 import { supabase } from '@/lib/supabaseClient';
 import { cn } from '@/lib/utils';
+import { usePromoStatus, PROMO_MAX_CHURCHES, PROMO_MAX_MEMBERS } from '@/hooks/useSubscriptionPlan';
 
 const PLAN_FEATURES = [
   'Gestão completa de membros',
@@ -31,10 +32,26 @@ const PLAN_FEATURES = [
 
 const PLANS = [
   {
+    id: 'trial',
+    icon: Gift,
+    name: 'Trial',
+    memberRange: 'Até 30 membros',
+    price: 0,
+    color: 'from-teal-500 to-cyan-600',
+    borderSelected: 'border-teal-500 ring-2 ring-teal-500/30',
+    borderDefault: 'border-border',
+    textColor: 'text-teal-600',
+    bgSelected: 'bg-teal-50 dark:bg-teal-950/30',
+    features: [
+      'Até 30 membros ativos',
+      ...PLAN_FEATURES,
+    ],
+  },
+  {
     id: 'super-oferta',
     icon: CreditCard,
-    name: 'Super Oferta Limitada',
-    memberRange: '1º ano 12x R$ 150 • 2º ano 12x R$ 125 • 3º ano+ 12x R$ 100 (Cartão)',
+    name: 'Super Oferta (20 Igrejas)',
+    memberRange: `Até ${PROMO_MAX_MEMBERS} membros • Limitado a ${PROMO_MAX_CHURCHES} igrejas`,
     price: 150,
     color: 'from-amber-500 via-orange-500 to-rose-600',
     borderSelected: 'border-amber-500 ring-2 ring-amber-500/30',
@@ -42,13 +59,14 @@ const PLANS = [
     textColor: 'text-amber-600 dark:text-amber-400',
     bgSelected: 'bg-amber-50 dark:bg-amber-950/30',
     features: [
+      `Até ${PROMO_MAX_MEMBERS} membros (exclusivo para as primeiras ${PROMO_MAX_CHURCHES} igrejas)`,
       '1º Ano: 12x de R$ 150 no Cartão de Crédito',
       '2º Ano: 12x de R$ 125 no Cartão de Crédito',
       '3º Ano em diante: 12x de R$ 100 no Cartão de Crédito',
       ...PLAN_FEATURES,
     ],
     popular: true,
-    badgeLabel: '🔥 Super Oferta',
+    badgeLabel: `🔥 Até ${PROMO_MAX_MEMBERS} membros (20 igrejas)`,
   },
   {
     id: 'starter',
@@ -67,7 +85,7 @@ const PLANS = [
     id: 'growth',
     icon: Star,
     name: 'Growth',
-    memberRange: '100 a 500 membros',
+    memberRange: 'Até 500 membros',
     price: 299,
     color: 'from-blue-500 to-indigo-600',
     borderSelected: 'border-blue-500 ring-2 ring-blue-500/30',
@@ -80,7 +98,7 @@ const PLANS = [
     id: 'professional',
     icon: Crown,
     name: 'Professional',
-    memberRange: '500 a 2.000 membros',
+    memberRange: 'Até 2.000 membros',
     price: 499,
     color: 'from-purple-500 to-violet-600',
     borderSelected: 'border-purple-500 ring-2 ring-purple-500/30',
@@ -93,7 +111,7 @@ const PLANS = [
     id: 'enterprise',
     icon: Building2,
     name: 'Enterprise',
-    memberRange: 'Mais de 2.000 membros',
+    memberRange: 'Até 99.999 membros',
     price: 1200,
     color: 'from-orange-500 to-red-600',
     borderSelected: 'border-orange-500 ring-2 ring-orange-500/30',
@@ -110,13 +128,27 @@ export default function Checkout() {
     const { toast } = useToast();
     const [loading, setLoading] = useState(false);
     const [showFallback, setShowFallback] = useState(false);
+    const { isPromoActive, remainingSpots } = usePromoStatus();
 
-    // Seleciona plano da URL ou Super Oferta por padrão
-    const planFromUrl = searchParams.get('plan') || 'super-oferta';
+    // Enquanto < 20 igrejas: ativos apenas Trial (até 30 membros) e Promoção 20 Igrejas (até 300 membros).
+    // Quando bater 20 igrejas: volta ao normal (Trial 30, Starter 100, Growth 500, Professional 2000, Enterprise 99999).
+    const availablePlans = isPromoActive
+        ? PLANS.filter(p => p.id === 'trial' || p.id === 'super-oferta')
+        : PLANS.filter(p => p.id !== 'super-oferta');
+
+    const defaultPlanId = isPromoActive ? 'super-oferta' : 'starter';
+    const planFromUrl = searchParams.get('plan') || defaultPlanId;
     const [selectedPlanId, setSelectedPlanId] = useState(
-        PLANS.find(p => p.id === planFromUrl) ? planFromUrl : 'super-oferta'
+        availablePlans.find(p => p.id === planFromUrl) ? planFromUrl : defaultPlanId
     );
-    const selectedPlan = PLANS.find(p => p.id === selectedPlanId) || PLANS[0];
+
+    useEffect(() => {
+        if (!isPromoActive && selectedPlanId === 'super-oferta') {
+            setSelectedPlanId('starter');
+        }
+    }, [isPromoActive, selectedPlanId]);
+
+    const selectedPlan = availablePlans.find(p => p.id === selectedPlanId) || availablePlans[0];
 
     const [formData, setFormData] = useState({
         churchName: '',
@@ -185,7 +217,7 @@ export default function Checkout() {
                 body: { 
                     action: 'init_checkout', 
                     ...formData,
-                    subscription_plan: selectedPlanId === 'super-oferta' ? 'starter' : selectedPlanId,
+                    subscription_plan: selectedPlanId === 'super-oferta' ? 'promo' : selectedPlanId,
                     plan_amount: selectedPlan.price,
                 }
             });
@@ -280,16 +312,26 @@ export default function Checkout() {
                 {/* Seleção de Planos */}
                 <div>
                     <h2 className="text-2xl font-black text-center mb-2">Escolha seu Plano</h2>
-                    <p className="text-muted-foreground text-center text-sm mb-6">Selecione conforme o número de membros da sua igreja</p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pb-4">
-                        {PLANS.map(plan => {
+                    <p className="text-muted-foreground text-center text-sm mb-6">
+                        {isPromoActive
+                            ? `🔥 Promoção exclusiva para as primeiras ${PROMO_MAX_CHURCHES} igrejas (até ${PROMO_MAX_MEMBERS} membros) — Restam ${remainingSpots} vagas!`
+                            : 'Selecione conforme o número de membros da sua igreja'}
+                    </p>
+                    <div className={cn('grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4', isPromoActive ? 'max-w-2xl mx-auto' : 'lg:grid-cols-5')}>
+                        {availablePlans.map(plan => {
                             const Icon = plan.icon;
                             const isSelected = selectedPlanId === plan.id;
                             return (
                                 <button
                                     key={plan.id}
                                     type="button"
-                                    onClick={() => setSelectedPlanId(plan.id)}
+                                    onClick={() => {
+                                        if (plan.id === 'trial') {
+                                            navigate('/cadastro-igreja-trial');
+                                            return;
+                                        }
+                                        setSelectedPlanId(plan.id);
+                                    }}
                                     className={cn(
                                         'relative rounded-2xl border-2 p-5 text-left transition-all hover:shadow-md w-full',
                                         isSelected ? `${plan.borderSelected} ${plan.bgSelected}` : `${plan.borderDefault} bg-background hover:border-muted-foreground/30`
@@ -308,8 +350,14 @@ export default function Checkout() {
                                     </p>
                                     <p className="text-[10px] text-muted-foreground mt-0.5">{plan.memberRange}</p>
                                     <p className={cn('text-lg font-black mt-1', isSelected ? 'text-foreground' : 'text-foreground/70')}>
-                                        R$ {plan.price.toLocaleString('pt-BR')}
-                                        <span className="text-xs font-normal text-muted-foreground">/mês</span>
+                                        {plan.price === 0 ? (
+                                            'Grátis'
+                                        ) : (
+                                            <>
+                                                R$ {plan.price.toLocaleString('pt-BR')}
+                                                <span className="text-xs font-normal text-muted-foreground">/mês</span>
+                                            </>
+                                        )}
                                     </p>
                                     {isSelected && (
                                         <div className="absolute top-2 right-2">

@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import NewLogin from '../pages/NewLogin';
 
@@ -61,7 +62,6 @@ vi.mock('@/hooks/useDocumentTitle', () => ({
   useDocumentTitle: () => {},
 }));
 
-
 beforeEach(() => {
   loginMock.mockReset();
   loginMock.mockResolvedValue(true);
@@ -69,7 +69,11 @@ beforeEach(() => {
 
 describe('NewLogin', () => {
   it('deve enviar o role membro ao entrar', async () => {
-    render(<NewLogin />);
+    render(
+      <MemoryRouter>
+        <NewLogin />
+      </MemoryRouter>
+    );
 
     fireEvent.change(screen.getByPlaceholderText('Seu Nome'), {
       target: { value: 'João' },

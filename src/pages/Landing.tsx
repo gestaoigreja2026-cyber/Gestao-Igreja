@@ -14,6 +14,7 @@ import { APP_NAME } from '@/lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AIAssistant } from '@/components/AIAssistant';
 import { InstallPrompt, InstallHeroButton } from '@/components/InstallPrompt';
+import { usePromoStatus, PROMO_MAX_CHURCHES, PROMO_MAX_MEMBERS } from '@/hooks/useSubscriptionPlan';
 
 const formatTime = (time: number) => {
   const minutes = Math.floor(time / 60);
@@ -58,7 +59,24 @@ const PLAN_FEATURES = [
   'Cancele quando quiser',
 ];
 
+const trialPlan = {
+  id: 'trial',
+  icon: Gift,
+  name: 'Trial',
+  memberRange: 'Até 30 membros',
+  price: 0,
+  description: 'Período de avaliação gratuita para conhecer a plataforma com até 30 membros.',
+  color: 'from-teal-500 to-cyan-600',
+  textColor: 'text-teal-600',
+  borderColor: 'border-teal-200 dark:border-teal-800',
+  bgColor: 'bg-teal-50 dark:bg-teal-950/30',
+  featured: false,
+  features: PLAN_FEATURES,
+  href: '/cadastro-igreja-trial',
+};
+
 const plans = [
+  trialPlan,
   {
     id: 'starter',
     icon: Zap,
@@ -77,7 +95,7 @@ const plans = [
     id: 'growth',
     icon: Star,
     name: 'Growth',
-    memberRange: '100 a 500 membros',
+    memberRange: 'Até 500 membros',
     price: 299,
     description: 'Para igrejas em expansão que precisam de mais recursos e controle sobre sua congregação.',
     color: 'from-blue-500 to-indigo-600',
@@ -91,7 +109,7 @@ const plans = [
     id: 'professional',
     icon: Crown,
     name: 'Professional',
-    memberRange: '500 a 2.000 membros',
+    memberRange: 'Até 2.000 membros',
     price: 499,
     description: 'Solução completa para igrejas consolidadas com gestão avançada e análise de dados.',
     color: 'from-purple-500 to-violet-600',
@@ -105,7 +123,7 @@ const plans = [
     id: 'enterprise',
     icon: Building2,
     name: 'Enterprise',
-    memberRange: 'Mais de 2.000 membros',
+    memberRange: 'Até 99.999 membros',
     price: 1200,
     description: 'Para grandes igrejas e redes com múltiplos campus e gestão centralizada.',
     color: 'from-orange-500 to-red-600',
@@ -117,7 +135,7 @@ const plans = [
   }
 ];
 
-const SuperOfferBanner = ({ timeLeft, id }: { timeLeft: number; id?: string }) => (
+const SuperOfferBanner = ({ timeLeft, remainingSpots, id }: { timeLeft: number; remainingSpots: number; id?: string }) => (
   <motion.div
     id={id}
     initial={{ opacity: 0, y: 24 }}
@@ -131,10 +149,13 @@ const SuperOfferBanner = ({ timeLeft, id }: { timeLeft: number; id?: string }) =
       <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-rose-500/20 blur-[90px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center text-center space-y-6">
-        {/* Topo: Badge + Cronômetro */}
+        {/* Topo: Badge + Vagas + Cronômetro */}
         <div className="flex flex-wrap items-center justify-center gap-3">
           <span className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-400 to-orange-500 text-slate-950 text-xs sm:text-sm font-black px-4 py-1.5 rounded-full uppercase tracking-wider shadow-lg">
-            🔥 Super Oferta por Tempo Limitado
+            🔥 Promoção Limitada: {PROMO_MAX_CHURCHES} Igrejas de até {PROMO_MAX_MEMBERS} Membros
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500/20 border border-emerald-400/40 rounded-full text-emerald-300 text-xs sm:text-sm font-black">
+            🎯 Restam {remainingSpots} de {PROMO_MAX_CHURCHES} vagas
           </span>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 border border-white/15 rounded-full text-amber-300 font-mono text-sm sm:text-base font-bold">
             <span>⏱️ Expira em:</span>
@@ -144,13 +165,13 @@ const SuperOfferBanner = ({ timeLeft, id }: { timeLeft: number; id?: string }) =
 
         <div className="space-y-2 max-w-2xl">
           <h3 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
-            Quanto mais tempo sua igreja fica,{' '}
+            Até {PROMO_MAX_MEMBERS} membros:{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-orange-400">
-              menos você paga!
+              quanto mais tempo fica, menos paga!
             </span>
           </h3>
           <p className="text-slate-300 text-sm sm:text-base font-medium">
-            Condição especial e progressiva exclusiva para assinatura no <strong>Cartão de Crédito</strong>:
+            Lote promocional exclusivo para as primeiras <strong>{PROMO_MAX_CHURCHES} igrejas (até {PROMO_MAX_MEMBERS} membros)</strong> no <strong>Cartão de Crédito</strong>:
           </p>
         </div>
 
@@ -213,6 +234,16 @@ const SuperOfferBanner = ({ timeLeft, id }: { timeLeft: number; id?: string }) =
               <ArrowRight className="h-6 w-6" />
             </Button>
           </Link>
+          <Link to="/cadastro-igreja-trial" className="w-full">
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full h-12 rounded-2xl font-bold text-sm sm:text-base gap-2 border-white/25 bg-white/5 hover:bg-white/15 text-white"
+            >
+              <Gift className="h-4 w-4 text-teal-300" />
+              Testar no Plano Trial (Até 30 membros)
+            </Button>
+          </Link>
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-slate-300">
             <span className="flex items-center gap-1.5">
               <Check className="h-4 w-4 text-emerald-400" /> Pagamento seguro no Cartão de Crédito
@@ -231,6 +262,8 @@ export default function Landing() {
   useDocumentTitle(APP_NAME);
   const { isAuthenticated } = useAuth();
   const [timeLeft, setTimeLeft] = useState(900);
+  const { isPromoActive, remainingSpots } = usePromoStatus();
+  const defaultCheckoutUrl = isPromoActive ? '/checkout?plan=super-oferta' : '/checkout?plan=starter';
 
   useEffect(() => {
     const timer = setInterval(() => setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0)), 1000);
@@ -260,7 +293,7 @@ export default function Landing() {
                 {isAuthenticated ? "Meu Painel" : "Entrar"}
               </Button>
             </Link>
-            <Link to="/checkout?plan=super-oferta">
+            <Link to={defaultCheckoutUrl}>
               <Button size="sm" className="rounded-full px-3 sm:px-6 font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 text-xs sm:text-sm">
                 <span className="hidden min-[480px]:inline">ASSINE AGORA</span>
                 <span className="min-[480px]:hidden">ASSINAR</span>
@@ -293,9 +326,9 @@ export default function Landing() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-              <Link to="/checkout?plan=super-oferta">
+              <Link to={defaultCheckoutUrl}>
                 <Button size="lg" className="h-16 px-10 rounded-2xl font-black text-xl bg-primary shadow-2xl shadow-primary/30 hover:scale-105 transition-transform">
-                  APROVEITAR SUPER OFERTA
+                  {isPromoActive ? 'APROVEITAR SUPER OFERTA' : 'ESCOLHER MEU PLANO'}
                 </Button>
               </Link>
               <InstallHeroButton />
@@ -311,8 +344,8 @@ export default function Landing() {
               </div>
             </div>
 
-            {/* Super Oferta por Tempo Limitado em Destaque logo na Entrada */}
-            <SuperOfferBanner timeLeft={timeLeft} id="super-oferta" />
+            {/* Super Oferta por Tempo Limitado em Destaque logo na Entrada (apenas enquanto < 20 igrejas) */}
+            {isPromoActive && <SuperOfferBanner timeLeft={timeLeft} remainingSpots={remainingSpots} id="super-oferta" />}
           </motion.div>
         </div>
         
@@ -369,15 +402,18 @@ export default function Landing() {
               <span className="text-primary">Sua Igreja</span>
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Aproveite a Super Oferta por Tempo Limitado no Cartão de Crédito ou escolha um plano por porte da congregação.
+              {isPromoActive
+                ? `Promoção exclusiva para as primeiras ${PROMO_MAX_CHURCHES} igrejas (até ${PROMO_MAX_MEMBERS} membros) ou comece no Plano Trial (até 30 membros).`
+                : 'Escolha o plano ideal conforme o número de membros da sua congregação.'}
             </p>
           </div>
 
-          <SuperOfferBanner timeLeft={timeLeft} />
+          {isPromoActive && <SuperOfferBanner timeLeft={timeLeft} remainingSpots={remainingSpots} />}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-            {plans.map((plan, idx) => {
+          <div className={`grid grid-cols-1 gap-6 ${isPromoActive ? 'max-w-md mx-auto' : 'md:grid-cols-2 xl:grid-cols-5'}`}>
+            {(isPromoActive ? [trialPlan] : plans).map((plan, idx) => {
               const Icon = plan.icon;
+              const targetUrl = (plan as any).href || `/checkout?plan=${plan.id}`;
               return (
                 <motion.div
                   key={plan.id}
@@ -410,9 +446,11 @@ export default function Landing() {
                     </p>
                     <div className="flex items-baseline gap-1">
                       <span className={`text-4xl font-black ${plan.featured ? 'text-white' : 'text-foreground'}`}>
-                        R$ {plan.price.toLocaleString('pt-BR')}
+                        {plan.price === 0 ? 'Grátis' : `R$ ${plan.price.toLocaleString('pt-BR')}`}
                       </span>
-                      <span className={`text-sm font-medium ${plan.featured ? 'text-blue-200' : 'text-muted-foreground'}`}>/mês</span>
+                      {plan.price > 0 && (
+                        <span className={`text-sm font-medium ${plan.featured ? 'text-blue-200' : 'text-muted-foreground'}`}>/mês</span>
+                      )}
                     </div>
                     <p className={`text-xs mt-2 leading-relaxed ${plan.featured ? 'text-blue-100' : 'text-muted-foreground'}`}>
                       {plan.description}
@@ -428,7 +466,7 @@ export default function Landing() {
                     ))}
                   </ul>
 
-                  <Link to={`/checkout?plan=${plan.id}`} className="mt-auto">
+                  <Link to={targetUrl} className="mt-auto">
                     <Button
                       className={`w-full font-bold rounded-xl py-5 gap-2 ${
                         plan.featured
@@ -436,7 +474,7 @@ export default function Landing() {
                           : `bg-gradient-to-r ${plan.color} text-white hover:opacity-90 shadow-lg`
                       }`}
                     >
-                      Assinar Plano {plan.name}
+                      {plan.id === 'trial' ? 'Começar Plano Trial (Até 30 membros)' : `Assinar Plano ${plan.name}`}
                       <ArrowRight className="h-4 w-4" />
                     </Button>
                   </Link>
