@@ -50,7 +50,8 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { assetsService, saveLocalAssetPhoto } from '@/services/assets.service';
+import { assetsService, isEmbeddedPhoto } from '@/services/assets.service';
+import { AssetPhoto, resolveAssetPhotoUrl } from '@/components/AssetPhoto';
 import { Asset, AssetSource, AssetStatus } from '@/types';
 import { format } from 'date-fns';
 import { AssetMaintenanceModal } from '@/components/AssetMaintenanceModal';
@@ -114,11 +115,7 @@ export default function Assets() {
     const [driveEmail, setDriveEmail] = useState<string | null>(null);
     const [driveLoading, setDriveLoading] = useState(false);
     const [connectingDrive, setConnectingDrive] = useState(false);
-    const [localFolderName, setLocalFolderName] = useState<string | null>(() => {
-        if (typeof window === 'undefined') return null;
-        return localStorage.getItem('ecclesia_patrimonio_local_folder_name');
-    });
-    const localDirHandleRef = useRef<any>(null);
+    const [migrationProgress, setMigrationProgress] = useState<{ done: number; total: number } | null>(null);
 
     // Visualizador de Foto do Patrimônio
     const [previewPhoto, setPreviewPhoto] = useState<{
@@ -196,22 +193,44 @@ export default function Assets() {
         }
     };
 
-    const handleSelectLocalFolder = async () => {
-        try {
-            if ('showDirectoryPicker' in window) {
-                const dirHandle = await (window as any).showDirectoryPicker({ mode: 'readwrite' });
-                localDirHandleRef.current = dirHandle;
-                setLocalFolderName(dirHandle.name);
-                localStorage.setItem('ecclesia_patrimonio_local_folder_name', dirHandle.name);
-                toast.success(`Pasta local "${dirHandle.name}" vinculada como Drive Local de Patrimônio!`);
-            } else {
-                toast.info('As fotos estão sendo salvas automaticamente no Drive Local deste dispositivo.');
+    // Retorno do fluxo OAuth do Google (?googleDrive=connected|error)
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const result = params.get('googleDrive');
+        if (!result) return;
+        if (result === 'connected') {
+            toast.success('Google Drive da igreja conectado! As fotos do patrimônio serão salvas nele.');
+            if (effectiveChurchId) {
+                googleDriveService.getStatus(effectiveChurchId).then((st) => setDriveEmail(st.email)).catch(() => {});
             }
-        } catch (err: any) {
-            if (err?.name !== 'AbortError') {
-                toast.error('Não foi possível selecionar a pasta local.');
-            }
+        } else {
+            toast.error(params.get('message') || 'Não foi possível conectar o Google Drive.');
         }
+        params.delete('googleDrive');
+        params.delete('message');
+        const query = params.toString();
+        window.history.replaceState(window.history.state, '', `${window.location.pathname}${query ? `?${query}` : ''}`);
+    }, [effectiveChurchId]);
+
+    /** Envia uma foto ao Google Drive da igreja e devolve o identificador `gdrive:<id>`. */
+    const uploadPhotoToDrive = async (file: File | Blob, assetName: string): Promise<string> => {
+        if (!effectiveChurchId) throw new Error('Igreja não identificada.');
+        const safeName = (assetName || 'patrimonio')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-zA-Z0-9_-]+/g, '_')
+            .slice(0, 60);
+        const type = file.type || 'image/jpeg';
+        const ext = type.includes('png') ? 'png' : type.includes('webp') ? 'webp' : 'jpg';
+        const named = new File([file], `patrimonio_${safeName}_${Date.now()}.${ext}`, { type });
+        return googleDriveService.upload(effectiveChurchId, named);
+    };
+
+    const deleteDrivePhoto = (url?: string | null) => {
+        if (!url || !effectiveChurchId || !googleDriveService.isDriveReceipt(url)) return;
+        googleDriveService.deleteFile(effectiveChurchId, url).catch(() => {
+            // arquivo pode já ter sido removido manualmente no Drive
+        });
     };
 
     const { data: assets = [], isLoading } = useQuery({
@@ -362,17 +381,17 @@ export default function Assets() {
         setOpenMaintenanceAfterSave(false);
         setIsModalOpen(true);
 
-        if (asset.photoUrl && googleDriveService.isDriveReceipt(asset.photoUrl) && effectiveChurchId) {
+        if (asset.photoUrl && googleDriveService.isDriveReceipt(asset.photoUrl)) {
+            setPhotoPreviewUrl('');
             try {
-                const prev = await googleDriveService.createPreviewUrl(effectiveChurchId, asset.photoUrl);
-                setPhotoPreviewUrl(prev.url);
+                setPhotoPreviewUrl(await resolveAssetPhotoUrl(effectiveChurchId, asset.photoUrl));
             } catch {
                 // ignora falha de preview remoto
             }
         }
     };
 
-    // Seleção e compressão de foto para o Drive Local da Igreja
+    // Seleção e compressão da foto (o envio ao Google Drive da igreja acontece ao salvar)
     const handlePhotoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -380,35 +399,19 @@ export default function Assets() {
         try {
             setUploadingPhoto(true);
             const optimized = await compressImageFile(file, {
-                maxWidth: 960,
-                maxHeight: 960,
-                quality: 0.78,
+                maxWidth: 1280,
+                maxHeight: 1280,
+                quality: 0.8,
             });
+            if (optimized.size > 5 * 1024 * 1024) {
+                throw new Error('A foto ficou maior que 5 MB mesmo após a otimização. Escolha outra imagem.');
+            }
             const dataUrl = await fileToDataUrl(optimized);
             setPhotoPreviewUrl(dataUrl);
-            setPhotoUrl(dataUrl);
-            setPhotoFile(optimized instanceof File ? optimized : file);
-
-            // Se o usuário vinculou uma pasta física do computador (File System Access API), salva cópia lá também!
-            if (localDirHandleRef.current) {
-                try {
-                    const safeName = (name || 'patrimonio')
-                        .normalize('NFD')
-                        .replace(/[\u0300-\u036f]/g, '')
-                        .replace(/[^a-zA-Z0-9_-]+/g, '_');
-                    const fileHandle = await localDirHandleRef.current.getFileHandle(
-                        `${safeName}_${Date.now()}.jpg`,
-                        { create: true }
-                    );
-                    const writable = await fileHandle.createWritable();
-                    await writable.write(optimized);
-                    await writable.close();
-                } catch {
-                    // Continua usando o Drive Local do navegador
-                }
+            setPhotoFile(optimized instanceof File ? optimized : new File([optimized], file.name, { type: optimized.type || file.type }));
+            if (!driveEmail) {
+                toast.warning('Conecte o Google Drive da igreja para que a foto possa ser salva.');
             }
-
-            toast.success('Foto carregada e otimizada para o Drive Local da Igreja!');
         } catch (err: any) {
             toast.error(err?.message || 'Não foi possível processar a imagem.');
         } finally {
@@ -419,15 +422,12 @@ export default function Assets() {
 
     const handleOpenPhotoViewer = async (asset: Asset) => {
         if (!asset.photoUrl) return;
-        let resolvedUrl = asset.photoUrl;
-        if (googleDriveService.isDriveReceipt(asset.photoUrl) && effectiveChurchId) {
-            try {
-                const prev = await googleDriveService.createPreviewUrl(effectiveChurchId, asset.photoUrl);
-                resolvedUrl = prev.url;
-            } catch (err: any) {
-                toast.error(err?.message || 'Não foi possível carregar a foto do Google Drive.');
-                return;
-            }
+        let resolvedUrl: string;
+        try {
+            resolvedUrl = await resolveAssetPhotoUrl(effectiveChurchId, asset.photoUrl);
+        } catch (err: any) {
+            toast.error(err?.message || 'Não foi possível carregar a foto do Google Drive.');
+            return;
         }
         setPreviewZoom(1);
         setPreviewPhoto({
@@ -445,16 +445,21 @@ export default function Assets() {
             return;
         }
 
-        let finalPhotoUrl = photoUrl || undefined;
+        const previousPhoto = editingAsset?.photoUrl;
+        let finalPhotoUrl: string | null = photoUrl || null;
 
-        // Se o Google Drive da igreja estiver conectado e houver um arquivo novo, envia também ao Drive da igreja,
-        // mantendo cópia local em cache para exibição instantânea
-        if (photoFile && driveEmail && effectiveChurchId) {
+        // Foto nova: envia ao Google Drive da igreja e grava apenas o identificador no cadastro
+        if (photoFile) {
+            if (!driveEmail) {
+                toast.error('Conecte o Google Drive da igreja para salvar a foto do patrimônio.');
+                return;
+            }
             try {
                 setUploadingPhoto(true);
-                await googleDriveService.upload(effectiveChurchId, photoFile);
-            } catch {
-                // Mantém o dataUrl salvo no Drive Local da igreja
+                finalPhotoUrl = await uploadPhotoToDrive(photoFile, name);
+            } catch (err: any) {
+                toast.error(err?.message || 'Não foi possível enviar a foto ao Google Drive da igreja.');
+                return;
             } finally {
                 setUploadingPhoto(false);
             }
@@ -470,7 +475,7 @@ export default function Assets() {
             value: value ? parseFloat(value) / 100 : undefined,
             serialNumber: serialNumber || undefined,
             acquisitionDate: acquisitionDate || undefined,
-            photoUrl: finalPhotoUrl,
+            photoUrl: finalPhotoUrl as any,
             qrCode: qrCode || undefined,
 
             source: source || undefined,
@@ -496,29 +501,38 @@ export default function Assets() {
             nextMaintenanceDate: nextMaintenanceDate || undefined,
         };
 
+        // Remove do Drive a foto antiga quando ela foi trocada ou removida
+        const cleanupOldPhoto = () => {
+            if (previousPhoto && previousPhoto !== finalPhotoUrl) deleteDrivePhoto(previousPhoto);
+        };
+
         if (editingAsset) {
-            if (finalPhotoUrl) saveLocalAssetPhoto(editingAsset.id, finalPhotoUrl);
             updateMutation.mutate(
                 { id: editingAsset.id, asset: payload },
                 {
                     onSuccess: () => {
+                        cleanupOldPhoto();
                         if (openMaintenanceAfterSave) {
                             setMaintenanceAsset(editingAsset);
                             setIsMaintenanceOpen(true);
                         }
+                    },
+                    onError: () => {
+                        // Cadastro não foi salvo: descarta a foto recém-enviada para não deixar arquivo órfão
+                        if (photoFile && finalPhotoUrl) deleteDrivePhoto(finalPhotoUrl);
                     },
                 } as any
             );
         } else {
             createMutation.mutate(payload, {
                 onSuccess: (created) => {
-                    if (finalPhotoUrl && created?.id) {
-                        saveLocalAssetPhoto(created.id, finalPhotoUrl);
-                    }
                     if (openMaintenanceAfterSave) {
                         setMaintenanceAsset(created);
                         setIsMaintenanceOpen(true);
                     }
+                },
+                onError: () => {
+                    if (photoFile && finalPhotoUrl) deleteDrivePhoto(finalPhotoUrl);
                 },
             });
         }
@@ -629,7 +643,7 @@ export default function Assets() {
                 </div>
             </div>
 
-            {/* Barra de Armazenamento de Fotos — Drive Local da Igreja */}
+            {/* Barra de Armazenamento de Fotos — Google Drive da Igreja */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-2xl bg-card border border-border shadow-sm">
                 <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border border-cyan-500/20">
@@ -638,55 +652,47 @@ export default function Assets() {
                     <div>
                         <div className="flex flex-wrap items-center gap-2">
                             <h2 className="text-sm font-bold text-foreground">
-                                Drive da Igreja Local — Fotos do Patrimônio
+                                Armazenamento das Fotos do Patrimônio
                             </h2>
-                            <Badge variant="outline" className="text-[10px] gap-1 border-emerald-500/40 text-emerald-600 dark:text-emerald-400">
-                                <ShieldCheck className="w-3 h-3" /> Armazenamento Local Ativo
-                            </Badge>
-                            {localFolderName && (
-                                <Badge variant="secondary" className="text-[10px] gap-1">
-                                    <FolderOpen className="w-3 h-3" /> Pasta: {localFolderName}
+                            {driveEmail ? (
+                                <Badge variant="outline" className="text-[10px] gap-1 border-emerald-500/40 text-emerald-600 dark:text-emerald-400">
+                                    <CheckCircle2 className="w-3 h-3" /> Google Drive Conectado: {driveEmail}
                                 </Badge>
-                            )}
-                            {driveEmail && (
-                                <Badge variant="outline" className="text-[10px] gap-1 border-blue-500/40 text-blue-600">
-                                    <HardDrive className="w-3 h-3" /> Google Drive: {driveEmail}
+                            ) : (
+                                <Badge variant="outline" className="text-[10px] gap-1 border-amber-500/40 text-amber-600 dark:text-amber-400">
+                                    <AlertTriangle className="w-3 h-3" /> Google Drive Desconectado
                                 </Badge>
                             )}
                         </div>
                         <p className="text-xs text-muted-foreground mt-0.5">
-                            As fotos dos bens ficam guardadas diretamente no Drive Local da Igreja (sem consumir espaço do servidor central).
+                            {driveEmail
+                                ? 'As fotos são salvas de forma segura e privada diretamente no Google Drive desta igreja.'
+                                : 'Conecte o Google Drive institucional para salvar as fotos dos bens com segurança e sem ocupar o servidor.'}
                         </p>
                     </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 shrink-0">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={handleSelectLocalFolder}
-                        className="text-xs gap-1.5 rounded-xl h-8"
-                    >
-                        <FolderOpen className="w-3.5 h-3.5 text-primary" />
-                        {localFolderName ? 'Trocar Pasta Local' : 'Vincular Pasta Local do PC'}
-                    </Button>
-                    {!driveEmail && (
+                    {!driveEmail ? (
                         <Button
                             type="button"
-                            variant="outline"
+                            variant="default"
                             size="sm"
                             onClick={handleConnectGoogleDrive}
                             disabled={driveLoading || connectingDrive}
-                            className="text-xs gap-1.5 rounded-xl h-8"
+                            className="text-xs gap-1.5 rounded-xl h-8 bg-cyan-600 hover:bg-cyan-700 text-white"
                         >
                             {connectingDrive ? (
                                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                             ) : (
-                                <HardDrive className="w-3.5 h-3.5 text-cyan-600" />
+                                <HardDrive className="w-3.5 h-3.5" />
                             )}
                             Conectar Google Drive da Igreja
                         </Button>
+                    ) : (
+                        <Badge variant="secondary" className="text-xs px-3 py-1">
+                            Fotos protegidas no Drive
+                        </Badge>
                     )}
                 </div>
             </div>
@@ -874,26 +880,14 @@ export default function Assets() {
                                     }
                                     className="h-44 bg-muted/50 relative cursor-pointer overflow-hidden flex items-center justify-center border-b border-border"
                                 >
-                                    {asset.photoUrl && !googleDriveService.isDriveReceipt(asset.photoUrl) ? (
-                                        <img
-                                            src={asset.photoUrl}
-                                            alt={asset.name}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                    ) : asset.photoUrl && googleDriveService.isDriveReceipt(asset.photoUrl) ? (
-                                        <div className="flex flex-col items-center gap-2 text-cyan-600">
-                                            <HardDrive className="w-10 h-10" />
-                                            <span className="text-xs font-bold">Foto no Google Drive da Igreja</span>
-                                            <span className="text-[10px] text-muted-foreground">Clique para abrir</span>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-2 text-muted-foreground/60 group-hover:text-primary transition-colors">
-                                            <div className="p-3 rounded-full bg-background/80 border border-border shadow-sm">
-                                                <Camera className="w-7 h-7" />
-                                            </div>
-                                            <span className="text-xs font-medium">Adicionar foto do bem</span>
-                                        </div>
-                                    )}
+                                    <AssetPhoto
+                                        churchId={effectiveChurchId}
+                                        photoUrl={asset.photoUrl}
+                                        alt={asset.name}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                        iconClassName="w-8 h-8"
+                                        emptyLabel="Adicionar foto do bem"
+                                    />
 
                                     <div className="absolute top-2.5 left-2.5">
                                         {getStatusBadge(asset.status)}
@@ -972,6 +966,7 @@ export default function Assets() {
                                         title="Excluir"
                                         onClick={() => {
                                             if (window.confirm(`Deseja realmente excluir "${asset.name}"?`)) {
+                                                deleteDrivePhoto(asset.photoUrl);
                                                 deleteMutation.mutate(asset.id);
                                             }
                                         }}
@@ -1015,19 +1010,13 @@ export default function Assets() {
                                                 }
                                                 className="w-12 h-12 rounded-xl border border-border bg-muted/50 overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-primary/40 transition-all group relative"
                                             >
-                                                {asset.photoUrl &&
-                                                !googleDriveService.isDriveReceipt(asset.photoUrl) ? (
-                                                    <img
-                                                        src={asset.photoUrl}
-                                                        alt={asset.name}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                ) : asset.photoUrl &&
-                                                  googleDriveService.isDriveReceipt(asset.photoUrl) ? (
-                                                    <HardDrive className="w-5 h-5 text-cyan-600" />
-                                                ) : (
-                                                    <Camera className="w-5 h-5 text-muted-foreground/60 group-hover:text-primary transition-colors" />
-                                                )}
+                                                <AssetPhoto
+                                                    churchId={effectiveChurchId}
+                                                    photoUrl={asset.photoUrl}
+                                                    alt={asset.name}
+                                                    className="w-full h-full object-cover"
+                                                    iconClassName="w-5 h-5 text-muted-foreground/60 group-hover:text-primary transition-colors"
+                                                />
                                             </button>
                                         </TableCell>
                                         <TableCell>
@@ -1108,6 +1097,7 @@ export default function Assets() {
                                                                 `Deseja realmente excluir "${asset.name}"?`
                                                             )
                                                         ) {
+                                                            deleteDrivePhoto(asset.photoUrl);
                                                             deleteMutation.mutate(asset.id);
                                                         }
                                                     }}
@@ -1220,11 +1210,11 @@ export default function Assets() {
                                                     variant="outline"
                                                     className="text-[10px] border-cyan-500/40 text-cyan-600 dark:text-cyan-400 gap-1"
                                                 >
-                                                    <HardDrive className="w-3 h-3" /> Drive da Igreja Local
+                                                    <HardDrive className="w-3 h-3" /> {driveEmail ? 'Google Drive Conectado' : 'Google Drive Necessário'}
                                                 </Badge>
                                             </div>
                                             <p className="text-xs text-muted-foreground leading-relaxed">
-                                                Tire uma foto com a câmera ou selecione uma imagem do computador. A foto é otimizada e salva diretamente no Drive Local da Igreja.
+                                                Tire uma foto com a câmera ou selecione uma imagem do computador. A foto é comprimida e arquivada com segurança no Google Drive da igreja.
                                             </p>
                                             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                                                 <Button

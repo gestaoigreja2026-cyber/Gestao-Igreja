@@ -1,36 +1,20 @@
 import { supabase } from '@/lib/supabaseClient';
 import { Asset, AssetMaintenance } from '@/types';
 
-const LOCAL_ASSET_PHOTOS_KEY = 'ecclesia_church_local_drive_asset_photos_v1';
-
-function getLocalPhotosMap(): Record<string, string> {
-    if (typeof window === 'undefined') return {};
-    try {
-        const raw = localStorage.getItem(LOCAL_ASSET_PHOTOS_KEY);
-        return raw ? JSON.parse(raw) : {};
-    } catch {
-        return {};
-    }
+/**
+ * Fotos de patrimônio ficam no Google Drive institucional da igreja.
+ * No banco é salvo apenas o identificador (`gdrive:<fileId>`) ou um link externo (https://...).
+ * Imagens embutidas (data:...) nunca devem ir para o banco — ocupam espaço do servidor central.
+ */
+export function isEmbeddedPhoto(value?: string | null): boolean {
+    return !!value && value.startsWith('data:');
 }
 
-export function saveLocalAssetPhoto(assetId: string, photoDataUrl: string | undefined) {
-    if (typeof window === 'undefined' || !assetId) return;
-    try {
-        const map = getLocalPhotosMap();
-        if (photoDataUrl) {
-            map[assetId] = photoDataUrl;
-        } else {
-            delete map[assetId];
-        }
-        localStorage.setItem(LOCAL_ASSET_PHOTOS_KEY, JSON.stringify(map));
-    } catch (e) {
-        console.warn('Aviso ao salvar foto no drive local:', e);
-    }
-}
-
-export function getLocalAssetPhoto(assetId: string): string | undefined {
-    const map = getLocalPhotosMap();
-    return map[assetId];
+export function sanitizePhotoUrlForDb(value?: string | null): string | null | undefined {
+    if (value === undefined) return undefined;
+    if (!value) return null;
+    if (isEmbeddedPhoto(value)) return undefined; // nunca grava base64 no banco
+    return value;
 }
 
 export const assetsService = {
@@ -62,38 +46,26 @@ export const assetsService = {
     },
 
     async createAsset(asset: Partial<Asset> & { churchId?: string | null }) {
-        const payload = mapAssetToSnakeCase(asset);
         const { data, error } = await supabase
             .from('assets')
-            .insert([payload])
+            .insert([mapAssetToSnakeCase(asset)])
             .select()
             .single();
 
         if (error) throw error;
-        const created = mapAssetToCamelCase(data);
-        if (asset.photoUrl) {
-            saveLocalAssetPhoto(created.id, asset.photoUrl);
-            created.photoUrl = asset.photoUrl;
-        }
-        return created;
+        return mapAssetToCamelCase(data);
     },
 
     async updateAsset(id: string, asset: Partial<Asset> & { churchId?: string | null }) {
-        const payload = mapAssetToSnakeCase(asset);
         const { data, error } = await supabase
             .from('assets')
-            .update(payload)
+            .update(mapAssetToSnakeCase(asset))
             .eq('id', id)
             .select()
             .single();
 
         if (error) throw error;
-        const updated = mapAssetToCamelCase(data);
-        if (asset.photoUrl !== undefined) {
-            saveLocalAssetPhoto(id, asset.photoUrl);
-            updated.photoUrl = asset.photoUrl;
-        }
-        return updated;
+        return mapAssetToCamelCase(data);
     },
 
     async deleteAsset(id: string) {
@@ -103,7 +75,6 @@ export const assetsService = {
             .eq('id', id);
 
         if (error) throw error;
-        saveLocalAssetPhoto(id, undefined);
     },
 
     // Maintenance
@@ -132,12 +103,11 @@ export const assetsService = {
 
 // Helpers
 function mapAssetToCamelCase(item: any): Asset {
-    const localPhoto = getLocalAssetPhoto(item.id);
     return {
         ...item,
         serialNumber: item.serial_number,
         acquisitionDate: item.acquisition_date,
-        photoUrl: item.photo_url || localPhoto,
+        photoUrl: item.photo_url,
         qrCode: item.qr_code,
         donorName: item.donor_name,
         donationDate: item.donation_date,
@@ -157,13 +127,16 @@ function mapAssetToCamelCase(item: any): Asset {
 
 function mapAssetToSnakeCase(item: Partial<Asset> & { churchId?: string | null }): any {
     const result: any = { ...item };
-    if (item.churchId !== undefined) {
+    if ('churchId' in item) {
         if (item.churchId) result.church_id = item.churchId;
         delete result.churchId;
     }
     if (item.serialNumber !== undefined) { result.serial_number = item.serialNumber; delete result.serialNumber; }
     if (item.acquisitionDate !== undefined) { result.acquisition_date = item.acquisitionDate; delete result.acquisitionDate; }
-    if (item.photoUrl !== undefined) { result.photo_url = item.photoUrl; delete result.photoUrl; }
+    if ('photoUrl' in item) {
+        result.photo_url = sanitizePhotoUrlForDb(item.photoUrl);
+        delete result.photoUrl;
+    }
     if (item.qrCode !== undefined) { result.qr_code = item.qrCode; delete result.qrCode; }
     if (item.donorName !== undefined) { result.donor_name = item.donorName; delete result.donorName; }
     if (item.donationDate !== undefined) { result.donation_date = item.donationDate; delete result.donationDate; }

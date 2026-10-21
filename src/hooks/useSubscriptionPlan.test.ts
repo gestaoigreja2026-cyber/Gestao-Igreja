@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { PLAN_CONFIG, PROMO_MAX_CHURCHES, PROMO_MAX_MEMBERS } from './useSubscriptionPlan';
-import { saveLocalAssetPhoto, getLocalAssetPhoto } from '@/services/assets.service';
+import { isEmbeddedPhoto, sanitizePhotoUrlForDb } from '@/services/assets.service';
 
 describe('Planos de Assinatura e Promoção de 20 Igrejas', () => {
   it('configura a promoção das primeiras 20 igrejas com limite de até 300 membros', () => {
@@ -19,32 +19,28 @@ describe('Planos de Assinatura e Promoção de 20 Igrejas', () => {
   });
 });
 
-describe('Drive Local da Igreja — Fotos do Patrimônio', () => {
-  beforeEach(() => {
-    const store: Record<string, string> = {};
-    const mockStorage = {
-      getItem: (k: string) => (k in store ? store[k] : null),
-      setItem: (k: string, v: string) => {
-        store[k] = String(v);
-      },
-      removeItem: (k: string) => {
-        delete store[k];
-      },
-      clear: () => {
-        for (const k of Object.keys(store)) delete store[k];
-      },
-    };
-    Object.defineProperty(globalThis, 'localStorage', { value: mockStorage, configurable: true });
+describe('Sanitização de Fotos do Patrimônio (Google Drive institucional)', () => {
+  it('detecta imagens embutidas (data URL base64)', () => {
+    expect(isEmbeddedPhoto('data:image/jpeg;base64,/9j/4AAQSkZJRg==')).toBe(true);
+    expect(isEmbeddedPhoto('gdrive:1a2b3c4d5e')).toBe(false);
+    expect(isEmbeddedPhoto('https://drive.google.com/uc?id=123')).toBe(false);
+    expect(isEmbeddedPhoto(null)).toBe(false);
+    expect(isEmbeddedPhoto(undefined)).toBe(false);
   });
 
-  it('salva, recupera e remove a foto do patrimônio no Drive Local da Igreja', () => {
-    const assetId = 'asset-123';
-    const fakeDataUrl = 'data:image/jpeg;base64,/9j/4AAQSkZJRg==';
+  it('bloqueia gravação de base64 no banco de dados e preserva referências do Drive', () => {
+    // base64 deve virar undefined (não atualiza ou não grava base64 pesado no Supabase)
+    expect(sanitizePhotoUrlForDb('data:image/jpeg;base64,/9j/4AAQSkZJRg==')).toBeUndefined();
 
-    saveLocalAssetPhoto(assetId, fakeDataUrl);
-    expect(getLocalAssetPhoto(assetId)).toBe(fakeDataUrl);
+    // identificadores do Google Drive são permitidos
+    expect(sanitizePhotoUrlForDb('gdrive:1a2b3c4d5e')).toBe('gdrive:1a2b3c4d5e');
 
-    saveLocalAssetPhoto(assetId, undefined);
-    expect(getLocalAssetPhoto(assetId)).toBeUndefined();
+    // URLs externas normais são permitidas
+    expect(sanitizePhotoUrlForDb('https://example.com/foto.jpg')).toBe('https://example.com/foto.jpg');
+
+    // Valores nulos ou vazios
+    expect(sanitizePhotoUrlForDb('')).toBeNull();
+    expect(sanitizePhotoUrlForDb(null)).toBeNull();
+    expect(sanitizePhotoUrlForDb(undefined)).toBeUndefined();
   });
 });

@@ -75,23 +75,39 @@ export function usePromoStatus() {
     let mounted = true;
     (async () => {
       try {
-        const { count, error } = await supabase
-          .from('churches')
-          .select('*', { count: 'exact', head: true });
+        let total: number | null = null;
+        try {
+          const rpcRes = await (supabase.rpc as any)('get_church_count');
+          if (!rpcRes.error && typeof rpcRes.data === 'number') {
+            total = rpcRes.data;
+          }
+        } catch {
+          // fallback silencioso
+        }
 
-        const total = !error && typeof count === 'number' ? count : 0;
-        const isPromoActive = total < PROMO_MAX_CHURCHES;
-        const remainingSpots = Math.max(0, PROMO_MAX_CHURCHES - total);
+        if (total === null) {
+          const { count, error } = await supabase
+            .from('churches')
+            .select('*', { count: 'exact', head: true });
+
+          if (!error && typeof count === 'number') {
+            total = count;
+          }
+        }
+
+        const safeTotal = total ?? 0;
+        const isPromoActive = safeTotal < PROMO_MAX_CHURCHES;
+        const remainingSpots = Math.max(0, PROMO_MAX_CHURCHES - safeTotal);
 
         promoStatusCache = {
           isPromoActive,
-          churchCount: total,
+          churchCount: safeTotal,
           remainingSpots,
           timestamp: Date.now(),
         };
 
         if (mounted) {
-          setPromo({ isPromoActive, churchCount: total, remainingSpots, loading: false });
+          setPromo({ isPromoActive, churchCount: safeTotal, remainingSpots, loading: false });
         }
       } catch {
         if (mounted) {
