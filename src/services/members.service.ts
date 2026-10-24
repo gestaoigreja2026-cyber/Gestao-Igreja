@@ -418,7 +418,7 @@ export const membersService = {
             await this.unlinkMemberRelations(id);
         }
 
-        let { error } = await supabase
+        const { error } = await supabase
             .from('members')
             .delete()
             .eq('id', id);

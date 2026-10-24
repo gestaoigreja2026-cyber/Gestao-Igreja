@@ -4,6 +4,7 @@ import { mockSupabaseAuth } from './supabase.mocks';
 
 test.describe('Dashboard navigation', () => {
   test.beforeEach(async ({ page }) => {
+    await goToLogin(page);
     await mockSupabaseAuth(page, { email: 'pastor@igreja.com', role: 'pastor', name: 'Pastor Teste' });
     await fillFirstStep(page, 'Pastor Teste', 'pastor@igreja.com');
     await selectRole(page, 'Pastor');

@@ -356,7 +356,7 @@ export function NewTransactionModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-1.5rem)] sm:w-full max-w-2xl max-h-[92vh] overflow-y-auto p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl font-bold">
             <DollarSign className="h-5 w-5 text-primary" />
@@ -511,19 +511,29 @@ export function NewTransactionModal({
                   Categoria (Plano de Contas) *
                 </Label>
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Selecione a categoria..." />
                   </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
+                  <SelectContent className="max-h-[320px] w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]">
                     {Object.entries(groupedCategories).map(([groupName, cats]) => (
                       <SelectGroup key={groupName}>
-                        <SelectLabel className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider py-1 bg-muted/40 px-2 rounded">
+                        <SelectLabel className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider py-1.5 bg-muted/40 px-2 rounded mb-1">
                           {groupName}
                         </SelectLabel>
                         {cats.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.name} className="py-2 pl-3">
-                            <span className="font-mono text-xs opacity-60 mr-1.5">{cat.code}</span>
-                            <span>{cat.name}</span>
+                          <SelectItem
+                            key={cat.id}
+                            value={cat.name}
+                            className="py-2.5 pl-8 pr-3 cursor-pointer text-left"
+                          >
+                            <span className="flex items-start gap-1.5 w-full text-left">
+                              {cat.code && (
+                                <span className="font-mono text-xs opacity-60 shrink-0 pt-0.5">{cat.code}</span>
+                              )}
+                              <span className="whitespace-normal break-words text-left leading-snug flex-1 min-w-0">
+                                {cat.name}
+                              </span>
+                            </span>
                           </SelectItem>
                         ))}
                       </SelectGroup>

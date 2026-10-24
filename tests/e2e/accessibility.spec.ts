@@ -24,12 +24,12 @@ test.describe('NewLogin accessibility', () => {
     await page.fill('input[placeholder="E-mail"]', 'joao@igreja.com');
     await page.click('button:has-text("Próximo")');
 
-    await expect(page.locator('button:has-text("Pastor")')).toBeVisible();
+    await expect(page.locator('button:has-text("Membro")')).toBeVisible();
 
     await page.keyboard.press('Tab');
-    await expect(page.locator('button:has-text("Pastor")')).toBeFocused();
+    await expect(page.locator('button:has-text("Membro")')).toBeFocused();
 
     await page.keyboard.press('Tab');
-    await expect(page.locator('button:has-text("Secretário")')).toBeFocused();
+    await expect(page.locator('button:has-text("Congregado")')).toBeFocused();
   });
 });

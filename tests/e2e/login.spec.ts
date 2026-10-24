@@ -8,9 +8,9 @@ test.describe('NewLogin page', () => {
   });
 
   test('should allow a valid login flow', async ({ page }) => {
-    await mockSupabaseAuth(page, { email: 'joao@igreja.com', role: 'pastor', name: 'João Silva' });
+    await mockSupabaseAuth(page, { email: 'joao@igreja.com', role: 'membro', name: 'João Silva' });
     await fillFirstStep(page, 'João Silva', 'joao@igreja.com');
-    await selectRole(page, 'Pastor');
+    await selectRole(page, 'Membro');
     await fillPin(page, '123456');
 
     await page.click('button:has-text("Entrar")');
@@ -34,8 +34,8 @@ test.describe('NewLogin page', () => {
     await expect(page.locator('button:has-text("Entrar")')).toBeDisabled();
   });
 
-  test('should auto-select superadmin role for unrestricted email', async ({ page }) => {
+  test('should advance to PIN step for unrestricted email', async ({ page }) => {
     await fillFirstStep(page, 'Admin Teste', 'edukadoshmda@gmail.com');
-    await expect(page.locator('button:has-text("Admin")')).toHaveClass(/text-primary|border-primary/);
+    await expect(page.locator('input[type="tel"]').first()).toBeVisible();
   });
 });

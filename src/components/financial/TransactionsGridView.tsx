@@ -1037,10 +1037,15 @@ export function TransactionsGridView({
                   <SelectTrigger className="h-10 text-xs">
                     <SelectValue placeholder="Selecione a categoria..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="max-h-[300px]">
                     {editAvailableCategories.map((c) => (
-                      <SelectItem key={c.id} value={c.name} className="text-xs">
-                        {c.code ? `${c.code} - ` : ''}{c.name}
+                      <SelectItem key={c.id} value={c.name} className="text-xs py-2">
+                        <span className="flex items-start gap-1.5 w-full text-left">
+                          {c.code && (
+                            <span className="font-mono opacity-60 shrink-0 pt-0.5">{c.code}</span>
+                          )}
+                          <span className="whitespace-normal break-words flex-1 min-w-0">{c.name}</span>
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
