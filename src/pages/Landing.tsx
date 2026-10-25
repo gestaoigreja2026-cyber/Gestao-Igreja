@@ -228,20 +228,20 @@ const SuperOfferBanner = ({ timeLeft, remainingSpots, id }: { timeLeft: number; 
           <Link to="/checkout?plan=super-oferta" className="w-full">
             <Button
               size="lg"
-              className="w-full h-16 rounded-2xl font-black text-lg sm:text-xl gap-3 bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:opacity-95 text-slate-950 shadow-2xl shadow-orange-500/30 hover:scale-[1.02] transition-all"
+              className="w-full h-auto min-h-[4rem] py-3 px-4 rounded-2xl font-black text-sm min-[380px]:text-base sm:text-xl gap-2 sm:gap-3 whitespace-normal text-center leading-tight bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 hover:opacity-95 text-slate-950 shadow-2xl shadow-orange-500/30 hover:scale-[1.02] transition-all"
             >
-              GARANTIR SUPER OFERTA AGORA
-              <ArrowRight className="h-6 w-6" />
+              <span>GARANTIR SUPER OFERTA AGORA</span>
+              <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 shrink-0" />
             </Button>
           </Link>
           <Link to="/cadastro-igreja-trial" className="w-full">
             <Button
               variant="outline"
               size="lg"
-              className="w-full h-12 rounded-2xl font-bold text-sm sm:text-base gap-2 border-white/25 bg-white/5 hover:bg-white/15 text-white"
+              className="w-full h-auto min-h-[3rem] py-2 px-4 rounded-2xl font-bold text-xs min-[380px]:text-sm sm:text-base gap-2 whitespace-normal text-center leading-tight border-white/25 bg-white/5 hover:bg-white/15 text-white"
             >
-              <Gift className="h-4 w-4 text-teal-300" />
-              Testar no Plano Trial (Até 30 membros)
+              <Gift className="h-4 w-4 shrink-0 text-teal-300" />
+              <span>Testar no Plano Trial (Até 30 membros)</span>
             </Button>
           </Link>
           <div className="flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-slate-300">
