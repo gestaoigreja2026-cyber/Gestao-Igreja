@@ -497,7 +497,7 @@ export default function Landing() {
           <div className="aspect-video rounded-[3rem] overflow-hidden shadow-2xl border-8 border-background bg-black relative group">
              <iframe
                 className="absolute inset-0 w-full h-full"
-                src={`https://www.youtube.com/embed/${import.meta.env.VITE_LANDING_VIDEO_ID || 'tg6745ZFLVw'}?rel=0`}
+                src={`https://www.youtube.com/embed/${import.meta.env.VITE_LANDING_VIDEO_ID || '447dTJQ2SGY'}?rel=0`}
                 title="Apresentação Gestão Igreja"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen

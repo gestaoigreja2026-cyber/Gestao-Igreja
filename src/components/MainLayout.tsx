@@ -14,6 +14,7 @@ import { Logo } from './Logo';
 import { ThemeSwitcher } from './ThemeSwitcher';
 import { useTheme } from '@/contexts/ThemeContext';
 import { GlobalSearch } from './GlobalSearch';
+import { AIAssistant } from './AIAssistant';
 import { cn } from '@/lib/utils';
 
 
@@ -142,6 +143,7 @@ export function MainLayout({ children }: MainLayoutProps) {
                 </main>
             </div>
             <OnboardingTour />
+            <AIAssistant />
         </div>
     );
 }
